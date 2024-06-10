@@ -1,17 +1,5 @@
 {
-  "builds": [
-    {
-      "src": "elevate/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "15mb","runtime": "python3.11.5"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "elevate/wsgi.py"
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
