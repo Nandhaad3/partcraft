@@ -19,6 +19,11 @@ class VehicleSerializer(serializers.ModelSerializer):
         model = Vehicle
         fields = ['vehicle_name','vehicle_model','vehicle_year','vehicle_type','url']
 
+class VehicleoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = ['vehicle_name','vehicle_model','vehicle_year','vehicle_type']
+
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage

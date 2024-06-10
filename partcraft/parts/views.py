@@ -154,16 +154,14 @@ class vehiclelistview(generics.ListAPIView):
 @api_view(['POST', 'GET'])
 def vehicle_view(request):
     if request.method == 'POST':
-        vehicleserializer = VehicleSerializer(data=request.data)
-
-
+        vehicleserializer = VehicleoneSerializer(data=request.data)
         if vehicleserializer.is_valid():
             try:
                 vehicle = Vehicle.objects.get(
                     vehicle_name=vehicleserializer.validated_data['vehicle_name'],
                     vehicle_type=vehicleserializer.validated_data['vehicle_type'],
                     vehicle_model=vehicleserializer.validated_data['vehicle_model'],
-                    vehicle_year=vehicleserializer.validated_data['vehicle_year']
+                    vehicle_year=vehicleserializer.validated_data['vehicle_year'],
                 )
                 this_part = Product.objects.filter(this_parts_fits=vehicle)
                 print(this_part)
