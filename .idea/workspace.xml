@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="adc4f870-3f99-43e4-ad14-e62fc1403439" name="Changes" comment="" />
+    <list default="true" id="adc4f870-3f99-43e4-ad14-e62fc1403439" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/partcraft/vercel.json" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/vercel.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -73,7 +75,7 @@
       <workItem from="1717741742282" duration="14359000" />
       <workItem from="1717998427815" duration="1603000" />
       <workItem from="1718000445587" duration="261000" />
-      <workItem from="1718000807388" duration="310000" />
+      <workItem from="1718000807388" duration="715000" />
     </task>
     <servers />
   </component>
