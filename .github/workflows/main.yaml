@@ -1,0 +1,61 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ad3infotech
+        ports:
+          - 5432:5432
+        options: > 
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run migrations
+      env:
+        DATABASE_URL: postgres://postgres:ad3infotech@localhost:5432/postgres
+      run: python manage.py migrate
+
+    - name: Run tests
+      env:
+        DATABASE_URL: postgres://postgres:ad3infotech@localhost:5432/postgres
+      run: python manage.py test
+
+    - name: Build Docker image
+      run: docker build -t my-django-app .
+
+    - name: Push Docker image to registry
+      env:
+        DOCKER_USERNAME: ${{ secrets.nandhakumar0007 }}
+        DOCKER_PASSWORD: ${{ secrets.ad3infotech@ }}
+      run: |
+        echo $DOCKER_PASSWORD | docker login -u $nandhakumar0007 --ad3infotech@-stdin
+        docker tag my-django-app $nandhakumar0007/my-django-app
+        docker push $ad3infotech@/my-django-app

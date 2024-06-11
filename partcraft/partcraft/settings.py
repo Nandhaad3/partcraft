@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-tnrr@^xourvp5u!tz$m__d-3nk6mp#1*ux)_27e251v)im5u$r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', '[::1]']
 
 
 # Application definition
@@ -83,8 +83,12 @@ WSGI_APPLICATION = 'partcraft.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'ad3infotech',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

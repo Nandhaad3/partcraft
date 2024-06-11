@@ -4,9 +4,44 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="adc4f870-3f99-43e4-ad14-e62fc1403439" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/partcraft/partcraft/wsgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/wsgi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/vercel.json" beforeDir="false" />
+    <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.github/workflows/main.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/deployment.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/brands/Bosch-logo.svg_n4nLT6s.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/brands/ford-parts_H4IkPpH.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/223_wNngOAC.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/51vmv4QGavL._AC_UF10001000_QL80__wDW0ZHh.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/bosch-alternator.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/bosch-alternator_1yjI8HF.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/ford-eco-sport-alternator_kOLfw9o.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/gabroo-automobiles-truck-car-bike-3-pipe-air-horn-with-air-compressor-500x500.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/images_2VHu9Qt.jfif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/images_3_kheH4Pw.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/new-product-500x500_2r7VGLZ.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0002_brand_category_product_productimage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/partcraft.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/partcraft.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/db.sqlite3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/partcraft/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/partcraft/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0002_alter_category_category_image.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0003_alter_product_parts_fits_alter_product_parts_litre_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0004_rename_parts_conditions_product_parts_condition_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0005_alter_product_parts_offer_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0006_remove_product_this_parts_fits_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0007_alter_product_parts_price.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0008_alter_product_parts_litre.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0009_alter_product_parts_offer_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/products/images.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/products/images_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/products/images_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,6 +51,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Dockerfile" />
         <option value="Python Script" />
       </list>
     </option>
@@ -24,34 +60,30 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 5
 }</component>
-  <component name="ProjectId" id="2hOsKkDMqCNCxnLVTONfxS9Q6Rl" />
+  <component name="ProjectId" id="2hgNzB08wPlerAFDK8Frw8IFq0S" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Python.admin.executor&quot;: &quot;Run&quot;,
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="E:\partcraft\partcraft\parts" />
-    </key>
-  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -63,27 +95,21 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="adc4f870-3f99-43e4-ad14-e62fc1403439" name="Changes" comment="" />
-      <created>1717476397499</created>
+      <changelist id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="" />
+      <created>1718012024179</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1717476397499</updated>
-      <workItem from="1717476399699" duration="882000" />
-      <workItem from="1717507887575" duration="2262000" />
-      <workItem from="1717568925052" duration="2533000" />
-      <workItem from="1717574154607" duration="21789000" />
-      <workItem from="1717656600650" duration="6320000" />
-      <workItem from="1717741742282" duration="14359000" />
-      <workItem from="1717998427815" duration="1603000" />
-      <workItem from="1718000445587" duration="261000" />
-      <workItem from="1718000807388" duration="1093000" />
+      <updated>1718012024179</updated>
+      <workItem from="1718012025723" duration="2217000" />
+      <workItem from="1718083684590" duration="7961000" />
+      <workItem from="1718096774607" duration="833000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/partcraft$admin.coverage" NAME="admin Coverage Results" MODIFIED="1717508355966" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/partcraft/parts" />
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
 </project>
