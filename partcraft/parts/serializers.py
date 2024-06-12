@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, ProductImage, Brand, Category, Vehicle
+from .models import *
 
 class BrandSerializer(serializers.ModelSerializer):
     url=serializers.HyperlinkedIdentityField(view_name='brandonedetails')

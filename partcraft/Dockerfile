@@ -1,30 +1,17 @@
-# Dockerfile
-FROM python:3.11-slim
+# Use an official Python runtime as a parent image
+FROM python:3.11.5-slim-bullseye
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
-# Set work directory
-WORKDIR /partscraft
+# Set the working directory in the container
+WORKDIR /partcraft
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        libpq-dev \
-        build-essential \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Copy the current directory contents into the container at /code
+COPY . /partcraft/
 
-# Install dependencies
-COPY requirements.txt /partscraft/
+# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8000
-
-ENV NAME PARTSCRAFT
-
-# Copy project
-COPY . /partscraft/
-
-
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Copy views.py into the container
+COPY parts/views.py /partcraft/
