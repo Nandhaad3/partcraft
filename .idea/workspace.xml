@@ -5,10 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/partcraft/account/migrations/0001_initial.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/account/migrations/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/brands/Bosch-logo.svg_LA6es3O.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/brands/ford-parts_q8jEoYF.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/223_FQuLL78.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/51vmv4QGavL._AC_UF10001000_QL80__JwUOrOl.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/bosch-alternator_glIV4kN.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/ford-eco-sport-alternator_zC7VFUo.jpeg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/media/products/images_3_2f8Hl1f.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/.env" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/partcraft/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/partcraft/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/vercel.json" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/vercel.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0002_wishlist.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0003_cart.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +30,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Dockerfile" />
-        <option value="Python Script" />
         <option value="package.json" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -90,7 +101,7 @@
       <workItem from="1718341188949" duration="7558000" />
       <workItem from="1718353261297" duration="5838000" />
       <workItem from="1718601464038" duration="8620000" />
-      <workItem from="1718616009069" duration="8975000" />
+      <workItem from="1718616009069" duration="11021000" />
     </task>
     <servers />
   </component>
