@@ -29,6 +29,16 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['id', 'image']
 
+class WishlistSerializer(serializers.Serializer):
+    class Meta:
+        model = Wishlist
+        fields = ['wishlist_name','wishlist_product']
+        read_only_fields = ['wishlist_name']
+
+    def create(self, validated_data):
+        return Wishlist.objects.create(**validated_data)
+
+
 
 class OfferSerializer(serializers.ModelSerializer):
     parts_name = serializers.SerializerMethodField()
@@ -55,13 +65,15 @@ class ProductSerializer(serializers.ModelSerializer):
     parts_name = serializers.SerializerMethodField()
     final_price=serializers.SerializerMethodField()
     url=serializers.HyperlinkedIdentityField(view_name='getoneproduct')
+    wishlist=serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
+    is_in_wishlist = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id','url','parts_name', 'parts_voltage',
+        fields = ['id','url','parts_name', 'parts_voltage','subcategory_name',
                   'parts_litre', 'parts_type', 'parts_description', 'parts_no', 'parts_price', 'parts_offer','final_price',
                   'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
-                  'main_image','images','parts_brand', 'parts_category','this_parts_fits']
+                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist']
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
                 f"{obj.parts_category.category_name} "
@@ -78,6 +90,14 @@ class ProductSerializer(serializers.ModelSerializer):
         discount_amount = obj.parts_price * (obj.parts_offer / 100)
         final_price = obj.parts_price - discount_amount
         return final_price
+
+    def get_is_in_wishlist(self, obj):
+        request = self.context.get('request', None)
+        if not request.user.is_authenticated:
+            return 'SIGN IN REQUEST'
+        elif request is None:
+            return False
+        return Wishlist.objects.filter(wishlist_name=request.user.id,wishlist_product=obj).exists()
     def create(self, validated_data):
         brand_data = validated_data.pop('parts_brand')
         category_data = validated_data.pop('parts_category')
@@ -153,3 +173,26 @@ class ProductSerializer(serializers.ModelSerializer):
                 image_instance.delete()
 
         return instance
+
+class WishallSerializer(serializers.ModelSerializer):
+    wishlist_product=ProductSerializer()
+    wishlist_name = serializers.SerializerMethodField()
+    wishlist_delete=serializers.HyperlinkedIdentityField(view_name='wishdeleteoneitem')
+    # wishlistdelall=serializers.HyperlinkedIdentityField(view_name='wishdeleteitem')
+    class Meta:
+        model = Wishlist
+        fields = ['wishlist_name','wishlist_product','wishlist_delete']
+        read_only_fields = ['wishlist_name']
+
+    def arrangename(self,obj):
+        return (f"{obj.parts_brand.brand_name} "
+                f"{obj.parts_category.category_name} "
+                f"{obj.subcategory_name} "
+                f"{obj.parts_voltage}V "
+                f"{obj.parts_fits} "
+                f"{obj.parts_litre}L")
+    def get_parts_name(self, obj):
+        b=self.arrangename(obj)
+        return b.replace('NoneL','').strip()
+    def get_wishlist_name(self, obj):
+        return obj.wishlist_name.email

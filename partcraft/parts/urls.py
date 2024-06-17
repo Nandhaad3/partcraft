@@ -16,4 +16,9 @@ urlpatterns = [
     path('vehicleonedetail/<int:pk>/',vehicleoneview.as_view(),name='vehicleonedetail'),
     path('alloffer/',allofferview.as_view(),name='alloffer'),
     path('offerproduct/<int:pk>/',partsonedetail.as_view(),name='offerproduct'),
+    path('wishlistcreate/<int:pk>/',WishlistCreateView.as_view(),name='wishlistcreate'),
+    path('wishallview/',WishallView.as_view(),name='wishallview'),
+    path('wishdeleteoneitem/<int:pk>/', DeleteWishlistItemView.as_view(), name='wishdeleteoneitem'),
+    path('wishdeleteitem/', DeleteAllWishlistItemsView.as_view(), name='wishdeleteitem'),
 ]
+

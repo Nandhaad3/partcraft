@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.conf import settings
 
 class Vehicle(models.Model):
     STATUS_CHOICES = (
@@ -75,3 +75,20 @@ class ProductImage(models.Model):
     def __str__(self):
         return f'{self.product.subcategory_name} - {self.id}'
 
+
+class Wishlist(models.Model):
+    wishlist_name=models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    wishlist_product=models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.wishlist_name} {self.wishlist_product}'
+
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+
+    def __str__(self):
+        return f'{self.user} {self.product} {self.quantity}'
