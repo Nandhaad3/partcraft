@@ -1,1 +1,0 @@
-web: gunicorn partcraft.wsgi --log-file--
