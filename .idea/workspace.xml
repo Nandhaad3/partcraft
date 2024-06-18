@@ -1303,7 +1303,7 @@
       <workItem from="1718601464038" duration="8620000" />
       <workItem from="1718616009069" duration="11291000" />
       <workItem from="1718687229470" duration="78000" />
-      <workItem from="1718688360866" duration="4083000" />
+      <workItem from="1718688360866" duration="4923000" />
     </task>
     <servers />
   </component>
@@ -1323,5 +1323,16 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/partcraft/partcraft/settings.py</url>
+          <line>15</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
