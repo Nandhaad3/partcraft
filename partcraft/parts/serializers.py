@@ -67,6 +67,7 @@ class ProductSerializer(serializers.ModelSerializer):
     url=serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist=serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
     is_in_wishlist = serializers.SerializerMethodField()
+    related_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -90,6 +91,13 @@ class ProductSerializer(serializers.ModelSerializer):
         discount_amount = obj.parts_price * (obj.parts_offer / 100)
         final_price = obj.parts_price - discount_amount
         return final_price
+
+    def get_related_products(self, obj):
+        related_products = Product.objects.filter(
+            parts_category=obj.parts_category
+        ).exclude(id=obj.id)[:4]  # Fetch 4 related products, excluding the current one
+        serializer = ProductoneSerializer(related_products, many=True, context=self.context)
+        return serializer.data
 
     def get_is_in_wishlist(self, obj):
         request = self.context.get('request', None)
@@ -174,6 +182,27 @@ class ProductSerializer(serializers.ModelSerializer):
 
         return instance
 
+class ProductoneSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
+    def arrangename(self,obj):
+        return (f"{obj.parts_brand.brand_name} "
+                f"{obj.parts_category.category_name} "
+                f"{obj.subcategory_name} "
+                f"{obj.parts_voltage}V "
+                f"{obj.parts_fits} "
+                f"{obj.parts_litre}L")
+    def get_parts_name(self, obj):
+        b=self.arrangename(obj)
+        return b.replace('NoneL','').strip()
+    def get_final_price(self, obj):
+        discount_amount = obj.parts_price * (obj.parts_offer / 100)
+        final_price = obj.parts_price - discount_amount
+        return final_price
+
+    class Meta:
+        model = Product
+        fields = ['id', 'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'url']
+
 class WishallSerializer(serializers.ModelSerializer):
     wishlist_product=ProductSerializer()
     wishlist_name = serializers.SerializerMethodField()
@@ -196,3 +225,4 @@ class WishallSerializer(serializers.ModelSerializer):
         return b.replace('NoneL','').strip()
     def get_wishlist_name(self, obj):
         return obj.wishlist_name.email
+
