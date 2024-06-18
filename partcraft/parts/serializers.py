@@ -74,7 +74,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id','url','parts_name', 'parts_voltage','subcategory_name',
                   'parts_litre', 'parts_type', 'parts_description', 'parts_no', 'parts_price', 'parts_offer','final_price',
                   'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
-                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist']
+                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist','related_products']
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
                 f"{obj.parts_category.category_name} "
