@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+import random
 
 class BrandSerializer(serializers.ModelSerializer):
     url=serializers.HyperlinkedIdentityField(view_name='brandonedetails')
@@ -68,13 +69,14 @@ class ProductSerializer(serializers.ModelSerializer):
     wishlist=serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
     is_in_wishlist = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
+    similar_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = ['id','url','parts_name', 'parts_voltage','subcategory_name',
                   'parts_litre', 'parts_type', 'parts_description', 'parts_no', 'parts_price', 'parts_offer','final_price',
                   'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
-                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist','related_products']
+                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist','related_products','similar_products']
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
                 f"{obj.parts_category.category_name} "
@@ -95,10 +97,21 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_related_products(self, obj):
         related_products = Product.objects.filter(
             parts_category=obj.parts_category
-        ).exclude(id=obj.id)[:4]  # Fetch 4 related products, excluding the current one
+        ).exclude(subcategory_name=obj.subcategory_name)  # Fetch 4 related products, excluding the current one
+        print(related_products)
+        related_products_list = list(related_products)
+        sample_size = min(4, len(related_products_list))
+        random_related_products = random.sample(related_products_list, sample_size)
+        serializer = ProductoneSerializer(random_related_products, many=True, context=self.context)
+        return serializer.data
+    def get_similar_products(self, obj):
+        print(obj.subcategory_name)
+        related_products = Product.objects.filter(
+            subcategory_name=obj.subcategory_name
+        ).exclude(id=obj.id)  # Fetch 4 related products, excluding the current one
+        print(related_products)
         serializer = ProductoneSerializer(related_products, many=True, context=self.context)
         return serializer.data
-
     def get_is_in_wishlist(self, obj):
         request = self.context.get('request', None)
         if not request.user.is_authenticated:
@@ -185,12 +198,14 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductoneSerializer(serializers.ModelSerializer):
     parts_name = serializers.SerializerMethodField()
     final_price = serializers.SerializerMethodField()
-    url = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
+    product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
+    wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
+    is_in_wishlist = serializers.SerializerMethodField()
 
 
     class Meta:
         model = Product
-        fields = ['id', 'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'url']
+        fields = ['id','parts_type' ,'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail','wishlist','is_in_wishlist']
 
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
@@ -206,6 +221,14 @@ class ProductoneSerializer(serializers.ModelSerializer):
         discount_amount = obj.parts_price * (obj.parts_offer / 100)
         final_price = obj.parts_price - discount_amount
         return final_price
+
+    def get_is_in_wishlist(self, obj):
+        request = self.context.get('request', None)
+        if not request.user.is_authenticated:
+            return 'SIGN IN REQUEST'
+        elif request is None:
+            return False
+        return Wishlist.objects.filter(wishlist_name=request.user.id, wishlist_product=obj).exists()
 
 class WishallSerializer(serializers.ModelSerializer):
     wishlist_product=ProductSerializer()
