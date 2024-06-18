@@ -5,21 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/partcraft/account/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/account/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/media/brands/Bosch-logo.svg_LA6es3O.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/media/brands/ford-parts_q8jEoYF.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/media/products/223_FQuLL78.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/media/products/51vmv4QGavL._AC_UF10001000_QL80__JwUOrOl.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/media/products/bosch-alternator_glIV4kN.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/media/products/ford-eco-sport-alternator_zC7VFUo.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/media/products/images_3_2f8Hl1f.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Procfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/.env" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/partcraft/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0002_wishlist.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0003_cart.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +24,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/partcraft" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -50,20 +38,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/partcraft/partcraft/account/migrations&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "E:/partcraft/partcraft/account/migrations",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\partcraft\partcraft\account\migrations" />
@@ -101,7 +89,9 @@
       <workItem from="1718341188949" duration="7558000" />
       <workItem from="1718353261297" duration="5838000" />
       <workItem from="1718601464038" duration="8620000" />
-      <workItem from="1718616009069" duration="11021000" />
+      <workItem from="1718616009069" duration="11291000" />
+      <workItem from="1718687229470" duration="78000" />
+      <workItem from="1718688360866" duration="860000" />
     </task>
     <servers />
   </component>
