@@ -183,6 +183,8 @@ class ProductSerializer(serializers.ModelSerializer):
         return instance
 
 class ProductoneSerializer(serializers.ModelSerializer):
+    parts_name = serializers.SerializerMethodField()
+    final_price = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
 
 
