@@ -184,6 +184,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ProductoneSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
+
+
+    class Meta:
+        model = Product
+        fields = ['id', 'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'url']
+
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
                 f"{obj.parts_category.category_name} "
@@ -198,10 +204,6 @@ class ProductoneSerializer(serializers.ModelSerializer):
         discount_amount = obj.parts_price * (obj.parts_offer / 100)
         final_price = obj.parts_price - discount_amount
         return final_price
-
-    class Meta:
-        model = Product
-        fields = ['id', 'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'url']
 
 class WishallSerializer(serializers.ModelSerializer):
     wishlist_product=ProductSerializer()
