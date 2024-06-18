@@ -1219,6 +1219,7 @@
       <change afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/rest_framework/js/load-ajax-form.js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/rest_framework/js/prettify-min.js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/wait-for-it.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -1302,7 +1303,7 @@
       <workItem from="1718601464038" duration="8620000" />
       <workItem from="1718616009069" duration="11291000" />
       <workItem from="1718687229470" duration="78000" />
-      <workItem from="1718688360866" duration="3109000" />
+      <workItem from="1718688360866" duration="4083000" />
     </task>
     <servers />
   </component>
