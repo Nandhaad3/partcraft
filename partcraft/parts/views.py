@@ -29,6 +29,7 @@ def adddict(serializer):
         data['brand_image']=i['parts_brand']['brand_image']
         d = (f"{i['parts_brand']['brand_name']} "
                                    f"{i['parts_category']['category_name']} "
+                                   f'{i["subcategory_name"]}' 
                                    f"{i['parts_voltage']} "
                                    f"{i['parts_litre']}L ")
         data['parts__Name']=d.replace('NoneL','').strip()
@@ -515,4 +516,38 @@ class RemoveFromCartView(APIView):
                 cart_item.delete()
                 return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
             return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+class Carouselallview(generics.ListAPIView):
+    serializer_class = Carouselserilizers
+    queryset = carousel.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        if not queryset.exists():
+            return Response({'details': 'Carousel Not Found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'Carousel':serializer.data}, status=status.HTTP_200_OK)
+
+class Carouseloneview(generics.ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        carousel_id = self.kwargs.get('pk')
+        c = carousel.objects.get(id=carousel_id)
+        cat=c.carousel_category
+        ban=c.carousel_brand
+        queryset = Product.objects.all().filter(parts_category=cat,parts_brand=ban)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        carousel_id = self.kwargs.get('pk')
+        c = carousel.objects.get(id=carousel_id)
+        if not queryset.exists():
+            return Response({'details': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        carousel_serilizer = Carouselserilizers(c, context={'request': request})
+        lastdata = adddict(serializer)
+        return Response({'Carousel': carousel_serilizer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+
 

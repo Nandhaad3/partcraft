@@ -307,7 +307,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_main_image(self,obj):
         product=obj.product
-        return product.main_image.url
+        return product.main_image
     def create(self, validated_data):
         request=self.context.get('request')
         if request.user.is_authenticated:
@@ -315,3 +315,36 @@ class CartSerializer(serializers.ModelSerializer):
         else:
             validated_data['session_key']=request.session.session_key
         return Cart.objects.create(**validated_data)
+
+
+class Carouselserilizers(serializers.ModelSerializer):
+    discount=serializers.SerializerMethodField()
+    ref=serializers.SerializerMethodField()
+    brand=serializers.SerializerMethodField()
+    image=serializers.SerializerMethodField()
+    code=serializers.SerializerMethodField()
+    category=serializers.SerializerMethodField()
+    url=serializers.HyperlinkedIdentityField(view_name='carouseloneview')
+
+
+    class Meta:
+        model=carousel
+        fields = ['image','discount','category','code','ref','brand','url']
+
+
+    def get_code(self,obj):
+        return obj.carousel_code
+
+    def get_category(self,obj):
+        return obj.carousel_category.category_name
+
+    def get_image(self,obj):
+        return obj.carousel_image
+    def get_discount(self,obj):
+        return f'Get {obj.carousel_offer}% off'
+    def get_ref(self,obj):
+        return f'{obj.carousel_offer}% off {obj.carousel_category.category_name}'
+    def get_brand(self,obj):
+        return f'{obj.carousel_brand.brand_name} brand only'
+
+

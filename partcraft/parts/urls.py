@@ -24,5 +24,7 @@ urlpatterns = [
     path('viewcartlist/',ViewCartView.as_view(),name='viewcartlist'),
     path('removecartitem/<int:pk>/',RemoveFromCartView.as_view(),name='removecartitem'),
     path('clearallcartitem/',CartItemsCreateView.as_view(),name='clearallcartitem'),
+    path('carouselallview/',Carouselallview.as_view(),name='carouselallview'),
+    path('carouseloneview/<int:pk>',Carouseloneview.as_view(),name='carouseloneview'),
 ]
 

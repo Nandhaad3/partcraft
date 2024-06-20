@@ -107,7 +107,7 @@ class Cart(models.Model):
 
 class carousel(models.Model):
     carousel_image=models.URLField(max_length=200)
-    carousel_offer=models.ForeignKey(Product, on_delete=models.CASCADE)
+    carousel_offer=models.IntegerField(default=0)
     carousel_category= models.ForeignKey(Category, on_delete=models.CASCADE)
     carousel_code=models.CharField(max_length=255)
     carousel_brand=models.ForeignKey(Brand, on_delete=models.CASCADE)
