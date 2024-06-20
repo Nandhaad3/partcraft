@@ -3,7 +3,7 @@ from .models import *
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['id','subcategory_name', 'parts_price', 'parts_status','parts_offer','main_image']
+    list_display = ['id', 'parts_brand','parts_category','subcategory_name','parts_price', 'parts_status','parts_offer','main_image']
 #
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
@@ -33,4 +33,4 @@ class WishlistAdmin(admin.ModelAdmin):
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    list_display = ['user', 'product', 'quantity']
+    list_display = ['user','session_key', 'product', 'quantity']

@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+import os
+import uuid
 
 class Vehicle(models.Model):
     STATUS_CHOICES = (
@@ -17,7 +19,7 @@ class Vehicle(models.Model):
 
 class Brand(models.Model):
     brand_name = models.CharField(max_length=50)
-    brand_image = models.ImageField(upload_to='brands/')
+    brand_image = models.URLField(max_length=200)
 
     def __str__(self):
         return self.brand_name
@@ -25,11 +27,18 @@ class Brand(models.Model):
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50)
-    category_image = models.ImageField(upload_to='categories/',blank=True)
+    category_image = models.URLField(max_length=200,blank=True)
 
     def __str__(self):
         return self.category_name
 
+# def get_unique_file_path(instance, filename):
+#     # Extract the file extension from the original file name
+#     ext = filename.split('.')[-1]
+#     # Generate a new file name using UUID
+#     new_filename = f"{uuid.uuid4()}.{ext}"
+#     # Define the subdirectory within the media root where files will be stored
+#     return os.path.join('products', new_filename)
 
 class Product(models.Model):
     TYPE_CHOICES = (
@@ -62,7 +71,7 @@ class Product(models.Model):
     parts_warranty= models.IntegerField()
     parts_specification=models.TextField()
     this_parts_fits=models.ManyToManyField(Vehicle)
-    main_image = models.ImageField(upload_to='products/')
+    main_image = models.URLField(max_length=200)
 
     def __str__(self):
         return f'{self.parts_brand}-{self.parts_category}-{self.subcategory_name}'
@@ -70,7 +79,7 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='products/')
+    image = models.URLField(max_length=200)
 
     def __str__(self):
         return f'{self.product.subcategory_name} - {self.id}'
@@ -86,9 +95,19 @@ class Wishlist(models.Model):
 
 
 class Cart(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,blank=True,null=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(default=1)
 
     def __str__(self):
-        return f'{self.user} {self.product} {self.quantity}'
+        return f'{self.user or self.session_key} {self.product} {self.quantity}'
+
+class carousel(models.Model):
+    carousel_image=models.URLField(max_length=200)
+    carousel_category= models.ForeignKey(Category, on_delete=models.CASCADE)
+    carousel_code=models.CharField(max_length=255)
+    carousel_brand=models.ForeignKey(Brand, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.carousel_code} {self.carousel_brand}'

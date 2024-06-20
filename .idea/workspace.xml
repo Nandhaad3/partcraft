@@ -1050,6 +1050,8 @@
       <change afterPath="$PROJECT_DIR$/partcraft/parts/apps.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/filter.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0002_cart_session_key_alter_cart_quantity.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0003_alter_cart_user.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/__init__.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/models.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
@@ -1307,7 +1309,10 @@
       <workItem from="1718616009069" duration="11291000" />
       <workItem from="1718687229470" duration="78000" />
       <workItem from="1718688360866" duration="9603000" />
-      <workItem from="1718713020277" duration="2500000" />
+      <workItem from="1718713020277" duration="7743000" />
+      <workItem from="1718771710244" duration="3816000" />
+      <workItem from="1718792515062" duration="2434000" />
+      <workItem from="1718860021274" duration="10684000" />
     </task>
     <servers />
   </component>

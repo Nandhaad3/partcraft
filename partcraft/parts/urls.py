@@ -20,5 +20,9 @@ urlpatterns = [
     path('wishallview/',WishallView.as_view(),name='wishallview'),
     path('wishdeleteoneitem/<int:pk>/', DeleteWishlistItemView.as_view(), name='wishdeleteoneitem'),
     path('wishdeleteitem/', DeleteAllWishlistItemsView.as_view(), name='wishdeleteitem'),
+    path('cartlistcreate/<int:pk>/',CartItemsCreateView.as_view(),name='Cartlistcreate'),
+    path('viewcartlist/',ViewCartView.as_view(),name='viewcartlist'),
+    path('removecartitem/<int:pk>/',RemoveFromCartView.as_view(),name='removecartitem'),
+    path('clearallcartitem/',CartItemsCreateView.as_view(),name='clearallcartitem'),
 ]
 

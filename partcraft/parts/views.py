@@ -94,13 +94,6 @@ class partslistview(generics.ListAPIView):
         # offer=offerdata(queryset)
         return Response(lastdata, status=status.HTTP_200_OK)
 
-# def filterwishlist(serializer):
-#     p=serializer.data
-#     if p.get("is_in_wishlist"):
-#         p.pop("wishlist", None)
-#         return p
-#     else:
-#         return p
 class partsonedetail(generics.RetrieveAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -373,4 +366,153 @@ class DeleteAllWishlistItemsView(APIView):
 
 
 
+
+class ViewCartView(APIView):
+    def get(self, request):
+        if request.user.is_authenticated:
+            cart_items = Cart.objects.filter(user=request.user)
+        else:
+            session_key = request.session.session_key
+            cart_items = Cart.objects.filter(session_key=session_key)
+
+        serializer = CartSerializer(cart_items, many=True, context={'request': request})
+        if bool(serializer.data) is False:
+            return Response({'cart': 'No Product in the Cart'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'cart': serializer.data}, status=status.HTTP_200_OK)
+
+
+# class CartItemsCreateView(APIView):
+#     def post(self, request, pk):
+#         product = get_object_or_404(Product, pk=pk)
+#         print(product)
+#         quantity = request.data.get('quantity', 1)
+#         print(type(quantity))
+#         quantity = int(quantity)
+#         cart = request.session.get('cart', {})
+#
+#         if str(product) in cart:
+#             cart[str(product)]['quantity'] += quantity
+#         else:
+#             cart[str(product)] = {
+#                 'quantity': quantity,
+#                 'parts_price': product.parts_price,
+#                 'main_image': product.main_image.url,
+#             }
+#
+#         request.session['cart'] = cart
+#         return Response({'message': 'Product added to cart', 'cart': cart}, status=status.HTTP_200_OK)
+#
+#     def patch(self, request, pk):
+#         product = get_object_or_404(Product, pk=pk)
+#         decrement_quantity = request.data.get('quantity', 1)
+#
+#         cart = request.session.get('cart', {})
+#
+#         if str(product) in cart:
+#             if cart[str(product)]['quantity'] > decrement_quantity:
+#                 cart[str(product)]['quantity'] -= decrement_quantity
+#             else:
+#                 del cart[str(product)]
+#         else:
+#             return Response({'message': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         request.session['cart'] = cart
+#         return Response({'message': 'Product decremented/removed from cart', 'cart': cart}, status=status.HTTP_200_OK)
+
+    # def delete(self, request):
+    #     if bool(request.session['cart']) is False:
+    #         return Response({'message': 'Cart has already cleared'}, status=status.HTTP_200_OK)
+    #     request.session['cart'] = {}
+    #     return Response({'message': 'All item has cleared successfully'}, status=status.HTTP_200_OK)
+
+
+class CartItemsCreateView(APIView):
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        print(product)
+        quantity = request.data.get('quantity', 1)
+        quantity=int(quantity)
+
+        if request.user.is_authenticated:
+            cart_item, created = Cart.objects.get_or_create(
+                user=request.user,
+                product=product,
+                defaults={'quantity': quantity}
+            )
+        else:
+            if not request.session.session_key:
+                request.session.create()
+            cart_item, created = Cart.objects.get_or_create(
+                session_key=request.session.session_key,
+                product=product,
+                defaults={'quantity': quantity}
+            )
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+        print(type(cart_item))
+        serializer = CartSerializer(cart_item, context={'request': request})
+        return Response({'message': 'Product added/incremented in cart', 'cart': serializer.data}, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        decrement_quantity = request.data.get('quantity', 1)
+
+        if request.user.is_authenticated:
+            cart_item = Cart.objects.filter(user=request.user, product=product).first()
+        else:
+            cart_item = Cart.objects.filter(session_key=request.session.session_key, product=product).first()
+
+        if cart_item:
+            if cart_item.quantity > decrement_quantity:
+                cart_item.quantity -= decrement_quantity
+                cart_item.save()
+                serializer = CartSerializer(cart_item, context={'request': request})
+                return Response({'message': 'Product decremented in cart', 'cart': serializer.data}, status=status.HTTP_200_OK)
+            else:
+                cart_item.delete()
+                return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        if request.user.is_authenticated:
+            c=Cart.objects.filter(user=request.user)
+            if bool(c) is False:
+                return Response({'message': 'Cart has already cleared'}, status=status.HTTP_200_OK)
+            c.delete()
+            return Response({'message': 'All items cleared from cart'}, status=status.HTTP_200_OK)
+
+        else:
+            c=Cart.objects.filter(session_key=request.session.session_key)
+            if bool(c) is False:
+                return Response({'message': 'Cart has already cleared'}, status=status.HTTP_200_OK)
+            c.delete()
+            return Response({'message': 'All items cleared from cart'}, status=status.HTTP_200_OK)
+
+
+class RemoveFromCartView(APIView):
+
+    def delete(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+
+        if request.user.is_authenticated:
+            cart_item = Cart.objects.filter(user=request.user, product=product).first()
+            if cart_item:
+                cart_item.delete()
+                return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+            return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            if not request.session.session_key:
+                request.session.create()
+            session_key = request.session.session_key
+
+            cart_item = Cart.objects.filter(session_key=session_key, product=product).first()
+            if cart_item:
+                cart_item.delete()
+                return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+            return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -70,13 +70,14 @@ class ProductSerializer(serializers.ModelSerializer):
     is_in_wishlist = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
     similar_products = serializers.SerializerMethodField()
+    addtocart= serializers.HyperlinkedIdentityField(view_name='Cartlistcreate')
 
     class Meta:
         model = Product
         fields = ['id','url','parts_name', 'parts_voltage','subcategory_name',
                   'parts_litre', 'parts_type', 'parts_description', 'parts_no', 'parts_price', 'parts_offer','final_price',
                   'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
-                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist','related_products','similar_products']
+                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist','related_products','similar_products','addtocart']
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
                 f"{obj.parts_category.category_name} "
@@ -253,3 +254,64 @@ class WishallSerializer(serializers.ModelSerializer):
     def get_wishlist_name(self, obj):
         return obj.wishlist_name.email
 
+class CartSerializer(serializers.ModelSerializer):
+    user_name=serializers.SerializerMethodField()
+    parts_name = serializers.SerializerMethodField()
+    parts_offer = serializers.SerializerMethodField()
+    parts_price = serializers.SerializerMethodField()
+    discount_amount = serializers.SerializerMethodField()
+    final_price = serializers.SerializerMethodField()
+    main_image=serializers.SerializerMethodField()
+
+    class Meta:
+        model = Cart
+        fields = ['user','user_name','session_key','product','quantity','parts_name','parts_price','parts_offer','discount_amount','final_price','main_image']
+
+    def get_user_name(self, obj):
+        request = self.context.get('request')
+        if request.user.is_authenticated:
+            return obj.user.email
+        else:
+            return None
+    def arrangename(self,product):
+        return (f"{product.parts_brand.brand_name} "
+                f"{product.parts_category.category_name} "
+                f"{product.subcategory_name} "
+                f"{product.parts_voltage}V "
+                f"{product.parts_fits} "
+                f"{product.parts_litre}L")
+
+    def get_parts_name(self, obj):
+        product=obj.product
+        b=self.arrangename(product)
+        return b.replace('NoneL','').strip()
+
+    def get_parts_offer(self,obj):
+        product=obj.product
+        return product.parts_offer
+    def get_parts_price(self,obj):
+        product=obj.product
+        return product.parts_price
+    def get_discount_amount(self,obj):
+        product=obj.product
+        discount_amount = product.parts_price * (product.parts_offer / 100)
+        return discount_amount
+
+
+    def get_final_price(self, obj):
+        product=obj.product
+        print(product.parts_price,product.parts_offer)
+        discount_amount = product.parts_price * (product.parts_offer / 100)
+        final_amount=product.parts_price - discount_amount
+        return final_amount
+
+    def get_main_image(self,obj):
+        product=obj.product
+        return product.main_image.url
+    def create(self, validated_data):
+        request=self.context.get('request')
+        if request.user.is_authenticated:
+            validated_data['user']=request.user
+        else:
+            validated_data['session_key']=request.session.session_key
+        return Cart.objects.create(**validated_data)
