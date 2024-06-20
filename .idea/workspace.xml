@@ -1052,6 +1052,7 @@
       <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0002_cart_session_key_alter_cart_quantity.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0003_alter_cart_user.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0004_alter_brand_brand_image_and_more.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/__init__.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/models.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
@@ -1224,7 +1225,6 @@
       <change afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/rest_framework/js/prettify-min.js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/versel.json" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/wait-for-it.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -1312,7 +1312,7 @@
       <workItem from="1718713020277" duration="7743000" />
       <workItem from="1718771710244" duration="3816000" />
       <workItem from="1718792515062" duration="2434000" />
-      <workItem from="1718860021274" duration="10684000" />
+      <workItem from="1718860021274" duration="10992000" />
     </task>
     <servers />
   </component>
