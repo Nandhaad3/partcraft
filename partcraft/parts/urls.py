@@ -30,5 +30,6 @@ urlpatterns = [
     path('order_summary/', OrderSummaryAPIView.as_view(), name='order_summary'),
     path('place_order/', OrderAPIView.as_view(), name='place_order'),
     path('couponcodeapply/',ViewCartView.as_view(),name='couponcodeapply'),
+    path('best_selling/', BestSellingView.as_view(), name='best_selling'),
 ]
 

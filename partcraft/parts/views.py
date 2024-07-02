@@ -29,7 +29,7 @@ def adddict(serializer):
         data['brand_image']=i['parts_brand']['brand_image']
         d = (f"{i['parts_brand']['brand_name']} "
                                    f"{i['parts_category']['category_name']} "
-                                   f'{i["subcategory_name"]}' 
+                                   f'{i["subcategory_name"]} ' 
                                    f"{i['parts_voltage']} "
                                    f"{i['parts_litre']}L ")
         data['parts__Name']=d.replace('NoneL','').strip()
@@ -406,7 +406,6 @@ class ViewCartView(APIView):
                 return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class CartItemsCreateView(APIView):
 
     def post(self, request, pk):
@@ -665,5 +664,24 @@ class OrderAPIView(APIView):
             response.delete_cookie(cookie_name)
 
         return response
+
+class BestSellingView(generics.ListAPIView):
+    serializer_class = Bestsellingserializer
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        threshold = 15
+        return ProductOrderCount.objects.filter(order_count__gte=threshold).order_by('-order_count')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        # page = self.paginate_queryset(self.get_queryset())
+        # if page is not None:
+        #     serializer = self.get_serializer(page, many=True, context={'request': request})
+        #     return self.get_paginated_response(serializer.data)
+        # serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        # return Response(serializer.data, status=status.HTTP_200_OK)
 
 

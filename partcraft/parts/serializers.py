@@ -418,6 +418,57 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['order_id', 'order_date']
 
+class Bestsellingserializer(serializers.ModelSerializer):
+    parts_type = serializers.SerializerMethodField(source='product.parts_type')
+    parts_name = serializers.SerializerMethodField()
+    parts_price = serializers.SerializerMethodField()
+    parts_offer = serializers.SerializerMethodField()
+    final_price = serializers.SerializerMethodField()
+    main_image = serializers.SerializerMethodField()
+    product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
+    wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
+    is_in_wishlist = serializers.SerializerMethodField()
+    class Meta:
+        model = ProductOrderCount
+        fields = ['id', 'parts_type', 'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail', 'wishlist', 'is_in_wishlist']
+
+    def get_parts_type(self, obj):
+        return obj.product.parts_type
+    def arrangename(self, obj):
+        product = obj.product
+        return (f"{product.parts_brand.brand_name} "
+                f"{product.parts_category.category_name} "
+                f"{product.subcategory_name} "
+                f"{product.parts_voltage}V "
+                f"{product.parts_fits} "
+                f"{product.parts_litre}L")
+
+    def get_parts_name(self, obj):
+        b = self.arrangename(obj)
+        return b.replace('NoneL', '').strip()
+
+    def get_parts_price(self, obj):
+        return obj.product.parts_price
+
+    def get_parts_offer(self, obj):
+        return obj.product.parts_offer
+
+    def get_final_price(self, obj):
+        product = obj.product
+        discount_amount = product.parts_price * (product.parts_offer / 100)
+        final_price = product.parts_price - discount_amount
+        return final_price
+
+    def get_main_image(self, obj):
+        return obj.product.main_image
+
+    def get_is_in_wishlist(self, obj):
+        request = self.context.get('request', None)
+        if not request.user.is_authenticated:
+            return 'SIGN IN REQUEST'
+        elif request is None:
+            return False
+        return Wishlist.objects.filter(wishlist_name=request.user.id, wishlist_product=obj).exists()
 
 class Carouselpostserializer(serializers.ModelSerializer):
     # code=serializers.SerializerMethodField()
