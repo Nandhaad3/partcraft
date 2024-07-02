@@ -1050,9 +1050,6 @@
       <change afterPath="$PROJECT_DIR$/partcraft/parts/apps.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/filter.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0002_cart_session_key_alter_cart_quantity.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0003_alter_cart_user.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0004_alter_brand_brand_image_and_more.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/__init__.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/models.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
@@ -1243,6 +1240,7 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/partcraft" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -1314,7 +1312,12 @@
       <workItem from="1718771710244" duration="3816000" />
       <workItem from="1718792515062" duration="2434000" />
       <workItem from="1718860021274" duration="11441000" />
-      <workItem from="1718876732887" duration="5337000" />
+      <workItem from="1718876732887" duration="5641000" />
+      <workItem from="1719207152951" duration="679000" />
+      <workItem from="1719381912328" duration="877000" />
+      <workItem from="1719388485710" duration="2821000" />
+      <workItem from="1719809616446" duration="7465000" />
+      <workItem from="1719896893706" duration="2042000" />
     </task>
     <servers />
   </component>

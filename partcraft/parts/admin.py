@@ -38,3 +38,25 @@ class CartAdmin(admin.ModelAdmin):
 @admin.register(carousel)
 class CarouselAdmin(admin.ModelAdmin):
     list_display = ['carousel_image','carousel_category','carousel_code','carousel_brand']
+
+
+
+@admin.register(BillingAddress)
+class BillingAddressAdmin(admin.ModelAdmin):
+    list_display = ['user', 'billing_name', 'billing_address']
+
+@admin.register(ShippingAddress)
+class ShippingAddressAdmin(admin.ModelAdmin):
+    list_display = ['user', 'shipping_name', 'shipping_address']
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'preferred_billing_address', 'preferred_shipping_address']
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['order_id', 'order_date', 'product']
+
+@admin.register(ProductOrderCount)
+class ProductOrderCountAdmin(admin.ModelAdmin):
+    list_display = ['product', 'order_count']

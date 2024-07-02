@@ -122,7 +122,7 @@ DATABASES = {
 #     }
 # }
 
-DATABASES["default"]=dj_database_url.parse("postgres://partcraft_render_l8s8_user:RcJrxzEJMoDmraOc0jJcJRXLmGKoaA5n@dpg-cppu4ddds78s73ees2q0-a.oregon-postgres.render.com/partcraft_render_l8s8")
+DATABASES["default"]=dj_database_url.parse("postgresql://postgres.nxqtvdzpzlpeeaordgab:475rpktWfcxuKlOh@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

@@ -383,49 +383,28 @@ class ViewCartView(APIView):
             return Response({'cart': serializer.data}, status=status.HTTP_200_OK)
 
 
-# class CartItemsCreateView(APIView):
-#     def post(self, request, pk):
-#         product = get_object_or_404(Product, pk=pk)
-#         print(product)
-#         quantity = request.data.get('quantity', 1)
-#         print(type(quantity))
-#         quantity = int(quantity)
-#         cart = request.session.get('cart', {})
-#
-#         if str(product) in cart:
-#             cart[str(product)]['quantity'] += quantity
-#         else:
-#             cart[str(product)] = {
-#                 'quantity': quantity,
-#                 'parts_price': product.parts_price,
-#                 'main_image': product.main_image.url,
-#             }
-#
-#         request.session['cart'] = cart
-#         return Response({'message': 'Product added to cart', 'cart': cart}, status=status.HTTP_200_OK)
-#
-#     def patch(self, request, pk):
-#         product = get_object_or_404(Product, pk=pk)
-#         decrement_quantity = request.data.get('quantity', 1)
-#
-#         cart = request.session.get('cart', {})
-#
-#         if str(product) in cart:
-#             if cart[str(product)]['quantity'] > decrement_quantity:
-#                 cart[str(product)]['quantity'] -= decrement_quantity
-#             else:
-#                 del cart[str(product)]
-#         else:
-#             return Response({'message': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         request.session['cart'] = cart
-#         return Response({'message': 'Product decremented/removed from cart', 'cart': cart}, status=status.HTTP_200_OK)
+    def post(self,request):
+        if request.user.is_authenticated:
+            carouselserializer=Carouselpostserializer(data=request.data)
+            print(carouselserializer)
+            return Response(data='Add successfully',status=status.HTTP_201_CREATED)
+        else:
+            carouselserializer = Carouselpostserializer(data=request.data)
+            session_key = request.session.session_key
+            if carouselserializer.is_valid():
+                c=carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
+                print(c)
+                b=Brand.objects.get(brand_name=c.carousel_brand)
+                print(b)
+                ct=Category.objects.get(category_name=c.carousel_category)
+                print(ct)
 
-    # def delete(self, request):
-    #     if bool(request.session['cart']) is False:
-    #         return Response({'message': 'Cart has already cleared'}, status=status.HTTP_200_OK)
-    #     request.session['cart'] = {}
-    #     return Response({'message': 'All item has cleared successfully'}, status=status.HTTP_200_OK)
+                crt=Cart.objects.filter(session_key=session_key)
+                print(crt)
+                return Response(data='Add successfully', status=status.HTTP_201_CREATED)
+            else:
+                return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class CartItemsCreateView(APIView):
@@ -549,5 +528,142 @@ class Carouseloneview(generics.ListAPIView):
         carousel_serilizer = Carouselserilizers(c, context={'request': request})
         lastdata = adddict(serializer)
         return Response({'Carousel': carousel_serilizer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+
+
+class BuyNowAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        serializer = Buynowserilizers(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            result = serializer.save()
+            response_data = {
+                "message": "Addresses saved successfully.",
+                "billing_address": Billaddressserializer(result["billing_address"]).data,
+                "shipping_address": Shippingaddressserializer(result["shipping_address"]).data if result["shipping_address"] else None
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class OrderSummaryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+        user_profile = Profile.objects.filter(user=user).first()
+        if not user_profile:
+            return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        preferred_billing_address = user_profile.preferred_billing_address
+        preferred_shipping_address = user_profile.preferred_shipping_address
+
+        products_data = request.query_params.getlist('products')
+        if not products_data:
+            return Response({"detail": "No products."}, status=status.HTTP_400_BAD_REQUEST)
+
+        order_items = []
+        grand_total = 0
+
+        for product_data in products_data:
+            product_id, quantity = product_data.split(',')
+            quantity = int(quantity)
+
+            product = Product.objects.get(id=product_id)
+            product_serializer = ProductSerializer(product, context={'request': request})
+            product_data = product_serializer.data
+
+            total = product_data['final_price'] * quantity
+            grand_total += total
+
+            #product_image1 = product.image1.url if product.image1 and hasattr(product.image1, 'url') else None
+
+            order_items.append({
+                "product_id": product_data['id'],
+                "product_name": product_data['parts_name'],
+                "product_category": product_data['parts_category'],
+                "product_brand": product_data['parts_brand'],
+                "product_price": product_data['final_price'],
+                "product_image": product_data['main_image'],
+                "quantity": quantity,
+                "total": total,
+            })
+
+        response = Response(status=status.HTTP_200_OK)
+        for item in order_items:
+            cookie_name = f'product_{item["product_id"]}'
+            cookie_value = item["quantity"]
+            response.set_cookie(cookie_name, cookie_value, httponly=True, secure=False, samesite='Lax')
+
+        response.data = {
+            "preferred_billing_address": Billaddressserializer(preferred_billing_address).data if preferred_billing_address else None,
+            "preferred_shipping_address": Shippingaddressserializer(preferred_shipping_address).data if preferred_shipping_address else None,
+            "order_items": order_items,
+            "grand_total": grand_total,
+        }
+        return response
+
+class OrderAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        user_profile = Profile.objects.filter(user=user).first()
+        if not user_profile:
+            return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        order_items = []
+        print("Cookies present in the request:")
+        for key, value in request.COOKIES.items():
+            print(f"{key}: {value}")
+            if key.startswith('product_'):
+                product_id = key.split('_')[1]
+                quantity = int(value)
+                print(f"get cookie {key} = {quantity}")
+                order_items.append({"product_id": product_id, "quantity": quantity})
+
+        if not order_items:
+            print("No order items found in cookies")
+            return Response({"detail": "No order items."}, status=status.HTTP_400_BAD_REQUEST)
+
+        orders = []
+        for item in order_items:
+            product_id = item['product_id']
+            quantity = item['quantity']
+
+            product = Product.objects.get(id=product_id)
+            order = Order.objects.create(
+                user=user,
+                product=product,
+                quantity=quantity,
+                billing_address=user_profile.preferred_billing_address,
+                shipping_address=user_profile.preferred_shipping_address,
+            )
+
+            product_order_count, created = ProductOrderCount.objects.get_or_create(product=product)
+            product_order_count.order_count += quantity
+            product_order_count.save()
+            orders.append(order)
+
+        response_data = {
+            "message": "Thank you for your order!",
+            "order_details": [OrderSerializer(order).data for order in orders]
+        }
+        try:
+            from account.emails import send_confirmation_email
+            order = orders[0]
+            data = {
+                'order_id': order.id,
+                'to_email': user.email,
+            }
+            send_confirmation_email(data)
+        except Exception as e:
+            print(e)
+        response = Response(response_data, status=status.HTTP_201_CREATED)
+
+        for item in order_items:
+            cookie_name = f'product_{item["product_id"]}'
+            print(f"Deleting cookie {cookie_name}")
+            response.delete_cookie(cookie_name)
+
+        return response
 
 

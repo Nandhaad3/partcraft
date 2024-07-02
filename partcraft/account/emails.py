@@ -31,3 +31,25 @@ class Util:
             to=[data['to_email']],
         )
         email.send()
+
+def send_confirmation_email(data):
+    from parts.models import Order
+    order_id = data['order_id']
+    subject = f'Order Confirmation of the product #{Order.order_id}'
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [data['to_email']]
+
+    order = Order.objects.get(id=order_id)
+    message = (
+        f'Thank you for your order!\n'
+        f'Order ID: {order.order_id}\n'
+        f'Product: {order.product}\n'
+        f'Quantity: {order.quantity}\n'
+        f'Order Date: {order.order_date}\n'
+        f'Billing Address: {order.billing_address}\n'
+        f'Shipping Address: {order.shipping_address}\n'
+        'We will notify you once your order has been shipped.\n'
+        'Thank you for shopping with us!\n'
+    )
+
+    send_mail(subject, message, email_from, recipient_list)

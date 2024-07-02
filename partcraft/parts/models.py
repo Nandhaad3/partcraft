@@ -4,7 +4,8 @@ from django.db import models
 from django.conf import settings
 import os
 import uuid
-
+import datetime
+import random
 class Vehicle(models.Model):
     STATUS_CHOICES = (
         ('petrol', 'petrol'),
@@ -95,16 +96,6 @@ class Wishlist(models.Model):
         return f'{self.wishlist_name} {self.wishlist_product}'
 
 
-
-class Cart(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,blank=True,null=True)
-    session_key = models.CharField(max_length=40, null=True, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
-
-    def __str__(self):
-        return f'{self.user or self.session_key} {self.product} {self.quantity}'
-
 class carousel(models.Model):
     carousel_image=models.URLField(max_length=200)
     carousel_offer=models.IntegerField(default=0)
@@ -114,3 +105,75 @@ class carousel(models.Model):
 
     def __str__(self):
         return f'{self.carousel_code} {self.carousel_brand}'
+class Cart(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,blank=True,null=True)
+    session_key = models.CharField(max_length=40, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    code=models.ManyToManyField(carousel,blank=True)
+
+    def __str__(self):
+        return f'{self.user or self.session_key} {self.product} {self.quantity}'
+
+
+
+
+class BillingAddress(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    billing_name = models.CharField(max_length=255)
+    gst_number = models.CharField(max_length=16, blank=True, null=True)
+    email = models.EmailField(max_length=255)
+    billing_address = models.CharField(max_length=1000)
+    contact = models.CharField(max_length=13)
+    use_same_address_for_shipping = models.BooleanField(default=False)
+    use_the_address_for_next_time = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.billing_name} {self.billing_address}'
+
+class ShippingAddress(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    shipping_name = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255)
+    shipping_address = models.CharField(max_length=1000)
+    contact = models.CharField(max_length=13)
+
+    def __str__(self):
+        return f'{self.shipping_name} {self.shipping_address}'
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    preferred_billing_address = models.ForeignKey(BillingAddress, null=True, blank=True, on_delete=models.SET_NULL, related_name='preferred_billing_user')
+    preferred_shipping_address = models.ForeignKey(ShippingAddress, null=True, blank=True, on_delete=models.SET_NULL, related_name='preferred_shipping_user')
+    def __str__(self):
+        return f"Profile for {self.user}"
+
+
+def order_gen_id():
+    timestamp = datetime.now().strftime('%m%d%Y')
+    num = random.randint(100000, 999999)
+    return f'{timestamp}_{num}'
+
+class Order(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
+    billing_address = models.ForeignKey(BillingAddress, on_delete=models.SET_NULL, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order_id = models.CharField(max_length=20, unique=True)
+    order_date = models.DateField(auto_now_add=True)
+    quantity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.order_id} {self.product}'
+
+    def save(self, *args, **kwargs):
+        if not self.order_id:
+            self.order_id = order_gen_id()
+        super(Order, self).save(*args, **kwargs)
+
+class ProductOrderCount(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f'{self.product} - {self.order_count}'
