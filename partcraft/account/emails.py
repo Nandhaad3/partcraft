@@ -34,22 +34,24 @@ class Util:
 
 def send_confirmation_email(data):
     from parts.models import Order
-    order_id = data['order_id']
-    subject = f'Order Confirmation of the product #{Order.order_id}'
+    #order_id = data['order_id']
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [data['to_email']]
 
-    order = Order.objects.get(id=order_id)
-    message = (
-        f'Thank you for your order!\n'
-        f'Order ID: {order.order_id}\n'
-        f'Product: {order.product}\n'
-        f'Quantity: {order.quantity}\n'
-        f'Order Date: {order.order_date}\n'
-        f'Billing Address: {order.billing_address}\n'
-        f'Shipping Address: {order.shipping_address}\n'
-        'We will notify you once your order has been shipped.\n'
-        'Thank you for shopping with us!\n'
-    )
+    subject = f'Order Confirmation of the product'
+    message = f'Thank you for your order!\n'
+    message += f'\n-----------------------------------------------------------------------\n'
+    for order_detail in data['order_details']:
+        message += (
+            f'Order ID: {order_detail["order_id"]}\n'
+            f'Product: {order_detail["product_name"]}\n'
+            f'Quantity: {order_detail["quantity"]}\n'
+            f'Order Date: {order_detail["order_date"]}\n'
+            f'Billing Address: {order_detail["billing_address"]}\n'
+            f'Shipping Address: {order_detail["shipping_address"]}\n'
+        )
+    message += f'\n-----------------------------------------------------------------------\n'
+    message += f'We will notify you once your order has been shipped.\n'
+    message += f'Thank you for shopping with us!\n.'
 
     send_mail(subject, message, email_from, recipient_list)
