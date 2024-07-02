@@ -17,6 +17,8 @@ from .models import *
 from .serializers import *
 from collections import defaultdict
 from .filter import *
+from account.emails import send_confirmation_email
+
 
 def adddict(serializer):
 
@@ -704,7 +706,6 @@ class OrderAPIView(APIView):
             "message": "Thank you for your order!",
             "order_details": [OrderSerializer(order).data for order in orders],
         }
-        from account.emails import send_confirmation_email
         order_details = [
             {
                 'order_id': order.order_id,
@@ -755,5 +756,4 @@ class BestSellingView(generics.ListAPIView):
         #     return self.get_paginated_response(serializer.data)
         # serializer = self.get_serializer(queryset, many=True, context={'request': request})
         # return Response(serializer.data, status=status.HTTP_200_OK)
-
 
