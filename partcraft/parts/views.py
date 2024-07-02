@@ -373,10 +373,10 @@ class ViewCartView(APIView):
         if request.user.is_authenticated:
             cart_items = Cart.objects.filter(user=request.user)
         else:
-            # if not request.session.session_key:
-            #     request.session.create()
+            if not request.session.session_key:
+                request.session.create()
             session_key = request.session.session_key
-            # print(f'session key: {session_key}')
+            print(f'session key: {session_key}')
             cart_items = Cart.objects.filter(session_key=session_key)
 
         serializer = CartSerializer(cart_items, many=True, context={'request': request})
@@ -385,11 +385,11 @@ class ViewCartView(APIView):
             return Response({'cart': 'No Product in the Cart'}, status=status.HTTP_200_OK)
         else:
             response = Response({'cart': serializer.data}, status=status.HTTP_200_OK)
-            # for item in serializer.data:
-            #     cookie_name = f'cart_product_{item["product"]}'
-            #     cookie_value = item["quantity"]
-            #     response.set_cookie(cookie_name, cookie_value, httponly=True, secure=True, samesite='Lax')
-            #     print(cookie_name, cookie_value)
+            for item in serializer.data:
+                cookie_name = f'cart_product_{item["product"]}'
+                cookie_value = item["quantity"]
+                response.set_cookie(cookie_name, cookie_value, httponly=True, secure=True, samesite='Lax')
+                print(cookie_name, cookie_value)
             return response
 
 class CartItemsCreateView(APIView):
@@ -407,20 +407,20 @@ class CartItemsCreateView(APIView):
                 defaults={'quantity': quantity}
             )
         else:
-            # if not request.session.session_key:
-            #     request.session.create()
-            # cart_item, created = Cart.objects.get_or_create(
-            #     session_key=request.session.session_key,
-            #     product=product,
-            #     defaults={'quantity': quantity}
-            # )
-            if not request.set_cookie:
-                request.set_cookie = Cookie()
-                cart_item, created = Cart.objects.get_or_create(
-                    session_key=request.session.session_key,
-                    product=product,
-                    defaults={'quantity': quantity}
-                )
+            if not request.session.session_key:
+                request.session.create()
+            cart_item, created = Cart.objects.get_or_create(
+                session_key=request.session.session_key,
+                product=product,
+                defaults={'quantity': quantity}
+            )
+            # if not request.set_cookie:
+            #     request.set_cookie = Cookie()
+            #     cart_item, created = Cart.objects.get_or_create(
+            #         session_key=request.session.session_key,
+            #         product=product,
+            #         defaults={'quantity': quantity}
+            #     )
         if not created:
             cart_item.quantity += quantity
             cart_item.save()
