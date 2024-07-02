@@ -1049,8 +1049,6 @@
       <change afterPath="$PROJECT_DIR$/partcraft/parts/admin.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/apps.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/filter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/__init__.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/models.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/partcraft/parts/tests.py" afterDir="false" />
@@ -1317,7 +1315,8 @@
       <workItem from="1719381912328" duration="877000" />
       <workItem from="1719388485710" duration="2821000" />
       <workItem from="1719809616446" duration="7465000" />
-      <workItem from="1719896893706" duration="2042000" />
+      <workItem from="1719896893706" duration="3361000" />
+      <workItem from="1719911220909" duration="508000" />
     </task>
     <servers />
   </component>
