@@ -71,13 +71,14 @@ class ProductSerializer(serializers.ModelSerializer):
     related_products = serializers.SerializerMethodField()
     similar_products = serializers.SerializerMethodField()
     addtocart= serializers.HyperlinkedIdentityField(view_name='Cartlistcreate')
+    buynow = serializers.HyperlinkedIdentityField(view_name='buy_now')
 
     class Meta:
         model = Product
         fields = ['id','url','parts_name', 'parts_voltage','subcategory_name',
                   'parts_litre', 'parts_type', 'parts_description', 'parts_no', 'parts_price', 'parts_offer','final_price',
                   'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
-                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist','related_products','similar_products','addtocart']
+                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist','related_products','similar_products','addtocart', 'buynow']
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
                 f"{obj.parts_category.category_name} "
@@ -384,7 +385,6 @@ class Buynowserilizers(serializers.Serializer):
 
         print(billing_instance)
 
-        # Create ShippingAddress instance if required
         shipping_instance = None
         if use_same_address_for_shipping:
             shipping_address_data = {
@@ -401,7 +401,6 @@ class Buynowserilizers(serializers.Serializer):
                 shipping_address_data['user'] = user
                 shipping_instance = ShippingAddress.objects.create(**shipping_address_data)
 
-        # Update user profile if required
         if use_the_address_for_next_time:
             user_profile, created = Profile.objects.get_or_create(user=user)
             user_profile.preferred_billing_address = billing_instance
