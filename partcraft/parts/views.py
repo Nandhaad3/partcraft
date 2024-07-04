@@ -394,6 +394,39 @@ class ViewCartView(APIView):
                 print(cookie_name, cookie_value)
             return response
 
+    def post(self,request):
+        if request.user.is_authenticated:
+            carouselserializer=Carouselpostserializer(data=request.data)
+            print(carouselserializer)
+            return Response(data='Add successfully',status=status.HTTP_201_CREATED)
+        else:
+            carouselserializer = Carouselpostserializer(data=request.data)
+            session_key = request.session.session_key
+            if carouselserializer.is_valid():
+                c=Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
+                print(c)
+                b=Brand.objects.get(brand_name=c.carousel_brand)
+                print(b)
+                ct=Category.objects.get(category_name=c.carousel_category)
+                print(ct)
+                p=Product.objects.filter(parts_brand=b,parts_category=ct)
+                print(p)
+                pro=None
+                for i in p:
+                    crt = Cart.objects.filter(session_key=session_key)
+                    print(crt)
+                    if crt:
+                        for j in crt:
+                            print(j.product)
+                            if i == j.product:
+                                j.code.add(c)
+                                return Response(data='Add successfully', status=status.HTTP_201_CREATED)
+                    else:
+                        return Response(data='Cart not found', status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CartItemsCreateView(APIView):
 
     def post(self, request, pk):
@@ -467,28 +500,28 @@ class CartItemsCreateView(APIView):
             return Response({'message': 'All items cleared from cart'}, status=status.HTTP_200_OK)
 
 
-class RemoveFromCartView(APIView):
-
-    def delete(self, request, pk):
-        product = get_object_or_404(Product, pk=pk)
-
-        if request.user.is_authenticated:
-            cart_item = Cart.objects.filter(user=request.user, product=product).first()
-            if cart_item:
-                cart_item.delete()
-                return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
-            return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
-
-        else:
-            if not request.session.session_key:
-                request.session.create()
-            session_key = request.session.session_key
-
-            cart_item = Cart.objects.filter(session_key=session_key, product=product).first()
-            if cart_item:
-                cart_item.delete()
-                return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
-            return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+# class RemoveFromCartView(APIView):
+#
+#     def delete(self, request, pk):
+#         product = get_object_or_404(Product, pk=pk)
+#
+#         if request.user.is_authenticated:
+#             cart_item = Cart.objects.filter(user=request.user, product=product).first()
+#             if cart_item:
+#                 cart_item.delete()
+#                 return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+#             return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         else:
+#             if not request.session.session_key:
+#                 request.session.create()
+#             session_key = request.session.session_key
+#
+#             cart_item = Cart.objects.filter(session_key=session_key, product=product).first()
+#             if cart_item:
+#                 cart_item.delete()
+#                 return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+#             return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
 
 class RemoveFromCartView(APIView):
 
@@ -514,7 +547,7 @@ class RemoveFromCartView(APIView):
             return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
 class Carouselallview(generics.ListAPIView):
     serializer_class = Carouselserilizers
-    queryset = carousel.objects.all()
+    queryset = Carousel.objects.all()
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -529,7 +562,7 @@ class Carouseloneview(generics.ListAPIView):
 
     def get_queryset(self):
         carousel_id = self.kwargs.get('pk')
-        c = carousel.objects.get(id=carousel_id)
+        c = Carousel.objects.get(id=carousel_id)
         cat=c.carousel_category
         ban=c.carousel_brand
         queryset = Product.objects.all().filter(parts_category=cat,parts_brand=ban)
@@ -538,7 +571,7 @@ class Carouseloneview(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         carousel_id = self.kwargs.get('pk')
-        c = carousel.objects.get(id=carousel_id)
+        c = Carousel.objects.get(id=carousel_id)
         if not queryset.exists():
             return Response({'details': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(queryset, many=True, context={'request': request})

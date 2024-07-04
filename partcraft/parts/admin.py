@@ -35,7 +35,7 @@ class WishlistAdmin(admin.ModelAdmin):
 class CartAdmin(admin.ModelAdmin):
     list_display = ['user','session_key', 'product', 'quantity']
 
-@admin.register(carousel)
+@admin.register(Carousel)
 class CarouselAdmin(admin.ModelAdmin):
     list_display = ['carousel_image','carousel_category','carousel_code','carousel_brand']
 
