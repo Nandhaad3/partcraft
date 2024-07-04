@@ -397,7 +397,30 @@ class ViewCartView(APIView):
     def post(self,request):
         if request.user.is_authenticated:
             carouselserializer=Carouselpostserializer(data=request.data)
-            print(carouselserializer)
+            user = request.user
+            if carouselserializer.is_valid():
+                c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
+                print(c)
+                b = Brand.objects.get(brand_name=c.carousel_brand)
+                print(b)
+                ct = Category.objects.get(category_name=c.carousel_category)
+                print(ct)
+                p = Product.objects.filter(parts_brand=b, parts_category=ct)
+                print(p)
+                pro = None
+                for i in p:
+                    crt = Cart.objects.filter(user=user)
+                    print(crt)
+                    if crt:
+                        for j in crt:
+                            print(j.product)
+                            if i == j.product:
+                                j.code.add(c)
+                                return Response(data='Add successfully', status=status.HTTP_201_CREATED)
+                    else:
+                        return Response(data='Cart not found', status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(data='Add successfully',status=status.HTTP_201_CREATED)
         else:
             carouselserializer = Carouselpostserializer(data=request.data)
