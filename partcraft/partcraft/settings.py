@@ -143,6 +143,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+COOKIE_SAMESITE = 'Lax'
+COOKIE_SECURE = True
+COOKIE_HTTPONLY = True
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
