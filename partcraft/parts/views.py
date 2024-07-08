@@ -371,6 +371,18 @@ class DeleteAllWishlistItemsView(APIView):
 
 
 class ViewCartView(APIView):
+    # def get(self, request):
+    #     if request.user.is_authenticated:
+    #         cart_items = Cart.objects.filter(user=request.user)
+    #     else:
+    #         session_key = request.session.session_key
+    #         cart_items = Cart.objects.filter(session_key=session_key)
+    #
+    #     serializer = CartSerializer(cart_items, many=True, context={'request': request})
+    #     if bool(serializer.data) is False:
+    #         return Response({'cart': 'No Product in the Cart'}, status=status.HTTP_200_OK)
+    #     else:
+    #         return Response({'cart': serializer.data}, status=status.HTTP_200_OK)
     def get(self, request):
         if request.user.is_authenticated:
             cart_items = Cart.objects.filter(user=request.user)

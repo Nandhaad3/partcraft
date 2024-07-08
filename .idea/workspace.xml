@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="Email and views are changed">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -117,7 +119,10 @@
       <workItem from="1719911220909" duration="1334000" />
       <workItem from="1719927692520" duration="2106000" />
       <workItem from="1719945704578" duration="3690000" />
-      <workItem from="1720074060405" duration="315000" />
+      <workItem from="1720074060405" duration="945000" />
+      <workItem from="1720097480899" duration="159000" />
+      <workItem from="1720097849664" duration="17000" />
+      <workItem from="1720422289937" duration="30000" />
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />

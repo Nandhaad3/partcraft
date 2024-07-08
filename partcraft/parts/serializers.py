@@ -266,7 +266,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['user','user_name','session_key','product','quantity','parts_name','parts_price','parts_offer','discount_amount','final_price','main_image']
+        fields = ['user','user_name','session_key','product','quantity','parts_name','parts_price','parts_offer','discount_amount','final_price','main_image','code']
 
     def get_user_name(self, obj):
         request = self.context.get('request')
