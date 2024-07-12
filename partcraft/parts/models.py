@@ -96,7 +96,7 @@ class Wishlist(models.Model):
         return f'{self.wishlist_name} {self.wishlist_product}'
 
 
-class carousel(models.Model):
+class Carousel(models.Model):
     carousel_image=models.URLField(max_length=200)
     carousel_offer=models.IntegerField(default=0)
     carousel_category= models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -105,12 +105,13 @@ class carousel(models.Model):
 
     def __str__(self):
         return f'{self.carousel_code} {self.carousel_brand}'
+
 class Cart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,blank=True,null=True)
     #session_key = models.CharField(max_length=40, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
-    code=models.ManyToManyField(carousel,blank=True)
+    code=models.ManyToManyField(Carousel,blank=True)
 
     def __str__(self):
         return f'{self.user} {self.product} {self.quantity}'

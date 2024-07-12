@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="Email and views are changed">
-      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0002_remove_cart_session_key.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Changes.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Changes/shelved.patch" beforeDir="false" />
+    <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="session key is removed and the cart value are stored in the cookies&#10;1. Session key is removed for the model.py &#10;2. cart value are stored in cookies">
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_04_07_24,_12_19_pm_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_04_07_24__12_19_pm__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/partcraft/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/views.py" afterDir="false" />
@@ -132,6 +130,12 @@
       <workItem from="1720111529324" duration="569000" />
       <workItem from="1720155307892" duration="4813000" />
       <workItem from="1720179293452" duration="5424000" />
+      <workItem from="1720333286562" duration="3000" />
+      <workItem from="1720504473075" duration="2404000" />
+      <workItem from="1720625788903" duration="1391000" />
+      <workItem from="1720676393081" duration="5457000" />
+      <workItem from="1720714590591" duration="1822000" />
+      <workItem from="1720762472512" duration="13563000" />
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />
@@ -190,6 +194,7 @@
     <MESSAGE value="update" />
     <MESSAGE value="Bestselling&#10;created a best selling serializers and view class" />
     <MESSAGE value="Email and views are changed" />
-    <option name="LAST_COMMIT_MESSAGE" value="Email and views are changed" />
+    <MESSAGE value="session key is removed and the cart value are stored in the cookies&#10;1. Session key is removed for the model.py &#10;2. cart value are stored in cookies" />
+    <option name="LAST_COMMIT_MESSAGE" value="session key is removed and the cart value are stored in the cookies&#10;1. Session key is removed for the model.py &#10;2. cart value are stored in cookies" />
   </component>
 </project>

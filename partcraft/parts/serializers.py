@@ -329,7 +329,7 @@ class Carouselserilizers(serializers.ModelSerializer):
 
 
     class Meta:
-        model=carousel
+        model=Carousel
         fields = ['image','discount','category','code','ref','brand','url']
 
 
@@ -473,7 +473,7 @@ class Carouselpostserializer(serializers.ModelSerializer):
     # code=serializers.SerializerMethodField()
 
     class Meta:
-        model=carousel
+        model=Carousel
         fields=['carousel_code']
 
     # def get_code(self,obj):
