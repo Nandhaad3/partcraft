@@ -266,7 +266,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['user','user_name','session_key','product','quantity','parts_name','parts_price','parts_offer','discount_amount','final_price','main_image']
+        fields = ['user','user_name','product','quantity','parts_name','parts_price','parts_offer','discount_amount','final_price','main_image']
 
     def get_user_name(self, obj):
         request = self.context.get('request')
@@ -313,9 +313,9 @@ class CartSerializer(serializers.ModelSerializer):
         request=self.context.get('request')
         if request.user.is_authenticated:
             validated_data['user']=request.user
-        else:
-            validated_data['session_key']=request.session.session_key
-        return Cart.objects.create(**validated_data)
+        # else:
+        #     validated_data['session_key']=request.session.session_key
+        # return Cart.objects.create(**validated_data)
 
 
 class Carouselserilizers(serializers.ModelSerializer):
@@ -351,7 +351,7 @@ class Carouselserilizers(serializers.ModelSerializer):
 class Billaddressserializer(serializers.ModelSerializer):
     class Meta:
         model = BillingAddress
-        fields = '__all__'
+        fields = ['user', 'billing_name', 'gst_number', 'email', 'billing_address', 'contact']
 
 class Shippingaddressserializer(serializers.ModelSerializer):
     class Meta:
