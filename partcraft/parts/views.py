@@ -371,7 +371,7 @@ class DeleteAllWishlistItemsView(APIView):
         return Response({'message': 'All items removed from wishlist successfully.'}, status=status.HTTP_200_OK)
 
 class BaseCartView(APIView):
-    COOKIE_NAME = 'cart_items'
+    COOKIE_NAME = 'ci'
 
     def get_cart_items_from_cookie(self, request):
         cart_items_json = request.COOKIES.get(self.COOKIE_NAME, '[]')
@@ -381,13 +381,13 @@ class BaseCartView(APIView):
         response.set_cookie(self.COOKIE_NAME, json.dumps(cart_items), httponly=True, secure=True, max_age=3600, samesite='Lax')
 
     def set_cart_item_cookie(self, request, response, product_id, quantity):
-        cookie_name = f'cart_product_{product_id}'
+        cookie_name = f'cp_{product_id}'
         existing_quantity = int(request.COOKIES.get(cookie_name, 0))
         new_quantity = existing_quantity + quantity
         response.set_cookie(cookie_name, new_quantity, httponly=True, max_age=3600, secure=True, samesite='Lax')
 
     def delete_cart_item_cookie(self, response, product_id):
-        cookie_name = f'cart_product_{product_id}'
+        cookie_name = f'cp_{product_id}'
         response.delete_cookie(cookie_name)
         print(f'Deleting cookie: {cookie_name}')
 
@@ -728,7 +728,7 @@ class OrderSummaryAPIView(BaseCartView):
         def parse_cookie_data():
             items = []
             for key, value in request.COOKIES.items():
-                if key.startswith('cart_product_'):
+                if key.startswith('cp_'):
                     try:
                         product_id = int(key.split('_')[2])
                         quantity = int(value)
@@ -805,8 +805,8 @@ class OrderAPIView(BaseCartView):
 
         order_items = []
         for key, value in request.COOKIES.items():
-            if key.startswith('product_') or key.startswith('cart_product_'):
-                split_index = 2 if key.startswith('cart_product_') else 1
+            if key.startswith('p_') or key.startswith('cp_'):
+                split_index = 2 if key.startswith('cp_') else 1
                 product_id = int(key.split('_')[split_index])
                 quantity = int(value)
                 order_items.append({"product_id": product_id, "quantity": quantity})
