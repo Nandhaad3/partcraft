@@ -108,14 +108,6 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='ProductOrderCount',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order_count', models.IntegerField(default=0)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.product')),
-            ],
-        ),
-        migrations.CreateModel(
             name='ShippingAddress',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -133,19 +125,6 @@ class Migration(migrations.Migration):
                 ('preferred_billing_address', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='preferred_billing_user', to='parts.billingaddress')),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
                 ('preferred_shipping_address', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='preferred_shipping_user', to='parts.shippingaddress')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Order',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order_id', models.CharField(max_length=20, unique=True)),
-                ('order_date', models.DateField(auto_now_add=True)),
-                ('quantity', models.IntegerField(default=1)),
-                ('billing_address', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='parts.billingaddress')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.product')),
-                ('shipping_address', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='parts.shippingaddress')),
             ],
         ),
         migrations.CreateModel(

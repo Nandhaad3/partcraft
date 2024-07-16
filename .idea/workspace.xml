@@ -4,8 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="session key is removed and the cart value are stored in the cookies&#10;1. Session key is removed for the model.py &#10;2. cart value are stored in cookies&#10;&#10;carousel was update in cartlist view">
+    <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="cookies name changed">
+      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0003_order_productordercount.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -121,7 +126,14 @@
       <workItem from="1719945704578" duration="3690000" />
       <workItem from="1720074060405" duration="315000" />
       <workItem from="1720861997725" duration="300000" />
-      <workItem from="1720862375324" duration="96000" />
+      <workItem from="1720862375324" duration="876000" />
+      <workItem from="1720884895320" duration="2770000" />
+      <workItem from="1721019128201" duration="7817000" />
+      <workItem from="1721049572403" duration="12971000" />
+      <workItem from="1721106606365" duration="18339000" />
+      <workItem from="1721126912414" duration="1094000" />
+      <workItem from="1721128096681" duration="3435000" />
+      <workItem from="1721135835803" duration="1870000" />
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />
@@ -163,7 +175,15 @@
       <option name="project" value="LOCAL" />
       <updated>1720801802020</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="cookies name changed">
+      <option name="closed" value="true" />
+      <created>1720862621029</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1720862621029</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -189,7 +209,8 @@
     <MESSAGE value="Bestselling&#10;created a best selling serializers and view class" />
     <MESSAGE value="Email and views are changed" />
     <MESSAGE value="session key is removed and the cart value are stored in the cookies&#10;1. Session key is removed for the model.py &#10;2. cart value are stored in cookies&#10;&#10;carousel was update in cartlist view" />
-    <option name="LAST_COMMIT_MESSAGE" value="session key is removed and the cart value are stored in the cookies&#10;1. Session key is removed for the model.py &#10;2. cart value are stored in cookies&#10;&#10;carousel was update in cartlist view" />
+    <MESSAGE value="cookies name changed" />
+    <option name="LAST_COMMIT_MESSAGE" value="cookies name changed" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/partcraft$views.coverage" NAME="views Coverage Results" MODIFIED="1720862278907" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/partcraft/parts" />

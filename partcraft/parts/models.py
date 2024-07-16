@@ -104,7 +104,7 @@ class Carousel(models.Model):
     carousel_brand=models.ForeignKey(Brand, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.carousel_code} {self.carousel_brand}'
+        return f'{self.carousel_code} {self.carousel_offer}'
 
 class Cart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,blank=True,null=True)
@@ -154,6 +154,12 @@ def order_gen_id():
     return f'{timestamp}_{num}'
 
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('InProgress', 'InProgress'),
+        ('Dispatched', 'Dispatched'),
+        ('Delivered', 'Delivered'),
+        ('Cancelled', 'Cancelled'),
+    ]
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
     billing_address = models.ForeignKey(BillingAddress, on_delete=models.SET_NULL, null=True, blank=True)
@@ -161,6 +167,7 @@ class Order(models.Model):
     order_id = models.CharField(max_length=20, unique=True)
     order_date = models.DateField(auto_now_add=True)
     quantity = models.IntegerField(default=1)
+    status = models.CharField(choices=STATUS_CHOICES, max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f'{self.order_id} {self.product}'

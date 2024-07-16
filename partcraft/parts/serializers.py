@@ -263,10 +263,11 @@ class CartSerializer(serializers.ModelSerializer):
     discount_amount = serializers.SerializerMethodField()
     final_price = serializers.SerializerMethodField()
     main_image=serializers.SerializerMethodField()
+    code = serializers.SerializerMethodField()
 
     class Meta:
         model = Cart
-        fields = ['user','user_name','product','quantity','parts_name','parts_price','parts_offer','discount_amount','final_price','main_image']
+        fields = ['user','user_name','product','quantity','parts_name','parts_price','parts_offer','discount_amount','final_price','main_image', 'code']
 
     def get_user_name(self, obj):
         request = self.context.get('request')
@@ -298,6 +299,8 @@ class CartSerializer(serializers.ModelSerializer):
         discount_amount = product.parts_price * (product.parts_offer / 100)
         return discount_amount
 
+    def get_code(self,obj):
+        return list(obj.code.values_list('carousel_code',flat=True))
 
     def get_final_price(self, obj):
         product=obj.product
@@ -313,10 +316,14 @@ class CartSerializer(serializers.ModelSerializer):
         request=self.context.get('request')
         if request.user.is_authenticated:
             validated_data['user']=request.user
+        code_data = validated_data.pop('code', None)
+        cart = Cart.objects.create(**validated_data)
+        if code_data:
+            cart.code.set(code_data)
+        return cart
         # else:
         #     validated_data['session_key']=request.session.session_key
         # return Cart.objects.create(**validated_data)
-
 
 class Carouselserilizers(serializers.ModelSerializer):
     discount=serializers.SerializerMethodField()
@@ -478,3 +485,4 @@ class Carouselpostserializer(serializers.ModelSerializer):
 
     # def get_code(self,obj):
     #     return obj.carousel_code
+

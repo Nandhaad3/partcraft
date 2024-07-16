@@ -371,7 +371,7 @@ class DeleteAllWishlistItemsView(APIView):
         return Response({'message': 'All items removed from wishlist successfully.'}, status=status.HTTP_200_OK)
 
 class BaseCartView(APIView):
-    COOKIE_NAME = 'ci'
+    COOKIE_NAME = 'cart_items'
 
     def get_cart_items_from_cookie(self, request):
         cart_items_json = request.COOKIES.get(self.COOKIE_NAME, '[]')
@@ -381,13 +381,13 @@ class BaseCartView(APIView):
         response.set_cookie(self.COOKIE_NAME, json.dumps(cart_items), httponly=True, secure=True, max_age=3600, samesite='Lax')
 
     def set_cart_item_cookie(self, request, response, product_id, quantity):
-        cookie_name = f'cp_{product_id}'
+        cookie_name = f'cart_product_{product_id}'
         existing_quantity = int(request.COOKIES.get(cookie_name, 0))
         new_quantity = existing_quantity + quantity
         response.set_cookie(cookie_name, new_quantity, httponly=True, max_age=3600, secure=True, samesite='Lax')
 
     def delete_cart_item_cookie(self, response, product_id):
-        cookie_name = f'cp_{product_id}'
+        cookie_name = f'cart_product_{product_id}'
         response.delete_cookie(cookie_name)
         print(f'Deleting cookie: {cookie_name}')
 
@@ -410,20 +410,61 @@ class ViewCartView(BaseCartView):
         if request.user.is_authenticated:
             cart_items = Cart.objects.filter(user=request.user)
             serializer = CartSerializer(cart_items, many=True, context={'request': request})
+
             if not serializer.data:
                 return Response({'message': 'No cart items found.'}, status=status.HTTP_404_NOT_FOUND)
-            else:
-                response = Response({'cart': serializer.data}, status=status.HTTP_200_OK)
-                for item in serializer.data:
-                    self.set_cart_item_cookie(request, response, item["product"], item["quantity"])
-                return response
+
+            total_price = 0
+            savings = 0
+            print(total_price, savings)
+            for item in serializer.data:
+                product_id = item.get('product')
+                quantity = item.get('quantity', 0)
+                if product_id is None:
+                    continue
+                try:
+                    product = Product.objects.get(id=product_id)
+                except Product.DoesNotExist:
+                    continue
+
+                final_price = product.parts_price - (product.parts_price * product.parts_offer) / 100
+                carousel_saving = 0
+
+                if 'code' in item and item['code']:
+                    for code in item['code']:
+                        carousel = Carousel.objects.filter(carousel_code=code).first()
+                        if carousel:
+                            c_final_price = final_price - final_price * (carousel.carousel_offer / 100)
+                            savings_per_unit = final_price - c_final_price
+                            carousel_saving += savings_per_unit
+                            final_price = c_final_price
+                total_price += final_price * quantity
+                savings += carousel_saving * quantity
+            response = Response({'cart': serializer.data, 'total_price': total_price, 'save': savings},status=status.HTTP_200_OK)
+
+            for item in serializer.data:
+                self.set_cart_item_cookie(request, response, item["product"], item["quantity"])
+            return response
         else:
             cart_items = self.get_cart_items_from_cookie(request)
             cart_data = []
+            total_price = 0
+            savings = 0
             for item in cart_items:
                 product = Product.objects.get(id=item['product_id'])
+                final_price = product.parts_price - (product.parts_price * product.parts_offer) / 100
+                carousel_saving = 0
+                if 'code' in item:
+                    for code in item['code']:
+                        carousel = Carousel.objects.filter(carousel_code=code).first()
+                        if carousel:
+                            c_final_price = final_price - final_price * (carousel.carousel_offer / 100)
+                            carousel_saving += final_price - c_final_price
+                            final_price = c_final_price
+
+                total_price += final_price * item['quantity']
+                savings += carousel_saving * item['quantity']
                 cart_data.append({
-                    'user': None,
                     'product': product.id,
                     'quantity': item['quantity'],
                     'parts_name': CartSerializer().arrangename(product),
@@ -432,11 +473,12 @@ class ViewCartView(BaseCartView):
                     'discount_amount': (product.parts_price * product.parts_offer) / 100,
                     'final_price': product.parts_price - (product.parts_price * product.parts_offer) / 100,
                     'main_image': product.main_image,
+                    'code': item.get('code',[]),
                 })
 
             if not cart_data:
                 return Response({'message': 'No cart items found.'}, status=status.HTTP_404_NOT_FOUND)
-            return Response({'cart': cart_data}, status=status.HTTP_200_OK)
+            return Response({'cart': cart_data, 'total_price':total_price, 'save':savings}, status=status.HTTP_200_OK)
 
     def post(self, request):
         if request.user.is_authenticated:
@@ -477,11 +519,13 @@ class ViewCartView(BaseCartView):
                 print(f"Category:{ct}")
                 p = Product.objects.filter(parts_brand=b, parts_category=ct)
                 print(f"part:{p}")
-                cart_items = self.get_cart_items_from_cookie(request)
 
+                cart_items = self.get_cart_items_from_cookie(request)
                 for i in p:
                     for item in cart_items:
                         if item['product_id'] == i.id:
+                            if 'code' in item and c.carousel_code in item['code']:
+                                return Response({'message': 'code is already applied'}, status=status.HTTP_200_OK)
                             item.setdefault('code', []).append(c.carousel_code)
                             cart_data=[]
                             for item in cart_items:
@@ -496,7 +540,7 @@ class ViewCartView(BaseCartView):
                                     'final_price': product.parts_price - (
                                                 product.parts_price * product.parts_offer) / 100,
                                     'main_image': product.main_image,
-                                    'code': item['code'],
+                                    'code': item.get('code', []),
                                 })
                             response = Response({'message': 'Added successfully', 'cart': cart_data}, status=status.HTTP_200_OK)
                             self.save_cart_items_to_cookie(response, cart_items)
@@ -728,7 +772,7 @@ class OrderSummaryAPIView(BaseCartView):
         def parse_cookie_data():
             items = []
             for key, value in request.COOKIES.items():
-                if key.startswith('cp_'):
+                if key.startswith('cart_product_'):
                     try:
                         product_id = int(key.split('_')[2])
                         quantity = int(value)
@@ -778,6 +822,7 @@ class OrderSummaryAPIView(BaseCartView):
                 "product_price": product_data['final_price'],
                 "product_image": product_data['main_image'],
                 "quantity": item["quantity"],
+                'code': item.get('code', []),
                 "total": total,
             })
 
@@ -805,8 +850,8 @@ class OrderAPIView(BaseCartView):
 
         order_items = []
         for key, value in request.COOKIES.items():
-            if key.startswith('p_') or key.startswith('cp_'):
-                split_index = 2 if key.startswith('cp_') else 1
+            if key.startswith('product_') or key.startswith('cart_product_'):
+                split_index = 2 if key.startswith('cart_product_') else 1
                 product_id = int(key.split('_')[split_index])
                 quantity = int(value)
                 order_items.append({"product_id": product_id, "quantity": quantity})
@@ -890,3 +935,45 @@ class BestSellingView(generics.ListAPIView):
         #     return self.get_paginated_response(serializer.data)
         # serializer = self.get_serializer(queryset, many=True, context={'request': request})
         # return Response(serializer.data, status=status.HTTP_200_OK)
+
+class MyOrderView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, order_id=None):
+        user = request.user
+
+        def get_order_details(order):
+            product = order.product
+            product_data = ProductSerializer(product, context={'request': request}).data
+            order_details = {
+                'order_id': order.order_id,
+                'order_date': order.order_date,
+                "product_name": product_data['parts_name'],
+                "part_no": product_data['parts_no'],
+                "product_price": product_data['final_price'],
+                "product_image": product_data['main_image'],
+                'quantity': order.quantity,
+            }
+            return order_details
+        if order_id:
+            order = get_object_or_404(Order, user=user, order_id=order_id)
+            order_details = get_order_details(order)
+            return Response(order_details, status=status.HTTP_404_NOT_FOUND)
+        orders = Order.objects.filter(user=user)
+        if not orders:
+            return Response({"detail": "No orders found."}, status=status.HTTP_404_NOT_FOUND)
+        all_order_details = [get_order_details(order) for order in orders]
+        return Response(all_order_details, status=status.HTTP_200_OK)
+
+    def delete(self, request, order_id=None):
+        if not order_id:
+            return Response({"detail": "Order ID required"}, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        order = get_object_or_404(Order, user=user, order_id=order_id)
+        product_order_count = get_object_or_404(ProductOrderCount, product=order.product)
+        product_order_count.order_count -= order.quantity
+        if product_order_count.order_count <= 0:
+            product_order_count.order_count = 0
+        product_order_count.save()
+
+        order.delete()
+        return Response({"detail": "Order deleted."}, status=status.HTTP_204_NO_CONTENT)
