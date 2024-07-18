@@ -44,6 +44,7 @@ class Category(models.Model):
 #     return os.path.join('products', new_filename)
 
 class Product(models.Model):
+    objects = None
     TYPE_CHOICES = (
         ('OE', 'OE'),
         ('AFTERMARKET', 'AFTERMARKET'),
