@@ -29,7 +29,7 @@ PUBLISHER_INDEX.settings(
                 'type': 'edge_ngram',
                 # 'min_gram': 0,
                 # 'max_gram': 0,
-                'token_chars': [ 'word', 'punctuation', 'sentence']
+                'token_chars': ['letter', 'digit', 'word', 'punctuation', 'sentence']
             }
         }
     }

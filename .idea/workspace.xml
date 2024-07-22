@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="cookies cart changed">
-      <change afterPath="$PROJECT_DIR$/partcraft/parts/documents.py" afterDir="false" />
+    <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="Elastic Search is updated">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/partcraft/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/parts/filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/filter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/parts/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/parts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/parts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/documents.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/documents.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -160,7 +155,8 @@
       <workItem from="1721577981652" duration="1442000" />
       <workItem from="1721622621132" duration="6001000" />
       <workItem from="1721633302504" duration="5047000" />
-      <workItem from="1721642741943" duration="3911000" />
+      <workItem from="1721642741943" duration="4535000" />
+      <workItem from="1721648339426" duration="1585000" />
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />
@@ -226,7 +222,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721292245250</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Elastic Search is updated">
+      <option name="closed" value="true" />
+      <created>1721647701332</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1721647701332</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -255,7 +259,8 @@
     <MESSAGE value="cookies name changed" />
     <MESSAGE value="calculation are done for carousel in cartliat view&#10;order cancellation and order history api are added" />
     <MESSAGE value="cookies cart changed" />
-    <option name="LAST_COMMIT_MESSAGE" value="cookies cart changed" />
+    <MESSAGE value="Elastic Search is updated" />
+    <option name="LAST_COMMIT_MESSAGE" value="Elastic Search is updated" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
