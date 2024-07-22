@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import *
 import random
+from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
+from .documents import ProductDocument
 
 class BrandSerializer(serializers.ModelSerializer):
     url=serializers.HyperlinkedIdentityField(view_name='brandonedetails')
@@ -79,6 +81,7 @@ class ProductSerializer(serializers.ModelSerializer):
                   'parts_litre', 'parts_type', 'parts_description', 'parts_no', 'parts_price', 'parts_offer','final_price',
                   'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
                   'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist','related_products','similar_products','addtocart', 'buynow']
+
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
                 f"{obj.parts_category.category_name} "
@@ -110,7 +113,7 @@ class ProductSerializer(serializers.ModelSerializer):
         print(obj.subcategory_name)
         related_products = Product.objects.filter(
             subcategory_name=obj.subcategory_name
-        ).exclude(id=obj.id)  # Fetch 4 related products, excluding the current one
+        ).exclude(id=obj.id)
         print(related_products)
         serializer = ProductoneSerializer(related_products, many=True, context=self.context)
         return serializer.data

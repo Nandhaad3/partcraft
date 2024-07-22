@@ -1,8 +1,8 @@
 import json
-
 from django.db.migrations import serializer
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
+from elasticsearch import NotFoundError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -18,10 +18,12 @@ from django.shortcuts import get_object_or_404
 from .models import *
 from .serializers import *
 from collections import defaultdict
-from .filter import *
+from .filter import OfferfilterSet
 from account.emails import send_confirmation_email
 import base64
-
+from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
+from django_elasticsearch_dsl_drf.filter_backends import FilteringFilterBackend, CompoundSearchFilterBackend
+from .documents import ProductDocument
 
 def adddict(serializer):
     last_data = []
@@ -62,6 +64,7 @@ class CustomPagination(PageNumberPagination):
 
 # def offerdata(queryset):
 #     return queryset.values_list('parts_offer', flat=True).distinct()
+
 class partslistview(generics.ListAPIView):
     # queryset = Product.objects.all()
     # print(queryset)
@@ -101,6 +104,78 @@ class partslistview(generics.ListAPIView):
         # offer=offerdata(queryset)
         return Response(lastdata, status=status.HTTP_200_OK)
 
+
+# localhost:9200/product/_search?pretty=
+# localhost:9200/product/
+# localhost:9200/product/_mapping?pretty
+class partslistsDocumentView(DocumentViewSet):
+    document = ProductDocument
+    serializer_class = ProductoneSerializer
+    filter_backends = [FilteringFilterBackend, CompoundSearchFilterBackend]
+    query_backends = [CompoundSearchFilterBackend]
+    filter_fields = {
+        'parts_brand': 'parts_brand',
+        'parts_category': 'parts_category',
+        'subcategory_name': 'subcategory_name',
+        'parts_no': 'parts_no',
+        'parts_fits': 'parts_fits',
+        'parts_type': 'parts_type',
+    }
+    search_fields = ['parts_brand', 'parts_category', 'subcategory_name', 'parts_no', 'parts_fits', 'parts_type']
+    multi_match_search_fields = ['parts_brand', 'parts_category', 'subcategory_name', 'parts_no', 'parts_fits', 'parts_type']
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        search_query = self.request.query_params.get('search', '').strip()
+        min_price = self.request.query_params.get('min_price')
+        max_price = self.request.query_params.get('max_price')
+        min_offer = self.request.query_params.get('min_offer')
+        max_offer = self.request.query_params.get('max_offer')
+
+        search = self.document.search()
+        print(search.to_dict())
+        if search_query:
+            search = search.query('bool', should=[
+            {'match': {'parts_brand': search_query}},
+            {'match': {'parts_category': search_query}},
+            {'match': {'subcategory_name': search_query}},
+            {'match': {'parts_no': search_query}},
+            {'match': {'parts_fits': search_query}},
+            {'match': {'parts_type': search_query}}
+        ])
+
+        if min_offer or max_offer:
+            offer_filter = {}
+            if min_offer:
+                offer_filter['gte'] = int(min_offer)
+            if max_offer:
+                offer_filter['lte'] = int(max_offer)
+            search = search.filter('range', parts_offer=offer_filter)
+
+        if min_price or max_price:
+            price_filter = {}
+            if min_price:
+                price_filter['gte'] = float(min_price)
+            if max_price:
+                price_filter['lte'] = float(max_price)
+            search = search.filter('range', final_price=price_filter)
+
+        return search
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        response = queryset.execute()
+        print(response)
+        if not response.hits:
+            return Response({"detail": "No Product found matching the criteria."}, status=status.HTTP_404_NOT_FOUND)
+        hit_ids = [hit.meta.id for hit in response.hits]
+        queryset = Product.objects.filter(id__in=hit_ids)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class partsonedetail(generics.RetrieveAPIView):
     serializer_class = ProductSerializer

@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="calculation are done for carousel in cartliat view&#10;order cancellation and order history api are added">
+    <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="cookies cart changed">
+      <change afterPath="$PROJECT_DIR$/partcraft/parts/documents.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/parts/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/partcraft/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/filter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/views.py" afterDir="false" />
     </list>
@@ -140,7 +143,24 @@
       <workItem from="1721226178247" duration="2056000" />
       <workItem from="1721233434266" duration="878000" />
       <workItem from="1721277235521" duration="3643000" />
-      <workItem from="1721284359207" duration="4759000" />
+      <workItem from="1721284359207" duration="9594000" />
+      <workItem from="1721365924039" duration="8556000" />
+      <workItem from="1721378054834" duration="5540000" />
+      <workItem from="1721383782975" duration="4869000" />
+      <workItem from="1721388839434" duration="2676000" />
+      <workItem from="1721395970836" duration="6112000" />
+      <workItem from="1721404303064" duration="1717000" />
+      <workItem from="1721455452081" duration="12352000" />
+      <workItem from="1721490058026" duration="90000" />
+      <workItem from="1721495049423" duration="325000" />
+      <workItem from="1721495385261" duration="2910000" />
+      <workItem from="1721498366403" duration="1914000" />
+      <workItem from="1721551614738" duration="2363000" />
+      <workItem from="1721568172512" duration="2054000" />
+      <workItem from="1721577981652" duration="1442000" />
+      <workItem from="1721622621132" duration="6001000" />
+      <workItem from="1721633302504" duration="5047000" />
+      <workItem from="1721642741943" duration="3911000" />
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />
@@ -198,7 +218,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721137836254</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="cookies cart changed">
+      <option name="closed" value="true" />
+      <created>1721292245250</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1721292245250</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -226,7 +254,19 @@
     <MESSAGE value="session key is removed and the cart value are stored in the cookies&#10;1. Session key is removed for the model.py &#10;2. cart value are stored in cookies&#10;&#10;carousel was update in cartlist view" />
     <MESSAGE value="cookies name changed" />
     <MESSAGE value="calculation are done for carousel in cartliat view&#10;order cancellation and order history api are added" />
-    <option name="LAST_COMMIT_MESSAGE" value="calculation are done for carousel in cartliat view&#10;order cancellation and order history api are added" />
+    <MESSAGE value="cookies cart changed" />
+    <option name="LAST_COMMIT_MESSAGE" value="cookies cart changed" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/partcraft/parts/views.py</url>
+          <line>80</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/partcraft$views.coverage" NAME="views Coverage Results" MODIFIED="1720862278907" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/partcraft/parts" />
