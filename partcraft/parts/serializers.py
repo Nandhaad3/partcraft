@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from .models import *
 import random
-from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
-from .documents import ProductDocument
+
 
 class BrandSerializer(serializers.ModelSerializer):
     url=serializers.HyperlinkedIdentityField(view_name='brandonedetails')

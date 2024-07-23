@@ -1,18 +1,12 @@
 from django_elasticsearch_dsl import Document, fields, Index
-from .models import *
+from parts.models import *
 from elasticsearch import Elasticsearch
-
-# client = Elasticsearch(
-#   "https://8ac9c4b4863b40adbf1f07e3302743ed.us-central1.gcp.cloud.es.io:443",
-#   api_key="NllCYTBaQUIxWkd3SFZMV2dwNnY6Q1VIYlcwVTFTZzJPV0oxWlVkaVlTdw=="
-# )
-# client.info()
-# print(client.info())
 
 PUBLISHER_INDEX = Index('product')
 PUBLISHER_INDEX.settings(
     number_of_shards=1,
     number_of_replicas=1,
+
     analysis={
         'analyzer': {
             'custom_analyzer': {
@@ -27,7 +21,7 @@ PUBLISHER_INDEX.settings(
         'filter': {
             'edge_ngram_filter': {
                 'type': 'edge_ngram',
-                'min_gram': 1,
+                'min_gram': 3,
                 'max_gram': 20,
                 'token_chars': ['letter', 'digit', 'word', 'punctuation', 'sentence']
             }
@@ -97,6 +91,7 @@ class ProductDocument(Document):
             }
         }
     )
+
 
     class Django(object):
         model = Product

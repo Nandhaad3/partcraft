@@ -1,5 +1,4 @@
 from itertools import product
-
 from django.db import models
 from django.conf import settings
 import os

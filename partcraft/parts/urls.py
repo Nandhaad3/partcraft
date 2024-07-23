@@ -5,8 +5,7 @@ from .views import *
 
 
 urlpatterns = [
-    #path('allproducts/',partslistview.as_view(),name='allproducts'),
-    path('allproducts/',partslistsDocumentView.as_view({'get':'list'}),name='allproducts'),
+    path('allproducts/',partslistview.as_view(),name='allproducts'),
     path('getoneproduct/<int:pk>/',partsonedetail.as_view(),name='getoneproduct'),
     path('allcategory/',categorylistview.as_view(),name='allcatetgories'),
     path('onecategorydetails/<int:pk>/',categoryonedetail.as_view(),name='onecategorydetails'),
