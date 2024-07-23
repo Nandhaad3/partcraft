@@ -53,22 +53,17 @@ class CustomPagination(PageNumberPagination):
 
 class partslistview(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
-    serializer_class = ProductSerializer
+    serializer_class = ProductoneSerializer
     pagination_class = CustomPagination
-
+    queryset = Product.objects.all()
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        if not queryset.exists():
-            raise NotFound(detail="No Product found matching the criteria.")
-        page = self.paginate_queryset(queryset)
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(self.get_queryset())
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={'request': request})
-            lastdata = adddict(serializer)
-            return self.get_paginated_response(lastdata)
+            return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        lastdata = adddict(serializer)
-        return Response(lastdata, status=status.HTTP_200_OK)
-
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class partsonedetail(generics.RetrieveAPIView):
