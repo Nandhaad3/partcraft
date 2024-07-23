@@ -11,8 +11,8 @@ from elasticsearch import Elasticsearch
 
 PUBLISHER_INDEX = Index('product')
 PUBLISHER_INDEX.settings(
-    number_of_shards=5,
-    number_of_replicas=5,
+    number_of_shards=1,
+    number_of_replicas=1,
     analysis={
         'analyzer': {
             'custom_analyzer': {
@@ -27,8 +27,8 @@ PUBLISHER_INDEX.settings(
         'filter': {
             'edge_ngram_filter': {
                 'type': 'edge_ngram',
-                # 'min_gram': 0,
-                # 'max_gram': 0,
+                'min_gram': 1,
+                'max_gram': 20,
                 'token_chars': ['letter', 'digit', 'word', 'punctuation', 'sentence']
             }
         }
@@ -60,7 +60,7 @@ class ProductDocument(Document):
             "raw": {
                 "type": "keyword"
             }
-        },
+        }
     )
     final_price = fields.FloatField(
         fields={
@@ -74,7 +74,7 @@ class ProductDocument(Document):
             "raw": {
                 "type": "keyword"
             }
-        },
+        }
     )
     parts_offer = fields.IntegerField(
         fields={
@@ -88,16 +88,15 @@ class ProductDocument(Document):
             "raw": {
                 "type": "keyword"
             }
-        },
+        }
     )
     parts_type = fields.TextField(
         fields={
             "raw": {
                 "type": "keyword"
             }
-        },
+        }
     )
-
 
     class Django(object):
         model = Product

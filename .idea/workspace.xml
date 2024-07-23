@@ -7,6 +7,10 @@
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="Elastic Search is updated">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/documents.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/documents.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -156,7 +160,10 @@
       <workItem from="1721622621132" duration="6001000" />
       <workItem from="1721633302504" duration="5047000" />
       <workItem from="1721642741943" duration="4535000" />
-      <workItem from="1721648339426" duration="1585000" />
+      <workItem from="1721648339426" duration="5654000" />
+      <workItem from="1721662566410" duration="1821000" />
+      <workItem from="1721669355940" duration="704000" />
+      <workItem from="1721709763992" duration="2134000" />
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />
@@ -230,7 +237,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721647701332</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Elastic Search is updated">
+      <option name="closed" value="true" />
+      <created>1721653396047</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1721653396047</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -267,7 +282,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/partcraft/parts/views.py</url>
-          <line>80</line>
+          <line>75</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
