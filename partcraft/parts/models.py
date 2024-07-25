@@ -1,5 +1,4 @@
 from itertools import product
-
 from django.db import models
 from django.conf import settings
 import os
@@ -34,14 +33,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.category_name
-
-# def get_unique_file_path(instance, filename):
-#     # Extract the file extension from the original file name
-#     ext = filename.split('.')[-1]
-#     # Generate a new file name using UUID
-#     new_filename = f"{uuid.uuid4()}.{ext}"
-#     # Define the subdirectory within the media root where files will be stored
-#     return os.path.join('products', new_filename)
 
 class Product(models.Model):
     objects = None
@@ -109,7 +100,6 @@ class Carousel(models.Model):
 
 class Cart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,blank=True,null=True)
-    #session_key = models.CharField(max_length=40, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     code=models.ManyToManyField(Carousel,blank=True)

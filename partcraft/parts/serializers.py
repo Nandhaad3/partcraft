@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from .models import *
 import random
-from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
-from .documents import ProductDocument
+
 
 class BrandSerializer(serializers.ModelSerializer):
     url=serializers.HyperlinkedIdentityField(view_name='brandonedetails')
@@ -102,19 +101,16 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_related_products(self, obj):
         related_products = Product.objects.filter(
             parts_category=obj.parts_category
-        ).exclude(subcategory_name=obj.subcategory_name)  # Fetch 4 related products, excluding the current one
-        print(related_products)
+        ).exclude(subcategory_name=obj.subcategory_name)
         related_products_list = list(related_products)
         sample_size = min(4, len(related_products_list))
         random_related_products = random.sample(related_products_list, sample_size)
         serializer = ProductoneSerializer(random_related_products, many=True, context=self.context)
         return serializer.data
     def get_similar_products(self, obj):
-        print(obj.subcategory_name)
         related_products = Product.objects.filter(
             subcategory_name=obj.subcategory_name
         ).exclude(id=obj.id)
-        print(related_products)
         serializer = ProductoneSerializer(related_products, many=True, context=self.context)
         return serializer.data
     def get_is_in_wishlist(self, obj):
@@ -239,7 +235,7 @@ class WishallSerializer(serializers.ModelSerializer):
     wishlist_product=ProductSerializer()
     wishlist_name = serializers.SerializerMethodField()
     wishlist_delete=serializers.HyperlinkedIdentityField(view_name='wishdeleteoneitem')
-    # wishlistdelall=serializers.HyperlinkedIdentityField(view_name='wishdeleteitem')
+
     class Meta:
         model = Wishlist
         fields = ['wishlist_name','wishlist_product','wishlist_delete']
@@ -307,7 +303,6 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_final_price(self, obj):
         product=obj.product
-        print(product.parts_price,product.parts_offer)
         discount_amount = product.parts_price * (product.parts_offer / 100)
         final_amount=product.parts_price - discount_amount
         return final_amount
@@ -324,9 +319,6 @@ class CartSerializer(serializers.ModelSerializer):
         if code_data:
             cart.code.set(code_data)
         return cart
-        # else:
-        #     validated_data['session_key']=request.session.session_key
-        # return Cart.objects.create(**validated_data)
 
 class Carouselserilizers(serializers.ModelSerializer):
     discount=serializers.SerializerMethodField()
@@ -392,8 +384,6 @@ class Buynowserilizers(serializers.Serializer):
         # Create BillingAddress instance
         billing_address_data['user'] = user
         billing_instance = BillingAddress.objects.create(**billing_address_data)
-
-        print(billing_instance)
 
         shipping_instance = None
         if use_same_address_for_shipping:
@@ -480,12 +470,8 @@ class Bestsellingserializer(serializers.ModelSerializer):
         return Wishlist.objects.filter(wishlist_name=request.user.id, wishlist_product=obj).exists()
 
 class Carouselpostserializer(serializers.ModelSerializer):
-    # code=serializers.SerializerMethodField()
 
     class Meta:
         model=Carousel
         fields=['carousel_code']
-
-    # def get_code(self,obj):
-    #     return obj.carousel_code
 

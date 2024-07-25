@@ -1,29 +1,18 @@
 import json
 from django.db.migrations import serializer
-from django.shortcuts import render
-from django_filters.rest_framework import DjangoFilterBackend
-from elasticsearch import NotFoundError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework import status, generics
 from rest_framework.exceptions import NotFound
-from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import api_view
-from django.db.models import F, CharField, Value
-from django.db.models.functions import Concat
-from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
-from .models import *
 from .serializers import *
 from collections import defaultdict
-from .filter import OfferfilterSet
 from account.emails import send_confirmation_email
-import base64
-from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
-from django_elasticsearch_dsl_drf.filter_backends import FilteringFilterBackend, CompoundSearchFilterBackend
-from .documents import ProductDocument
+
+
 
 def adddict(serializer):
     last_data = []
@@ -62,120 +51,20 @@ class CustomPagination(PageNumberPagination):
     max_page_size = 10
 
 
-# def offerdata(queryset):
-#     return queryset.values_list('parts_offer', flat=True).distinct()
-
 class partslistview(generics.ListAPIView):
-    # queryset = Product.objects.all()
-    # print(queryset)
     permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = Product.objects.annotate(
-        parts_name=Concat(
-            F('parts_brand__brand_name'),
-            Value(' '),
-            F('parts_category__category_name'),
-            Value(' '),
-            F('subcategory_name'),
-            Value(' '),
-            F('parts_voltage'),
-            Value('V'),
-            output_field=CharField()
-        )
-    )
-    serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_class = OfferfilterSet
-    search_fields = ['parts_brand__brand_name', 'parts_category__category_name', 'parts_name', 'subcategory_name']
-    ordering_fields = ['parts_name', 'parts_price']
-    pagination_class = CustomPagination
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        #print(queryset)
-        if not queryset.exists():
-            raise NotFound(detail="No Product found matching the criteria.")
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'request': request})
-            lastdata = adddict(serializer)
-            return self.get_paginated_response(lastdata)
-        serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        lastdata = adddict(serializer)
-        # offer=offerdata(queryset)
-        return Response(lastdata, status=status.HTTP_200_OK)
-
-
-# localhost:9200/product/_search?pretty=
-# localhost:9200/product/
-# localhost:9200/product/_mapping?pretty
-class partslistsDocumentView(DocumentViewSet):
-    document = ProductDocument
     serializer_class = ProductoneSerializer
-    filter_backends = [FilteringFilterBackend, CompoundSearchFilterBackend]
-    query_backends = [CompoundSearchFilterBackend]
-    filter_fields = {
-        'parts_brand': 'parts_brand',
-        'parts_category': 'parts_category',
-        'subcategory_name': 'subcategory_name',
-        'parts_no': 'parts_no',
-        'parts_fits': 'parts_fits',
-        'parts_type': 'parts_type',
-    }
-    search_fields = ['parts_brand', 'parts_category', 'subcategory_name', 'parts_no', 'parts_fits', 'parts_type']
-    multi_match_search_fields = ['parts_brand', 'parts_category', 'subcategory_name', 'parts_no', 'parts_fits', 'parts_type']
     pagination_class = CustomPagination
-
-    def get_queryset(self):
-        search_query = self.request.query_params.get('search', '').strip()
-        min_price = self.request.query_params.get('min_price')
-        max_price = self.request.query_params.get('max_price')
-        min_offer = self.request.query_params.get('min_offer')
-        max_offer = self.request.query_params.get('max_offer')
-
-        search = self.document.search()
-        print(search.to_dict())
-        if search_query:
-            search = search.query('bool', should=[
-            {'match': {'parts_brand': search_query}},
-            {'match': {'parts_category': search_query}},
-            {'match': {'subcategory_name': search_query}},
-            {'match': {'parts_no': search_query}},
-            {'match': {'parts_fits': search_query}},
-            {'match': {'parts_type': search_query}}
-        ])
-
-        if min_offer or max_offer:
-            offer_filter = {}
-            if min_offer:
-                offer_filter['gte'] = int(min_offer)
-            if max_offer:
-                offer_filter['lte'] = int(max_offer)
-            search = search.filter('range', parts_offer=offer_filter)
-
-        if min_price or max_price:
-            price_filter = {}
-            if min_price:
-                price_filter['gte'] = float(min_price)
-            if max_price:
-                price_filter['lte'] = float(max_price)
-            search = search.filter('range', final_price=price_filter)
-
-        return search
-
+    queryset = Product.objects.all()
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        response = queryset.execute()
-        print(response)
-        if not response.hits:
-            return Response({"detail": "No Product found matching the criteria."}, status=status.HTTP_404_NOT_FOUND)
-        hit_ids = [hit.meta.id for hit in response.hits]
-        queryset = Product.objects.filter(id__in=hit_ids)
-        page = self.paginate_queryset(queryset)
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(self.get_queryset())
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class partsonedetail(generics.RetrieveAPIView):
     serializer_class = ProductSerializer
@@ -210,7 +99,6 @@ class categorylistview(generics.ListAPIView):
         if not queryset.exists():
             raise NotFound(detail="No Category found matching the criteria.")
         serializer = self.get_serializer(queryset, many=True)
-        print(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -293,7 +181,6 @@ def vehicle_view(request):
                     vehicle_year=vehicleserializer.validated_data['vehicle_year'],
                 )
                 this_part = Product.objects.filter(this_parts_fits=vehicle)
-                print(this_part)
                 productserializer = ProductSerializer(this_part, context={'request': request}, many=True)
                 lastdata = adddict(productserializer)
                 return Response({
@@ -357,19 +244,12 @@ class allofferview(generics.ListAPIView):
         return Response({'Offer': categorized_data}, status=status.HTTP_200_OK)
 
 
-# class allofferview(generics.ListAPIView):
-#     queryset = Product.objects.all()
-#     serializer_class = ProductSerializer
-#     def list(self, request, *args, **kwargs):
-#         offer=self.queryset.values_list('parts_offer', flat=True).distinct()
-#         return Response({'offer':offer}, status=status.HTTP_200_OK)
 
 class WishlistCreateView(generics.ListCreateAPIView):
     serializer_class = WishlistSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Return the user's wishlist items
         queryset = Wishlist.objects.all().filter(wishlist_name=self.request.user)
         return queryset
 
@@ -382,22 +262,17 @@ class WishlistCreateView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         product = self.get_product()
-        print('p', product)
         if not product:
             return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Check if the product is already in the user's wishlist
         if Wishlist.objects.filter(wishlist_name=request.user, wishlist_product=product).exists():
             return Response({"error": "Product already exists in the wishlist."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Prepare the data for serialization
         data = {
             'wishlist_name': self.request.user,
             'wishlist_product': product
         }
-        print(data)
         s = self.get_serializer(data=data)
-        # serializer.is_valid(raise_exception=True)
         self.perform_create(s)
 
         headers = self.get_success_headers(serializer)
@@ -412,18 +287,12 @@ class WishallView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        # Filter the Wishlist items for the authenticated user
         wishlists = Wishlist.objects.filter(wishlist_name=self.request.user)
 
-        # Initialize a list to hold serialized wishlist data
-
         categorized_data = defaultdict(list)
-        # Serialize each wishlist item individually
         for wishlist in wishlists:
-            # Serialize the wishlist item using WishlistSerializer
             wishlist_data = WishallSerializer(wishlist, context={'request': request}).data
             brand = wishlist_data['wishlist_name']
-            # wishlist_delete_all=wishlist_data['wishlistdelall']
             product_info = {
                 'wishlist_product': f"{wishlist_data['wishlist_product']['parts_brand']['brand_name']} {wishlist_data['wishlist_product']['parts_category']['category_name']} {wishlist_data['wishlist_product']['subcategory_name']}",
                 'url': wishlist_data['wishlist_product']['url'],
@@ -431,7 +300,6 @@ class WishallView(APIView):
             }
 
             categorized_data[brand].append(product_info)
-            # Append serialized data to the list
         categorized_data = dict(categorized_data)
         if bool(categorized_data) is not False:
             return Response(categorized_data, status=status.HTTP_200_OK)
@@ -477,16 +345,13 @@ class BaseCartView(APIView):
     def delete_cart_item_cookie(self, response, product_id):
         cookie_name = f'cart_product_{product_id}'
         response.delete_cookie(cookie_name, path='/')
-        print(f'Deleting cookie: {cookie_name}')
 
     def delete_all_cart_item_cookies(self, request, response):
         cart_items = self.get_cart_items_from_cookie(request)
-        print(f'cart_items: {cart_items}')
         for item in cart_items:
             product_id = item['product_id']
             self.delete_cart_item_cookie(response, product_id)
         response.delete_cookie(self.COOKIE_NAME, path='/')
-        print(f'Deleting cookie: {self.COOKIE_NAME}')
 
     def clear_cart(self, request, response):
         self.delete_all_cart_item_cookies(request, response)
@@ -504,7 +369,6 @@ class ViewCartView(BaseCartView):
 
             total_price = 0
             savings = 0
-            print(total_price, savings)
             for item in serializer.data:
                 product_id = item.get('product')
                 quantity = item.get('quantity', 0)
@@ -574,20 +438,14 @@ class ViewCartView(BaseCartView):
             user = request.user
             if carouselserializer.is_valid():
                 c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
-                print(c)
                 b = Brand.objects.get(brand_name=c.carousel_brand)
-                print(b)
                 ct = Category.objects.get(category_name=c.carousel_category)
-                print(ct)
                 p = Product.objects.filter(parts_brand=b, parts_category=ct)
-                print(p)
                 pro = None
                 for i in p:
                     crt = Cart.objects.filter(user=user)
-                    print(crt)
                     if crt:
                         for j in crt:
-                            print(j.product)
                             if i == j.product:
                                 j.code.add(c)
                                 return Response(data='Add successfully', status=status.HTTP_201_CREATED)
@@ -600,13 +458,9 @@ class ViewCartView(BaseCartView):
             carouselserializer = Carouselpostserializer(data=request.data)
             if carouselserializer.is_valid():
                 c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
-                print(f"carousel:{c}")
                 b = Brand.objects.get(brand_name=c.carousel_brand)
-                print(f"Brand:{b}")
                 ct = Category.objects.get(category_name=c.carousel_category)
-                print(f"Category:{ct}")
                 p = Product.objects.filter(parts_brand=b, parts_category=ct)
-                print(f"part:{p}")
 
                 cart_items = self.get_cart_items_from_cookie(request)
                 for i in p:
@@ -848,10 +702,6 @@ class OrderSummaryAPIView(BaseCartView):
         order_items = []
         grand_total = 0
 
-        # Debugging print to check the cookies and query parameters
-        print(f"Request COOKIES: {request.COOKIES}")
-        print(f"Request query params: {products_data}")
-
         def parse_cookie_data():
             items = []
             for key, value in request.COOKIES.items():
@@ -878,8 +728,6 @@ class OrderSummaryAPIView(BaseCartView):
         if products_data:
             order_items.extend(parse_url_parameter_data(products_data))
 
-        # Debugging print to check parsed order items
-        print(f"Order items after parsing: {order_items}")
 
         if not order_items:
             return Response({"detail": "No products."}, status=status.HTTP_400_BAD_REQUEST)
