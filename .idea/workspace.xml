@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="requirements text is updated">
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_7_23_2024_10_23_AM__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/partcraft/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/settings.py" afterDir="false" />
     </list>
@@ -202,7 +203,10 @@
       <workItem from="1722874757845" duration="5336000" />
       <workItem from="1722881186607" duration="1000" />
       <workItem from="1722919830011" duration="5977000" />
-      <workItem from="1723006017192" duration="8166000" />
+      <workItem from="1723006017192" duration="10199000" />
+      <workItem from="1723017109175" duration="713000" />
+      <workItem from="1723017931647" duration="30000" />
+      <workItem from="1723018032137" duration="1090000" />
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />
@@ -412,7 +416,79 @@
       <option name="project" value="LOCAL" />
       <updated>1723013086247</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723015030279</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1723015030279</updated>
+    </task>
+    <task id="LOCAL-00028" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723015188812</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1723015188812</updated>
+    </task>
+    <task id="LOCAL-00029" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723015432992</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1723015432992</updated>
+    </task>
+    <task id="LOCAL-00030" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723016360644</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1723016360644</updated>
+    </task>
+    <task id="LOCAL-00031" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723017080097</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1723017080097</updated>
+    </task>
+    <task id="LOCAL-00032" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723017302511</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1723017302511</updated>
+    </task>
+    <task id="LOCAL-00033" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723017951638</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1723017951638</updated>
+    </task>
+    <task id="LOCAL-00034" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723018041298</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1723018041298</updated>
+    </task>
+    <task id="LOCAL-00035" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723018155791</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1723018155791</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

@@ -43,8 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'parts',
-    'account',
     'rest_framework',
     'django_filters',
     'rest_framework.authtoken',
@@ -52,6 +50,8 @@ INSTALLED_APPS = [
     'django_elasticsearch_dsl',
     'django_elasticsearch_dsl_drf',
     'corsheaders',
+    'parts',
+    'account',
 ]
 
 REST_FRAMEWORK = {
