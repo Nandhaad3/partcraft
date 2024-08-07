@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'parts',
     'account',
+    'part_search',
 ]
 
 REST_FRAMEWORK = {
