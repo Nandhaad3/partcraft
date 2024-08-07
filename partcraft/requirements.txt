@@ -15,7 +15,6 @@ defusedxml==0.7.1
 distlib==0.3.7
 dj-database-url==2.1.0
 Django==3.2.7
-Django==4.2
 django-autoslug==1.9.9
 django-cities-light==3.10.1
 django-cors-headers==4.3.1
