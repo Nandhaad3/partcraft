@@ -58,6 +58,7 @@ packaging==23.2
 parts==2.0.0
 pexpect==4.9.0
 pillow==10.3.0
+pipdeptree==2.23.1
 pipenv==2024.0.0
 pkginfo==1.10.0
 platformdirs==3.11.0
