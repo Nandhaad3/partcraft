@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import serializers
 from .models import *
 import random
@@ -68,6 +70,7 @@ class ProductSerializer(serializers.ModelSerializer):
     final_price=serializers.SerializerMethodField()
     url=serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist=serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
+    product_fit = serializers.SerializerMethodField()
     is_in_wishlist = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
     similar_products = serializers.SerializerMethodField()
@@ -79,7 +82,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id','url','parts_name', 'parts_voltage','subcategory_name',
                   'parts_litre', 'parts_type', 'parts_description', 'parts_no', 'parts_price', 'parts_offer','final_price',
                   'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
-                  'main_image','images','parts_brand', 'parts_category','this_parts_fits','wishlist','is_in_wishlist','related_products','similar_products','addtocart', 'buynow']
+                  'main_image','images','parts_brand', 'parts_category','this_parts_fits', 'product_fit', 'wishlist','is_in_wishlist','related_products','similar_products','addtocart', 'buynow']
 
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
@@ -120,6 +123,39 @@ class ProductSerializer(serializers.ModelSerializer):
         elif request is None:
             return False
         return Wishlist.objects.filter(wishlist_name=request.user.id,wishlist_product=obj).exists()
+
+    def get_product_fit(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return 'Not Guarantee Fit'
+        post_vehicle_data = request.data.get('vehicle')
+        cookie_vehicle_data = request.COOKIES.get('vehicle')
+        if cookie_vehicle_data:
+            cookie_vehicle = json.loads(cookie_vehicle_data)
+        else:
+            cookie_vehicle = []
+
+        parts_fits = obj.this_parts_fits.all()
+        def check_vehicle_match(vehicle_list):
+            for vehicle in vehicle_list:
+                for fit in parts_fits:
+                    if (
+                        vehicle.get('vehicle_name') == fit.vehicle_name and
+                        vehicle.get('vehicle_model') == fit.vehicle_model and
+                        vehicle.get('vehicle_year') == fit.vehicle_year and
+                        vehicle.get('vehicle_type') == fit.vehicle_type
+                    ):
+                        return True
+                return False
+        if post_vehicle_data and check_vehicle_match([post_vehicle_data]):
+            return 'Guarantee Fit'
+
+        if cookie_vehicle and check_vehicle_match(cookie_vehicle):
+            return 'Guarantee Fit'
+
+        return 'Not Guarantee Fit'
+
+
     def create(self, validated_data):
         brand_data = validated_data.pop('parts_brand')
         category_data = validated_data.pop('parts_category')
@@ -137,7 +173,7 @@ class ProductSerializer(serializers.ModelSerializer):
             product.this_parts_fits.add(vehicle_obj)
 
         for image_data in images_data:
-            ProductImage.objects.create(product=product, **image_data)
+            ProductImage.objects.crethis_parts_fitsate(product=product, **image_data)
 
         return product
 
@@ -202,11 +238,11 @@ class ProductoneSerializer(serializers.ModelSerializer):
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
     is_in_wishlist = serializers.SerializerMethodField()
-
+    product_fit = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id','parts_type' ,'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail','wishlist','is_in_wishlist']
+        fields = ['id','parts_type' ,'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail','wishlist','is_in_wishlist','product_fit']
 
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
@@ -230,6 +266,27 @@ class ProductoneSerializer(serializers.ModelSerializer):
         elif request is None:
             return False
         return Wishlist.objects.filter(wishlist_name=request.user.id, wishlist_product=obj).exists()
+
+    def get_product_fit(self, obj):
+        request = self.context.get('request', None)
+        if request is None:
+            return "NOT Guarantee fit"
+
+        vehicle_data = request.COOKIES.get('vehicle')
+        if not vehicle_data:
+            return "NOT Guarantee fit"
+
+        vehicles = json.loads(vehicle_data)
+
+        for vehicle in obj.this_parts_fits.all():
+            for v in vehicles:
+                if (vehicle.vehicle_name == v.get('vehicle_name') and
+                        vehicle.vehicle_model == v.get('vehicle_model') and
+                        vehicle.vehicle_year == v.get('vehicle_year') and
+                        vehicle.vehicle_type == v.get('vehicle_type')):
+                    return "Guarantee fit"
+        return "NOT Guarantee fit"
+
 
 class WishallSerializer(serializers.ModelSerializer):
     wishlist_product=ProductSerializer()

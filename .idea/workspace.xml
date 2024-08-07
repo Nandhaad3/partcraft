@@ -5,7 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="created a new application for search api">
+      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0004_product_product_fit.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/parts/migrations/0005_remove_product_product_fit.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/account/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/account/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/parts/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -59,7 +64,7 @@
     &quot;Python.views.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/partcraft/partcraft/account/migrations&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/dhanushpathi/AD3&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -166,7 +171,42 @@
       <workItem from="1721723240614" duration="1109000" />
       <workItem from="1721724694882" duration="8787000" />
       <workItem from="1721735964923" duration="3102000" />
-      <workItem from="1721745294115" duration="2052000" />
+      <workItem from="1721745294115" duration="3668000" />
+      <workItem from="1721794773020" duration="695000" />
+      <workItem from="1721798992009" duration="2853000" />
+      <workItem from="1721810224638" duration="7941000" />
+      <workItem from="1721883011685" duration="4637000" />
+      <workItem from="1721991064706" duration="3143000" />
+      <workItem from="1722018025989" duration="843000" />
+      <workItem from="1722025133145" duration="746000" />
+      <workItem from="1722105069304" duration="1245000" />
+      <workItem from="1722226173963" duration="5476000" />
+      <workItem from="1722265391037" duration="622000" />
+      <workItem from="1722267971084" duration="621000" />
+      <workItem from="1722348600361" duration="613000" />
+      <workItem from="1722409474963" duration="262000" />
+      <workItem from="1722409745549" duration="926000" />
+      <workItem from="1722418589683" duration="532000" />
+      <workItem from="1722419245765" duration="1000" />
+      <workItem from="1722489553037" duration="9000" />
+      <workItem from="1722576677585" duration="4763000" />
+      <workItem from="1722589442476" duration="957000" />
+      <workItem from="1722598504697" duration="646000" />
+      <workItem from="1722601333088" duration="1039000" />
+      <workItem from="1722610982563" duration="682000" />
+      <workItem from="1722611914594" duration="522000" />
+      <workItem from="1722612448081" duration="17000" />
+      <workItem from="1722617103988" duration="1251000" />
+      <workItem from="1722667805055" duration="1037000" />
+      <workItem from="1722675036425" duration="17000" />
+      <workItem from="1722675657434" duration="76000" />
+      <workItem from="1722752663249" duration="168000" />
+      <workItem from="1722850804826" duration="688000" />
+      <workItem from="1722862326863" duration="9124000" />
+      <workItem from="1722874757845" duration="5336000" />
+      <workItem from="1722881186607" duration="1000" />
+      <workItem from="1722919830011" duration="5977000" />
+      <workItem from="1723006017192" duration="1705000" />
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />
@@ -264,7 +304,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721733511217</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="created a new application for search api">
+      <option name="closed" value="true" />
+      <created>1721747388563</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1721747388563</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
