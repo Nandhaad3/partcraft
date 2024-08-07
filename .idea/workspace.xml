@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="requirements text is updated">
+      <change afterPath="$PROJECT_DIR$/partcraft/parts/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/part_search/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/part_search/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +60,7 @@
     "Python.views.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/dhanushpathi/Proj/partcraft",
+    "last_opened_file_path": "/home/dhanushpathi/Proj/partcraft/partcraft/parts",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -72,11 +72,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/partcraft/parts" />
       <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/partcraft" />
       <recent name="E:\partcraft\partcraft\account\migrations" />
       <recent name="E:\partcraft\partcraft\user" />
-      <recent name="E:\partcraft\partcraft" />
-      <recent name="E:\partcraft" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/partcraft" />
@@ -207,31 +207,8 @@
       <workItem from="1723006017192" duration="10199000" />
       <workItem from="1723017109175" duration="713000" />
       <workItem from="1723017931647" duration="30000" />
-      <workItem from="1723018032137" duration="15092000" />
-    </task>
-    <task id="LOCAL-00006" summary="cookies name changed">
-      <option name="closed" value="true" />
-      <created>1720862621029</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1720862621029</updated>
-    </task>
-    <task id="LOCAL-00007" summary="calculation are done for carousel in cartliat view&#10;order cancellation and order history api are added">
-      <option name="closed" value="true" />
-      <created>1721137836254</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1721137836254</updated>
-    </task>
-    <task id="LOCAL-00008" summary="cookies cart changed">
-      <option name="closed" value="true" />
-      <created>1721292245250</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1721292245250</updated>
+      <workItem from="1723018032137" duration="16578000" />
+      <workItem from="1723046134665" duration="751000" />
     </task>
     <task id="LOCAL-00009" summary="Elastic Search is updated">
       <option name="closed" value="true" />
@@ -601,7 +578,31 @@
       <option name="project" value="LOCAL" />
       <updated>1723038499610</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723038938548</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1723038938548</updated>
+    </task>
+    <task id="LOCAL-00056" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723040154263</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1723040154263</updated>
+    </task>
+    <task id="LOCAL-00057" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723046203683</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1723046203684</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

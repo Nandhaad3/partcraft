@@ -5,7 +5,6 @@ from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
 from django_elasticsearch_dsl_drf.filter_backends import FilteringFilterBackend, CompoundSearchFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from parts.serializers import ProductoneSerializer
-
 from parts.models import Product
 
 
