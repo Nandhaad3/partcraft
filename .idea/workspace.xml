@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="requirements text is updated">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,24 +54,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Python.views.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/dhanushpathi/AD3&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Python.views.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/dhanushpathi/Proj/partcraft",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="E:\partcraft\partcraft\account\migrations" />
       <recent name="E:\partcraft\partcraft\user" />
       <recent name="E:\partcraft\partcraft" />
@@ -204,23 +207,7 @@
       <workItem from="1723006017192" duration="10199000" />
       <workItem from="1723017109175" duration="713000" />
       <workItem from="1723017931647" duration="30000" />
-      <workItem from="1723018032137" duration="12839000" />
-    </task>
-    <task id="LOCAL-00004" summary="Email and views are changed">
-      <option name="closed" value="true" />
-      <created>1719948760742</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1719948760742</updated>
-    </task>
-    <task id="LOCAL-00005" summary="session key is removed and the cart value are stored in the cookies&#10;1. Session key is removed for the model.py &#10;2. cart value are stored in cookies&#10;&#10;carousel was update in cartlist view">
-      <option name="closed" value="true" />
-      <created>1720801802020</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1720801802020</updated>
+      <workItem from="1723018032137" duration="15092000" />
     </task>
     <task id="LOCAL-00006" summary="cookies name changed">
       <option name="closed" value="true" />
@@ -598,7 +585,23 @@
       <option name="project" value="LOCAL" />
       <updated>1723036079888</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723036619272</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1723036619272</updated>
+    </task>
+    <task id="LOCAL-00054" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723038499610</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1723038499610</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
