@@ -5,8 +5,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="requirements text is updated">
+      <change afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/fonts.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/fonts/LICENSE.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/fonts/README.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/fonts/Roboto-Bold-webfont.woff" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/fonts/Roboto-Light-webfont.woff" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/fonts/Roboto-Regular-webfont.woff" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/partcraft/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/base.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/base.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/changelists.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/changelists.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/dark_mode.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/dark_mode.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/dashboard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/forms.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/forms.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/nav_sidebar.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/nav_sidebar.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/responsive.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/responsive.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/responsive_rtl.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/responsive_rtl.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/rtl.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/rtl.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/widgets.css" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/css/widgets.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/SelectBox.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/SelectBox.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/SelectFilter2.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/SelectFilter2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/actions.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/actions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/admin/DateTimeShortcuts.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/admin/DateTimeShortcuts.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/admin/RelatedObjectLookups.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/admin/RelatedObjectLookups.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/calendar.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/calendar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/core.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/core.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/filters.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/filters.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/nav_sidebar.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/nav_sidebar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/urlify.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/urlify.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/jquery/jquery.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/jquery/jquery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/jquery/jquery.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/jquery/jquery.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/xregexp/LICENSE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/xregexp/LICENSE.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/xregexp/xregexp.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/xregexp/xregexp.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/xregexp/xregexp.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/staticfiles_build/static/admin/js/vendor/xregexp/xregexp.min.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -205,7 +235,7 @@
       <workItem from="1723006017192" duration="10199000" />
       <workItem from="1723017109175" duration="713000" />
       <workItem from="1723017931647" duration="30000" />
-      <workItem from="1723018032137" duration="4713000" />
+      <workItem from="1723018032137" duration="8316000" />
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />
@@ -543,7 +573,39 @@
       <option name="project" value="LOCAL" />
       <updated>1723022765115</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723022910196</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1723022910196</updated>
+    </task>
+    <task id="LOCAL-00044" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723023369182</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1723023369182</updated>
+    </task>
+    <task id="LOCAL-00045" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723023596703</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1723023596703</updated>
+    </task>
+    <task id="LOCAL-00046" summary="requirements text is updated">
+      <option name="closed" value="true" />
+      <created>1723023986513</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1723023986513</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
