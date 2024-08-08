@@ -49,8 +49,9 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
-    'django_elasticsearch_dsl',
-    'django_elasticsearch_dsl_drf',
+    # 'django_elasticsearch_dsl',
+    # 'django_elasticsearch_dsl_drf',
+    'part_admin',
 ]
 
 REST_FRAMEWORK = {
@@ -59,11 +60,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',),
 }
 
-ELASTICSEARCH_DSL = {
-    'default' : {
-        "hosts" : "localhost:9200",
-    }
-}
+# ELASTICSEARCH_DSL = {
+#     'default' : {
+#         "hosts" : "localhost:9200",
+#     }
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

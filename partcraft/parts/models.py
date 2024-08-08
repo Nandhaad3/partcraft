@@ -72,6 +72,11 @@ class Product(models.Model):
         return f'{self.parts_brand}-{self.parts_category}-{self.subcategory_name}'
 
 
+class RelatedProduct(models.Model):
+    related_product1 = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='related_product1_set')
+    related_product2 = models.ManyToManyField(Product,related_name='related_product2_set')
+    retated_type = models.CharField(max_length=255)
+
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
     image = models.URLField(max_length=200)

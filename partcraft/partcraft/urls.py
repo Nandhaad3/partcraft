@@ -24,8 +24,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
     path('api/', include('parts.urls')),
-    path('api/search/', include('part_search.urls')),
-    path('account/', include('account.urls'))
+    # path('api/search/', include('part_search.urls')),
+    path('account/', include('account.urls')),
+    path('admindashboard/',include('part_admin.urls')),
 ]
 
 if settings.DEBUG:

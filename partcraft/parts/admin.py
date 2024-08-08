@@ -5,6 +5,10 @@ from .models import *
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['id', 'parts_brand','parts_category','subcategory_name','parts_price', 'parts_status','parts_offer','main_image']
 #
+
+@admin.register(RelatedProduct)
+class RelatedProductAdmin(admin.ModelAdmin):
+    list_display = ['id', 'related_product1','retated_type']
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ['product', 'image']

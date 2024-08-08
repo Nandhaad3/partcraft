@@ -99,12 +99,14 @@ class ProductSerializer(serializers.ModelSerializer):
         return final_price
 
     def get_related_products(self, obj):
-        related_products = Product.objects.filter(
-            parts_category=obj.parts_category
-        ).exclude(subcategory_name=obj.subcategory_name)
-        related_products_list = list(related_products)
-        sample_size = min(4, len(related_products_list))
-        random_related_products = random.sample(related_products_list, sample_size)
+        related_product_qs = RelatedProduct.objects.filter(related_product1=obj)
+        related_products = set()
+        for related_product in related_product_qs:
+            related_products.update(related_product.related_product2.all())
+
+        related_products = list(related_products)
+        sample_size = min(4, len(related_products))
+        random_related_products = random.sample(related_products, sample_size)
         serializer = ProductoneSerializer(random_related_products, many=True, context=self.context)
         return serializer.data
     def get_similar_products(self, obj):
