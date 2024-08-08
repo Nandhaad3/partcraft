@@ -40,6 +40,7 @@ def adddict(serializer):
             data['is_in_wishlist'] = i['is_in_wishlist']
         elif i['is_in_wishlist'] is True:
             data['is_in_wishlist'] = i['is_in_wishlist']
+        data['product_fit'] = i['product_fit']
 
         last_data.append(data)
     return last_data
@@ -174,19 +175,28 @@ def vehicle_view(request):
         vehicleserializer = VehicleoneSerializer(data=request.data)
         if vehicleserializer.is_valid():
             try:
-                vehicle = Vehicle.objects.get(
+                vehicle = Vehicle.objects.filter(
                     vehicle_name=vehicleserializer.validated_data['vehicle_name'],
                     vehicle_type=vehicleserializer.validated_data['vehicle_type'],
                     vehicle_model=vehicleserializer.validated_data['vehicle_model'],
                     vehicle_year=vehicleserializer.validated_data['vehicle_year'],
                 )
-                this_part = Product.objects.filter(this_parts_fits=vehicle)
-                productserializer = ProductSerializer(this_part, context={'request': request}, many=True)
+                v = []
+                for i in vehicle:
+                    this_part = Product.objects.filter(this_parts_fits=i)
+                    productserializer = ProductSerializer(this_part, context={'request': request}, many=True)
+                    v.append(productserializer.data)
+
                 lastdata = adddict(productserializer)
-                return Response({
-                    'vehicle': vehicleserializer.data,
-                    'parts': lastdata
-                }, status=status.HTTP_200_OK)
+
+                vehicle_data = VehicleoneSerializer(vehicle, many=True, context={'request': request}).data
+
+                response = Response({'vehicle': vehicleserializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+                response.set_cookie('vehicle', json.dumps(vehicle_data))
+                print("cookies set response:")
+                for key, value in response.cookies.items():
+                    print(f"{key}, {value}")
+                return response
             except Vehicle.DoesNotExist:
                 return Response({'detail': 'Vehicle not found.'}, status=status.HTTP_404_NOT_FOUND)
         else:

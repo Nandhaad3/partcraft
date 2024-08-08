@@ -21,6 +21,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'id': {'read_only': True}
         }
 
+
     def validate(self, attrs):
         password = attrs.get('password')
         password2 = attrs.get('password2')
