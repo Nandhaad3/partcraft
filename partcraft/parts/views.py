@@ -132,7 +132,7 @@ class brandlistview(generics.ListAPIView):
         if not queryset.exists():
             raise NotFound(detail="No Brand found matching the criteria.")
         serializer = self.get_serializer(queryset, many=True)
-        return Response({'Products':serializer.data}, status=status.HTTP_200_OK)
+        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
 
 
 class brandonedetail(generics.ListAPIView):
