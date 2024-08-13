@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework import status, generics
+from django.db.models import F, Q
 from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import api_view
@@ -11,8 +12,6 @@ from django.shortcuts import get_object_or_404
 from .serializers import *
 from collections import defaultdict
 from account.emails import send_confirmation_email
-
-
 
 def adddict(serializer):
     last_data = []
@@ -47,7 +46,7 @@ def adddict(serializer):
 
 
 class CustomPagination(PageNumberPagination):
-    page_size = 2
+    page_size = 3
     page_size_query_param = 'size'
     max_page_size = 10
 
@@ -920,3 +919,46 @@ class MyOrderView(APIView):
 
         order.delete()
         return Response({"detail": "Order deleted."}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+class ToptenView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = Toptenserializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        if not queryset.exists():
+            raise NotFound(detail="No Product")
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ToptenProductView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        category_id = self.kwargs.get('pk')
+        cat = Category.objects.get(id=category_id)
+        queryset = Product.objects.filter(parts_category_id=cat.id).annotate(
+            order_count=F('productordercount__order_count')
+        ).filter(
+            Q(order_count__gt=0) | Q(order_count__isnull=False)
+                 ).order_by('-order_count')[:2]
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        category_id = self.kwargs.get('pk')
+        cat = Category.objects.get(id=category_id)
+
+        if not queryset.exists():
+            return Response({'details': 'No Products Found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(queryset, many=True)
+        category_serializer = Toptenserializer(cat, context={'request': request})
+        lastdata = adddict(serializer)
+        return Response({
+            'Category': category_serializer.data,
+            'parts': lastdata
+        }, status=status.HTTP_200_OK)

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     # 'django_elasticsearch_dsl',
     # 'django_elasticsearch_dsl_drf',
     'part_admin',
+    'corsheaders',
 ]
 
 REST_FRAMEWORK = {
@@ -74,6 +75,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'partcraft.urls'
@@ -234,8 +237,29 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'dhanushpathiprakash0511@gmail.com'
 EMAIL_HOST_PASSWORD = 'opghzxooktakptya'
 
-
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:9000",
+    'http://localhost:3000',
+    'https://partcraft-a2ti.onrender.com',
+]
+
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]

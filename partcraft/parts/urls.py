@@ -31,5 +31,7 @@ urlpatterns = [
     path('best_selling/', BestSellingView.as_view(), name='best_selling'),
     path('my_order/', MyOrderView.as_view(), name='my_order'),
     path('order_status/<str:order_id>/', MyOrderView.as_view(), name='order_status'),
+    path('top-ten/', ToptenView.as_view(), name='top-ten'),
+    path('top-ten-product/<int:pk>/', ToptenProductView.as_view(), name='top-ten-product'),
 ]
 

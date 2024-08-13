@@ -1,5 +1,4 @@
 import json
-
 from rest_framework import serializers
 from .models import *
 import random
@@ -112,6 +111,7 @@ class ProductSerializer(serializers.ModelSerializer):
         random_related_products = random.sample(related_products, sample_size)
         serializer = ProductoneSerializer(random_related_products, many=True, context=self.context)
         return serializer.data
+
     def get_similar_products(self, obj):
         related_products = Product.objects.filter(
             subcategory_name=obj.subcategory_name
@@ -533,4 +533,12 @@ class Carouselpostserializer(serializers.ModelSerializer):
     class Meta:
         model=Carousel
         fields=['carousel_code']
+
+
+class Toptenserializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='top-ten-product')
+    class Meta:
+        model = Category
+        fields = ['category_name', 'category_image', 'url']
+
 
