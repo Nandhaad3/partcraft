@@ -5,12 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8a259d45-3f5d-4858-a05d-0f3155ed5749" name="Changes" comment="Elastic Search is updated">
+<<<<<<< Updated upstream
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/partcraft/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/partcraft/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/partcraft/parts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/parts/views.py" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_07_08_24__11_33_am__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_07_08_24__11_33_am__Changes_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/partcraft/partcraft/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/partcraft/partcraft/settings.py" afterDir="false" />
+>>>>>>> Stashed changes
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +48,9 @@
     &quot;accountId&quot;: &quot;50aaa3d5-14e2-4a1f-a422-41718d8ff016&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/partcraft/partcraft/settings.py" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -174,6 +183,7 @@
       <workItem from="1722919612787" duration="8000" />
       <workItem from="1723058205920" duration="1530000" />
       <workItem from="1723093839957" duration="16000" />
+<<<<<<< Updated upstream
       <workItem from="1723096261946" duration="9502000" />
       <workItem from="1723183333438" duration="3694000" />
       <workItem from="1723193966493" duration="1856000" />
@@ -185,6 +195,14 @@
       <workItem from="1723524585474" duration="14174000" />
       <workItem from="1723547251332" duration="31000" />
       <workItem from="1723547736423" duration="434000" />
+=======
+      <workItem from="1723109784510" duration="2577000" />
+      <workItem from="1723441210949" duration="5258000" />
+      <workItem from="1723467931356" duration="1779000" />
+      <workItem from="1723471237120" duration="714000" />
+      <workItem from="1723522901335" duration="16000" />
+      <workItem from="1723547610633" duration="3143000" />
+>>>>>>> Stashed changes
     </task>
     <task id="LOCAL-00001" summary="Bestselling&#10;created a best selling serializers and view class">
       <option name="closed" value="true" />
