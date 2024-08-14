@@ -63,7 +63,7 @@ class partslistview(generics.ListAPIView):
             serializer = self.get_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
 
 
 class partsonedetail(generics.RetrieveAPIView):
@@ -87,7 +87,7 @@ class partsonedetail(generics.RetrieveAPIView):
         if data.get('is_in_wishlist'):
             data.pop('wishlist', None)
 
-        return Response(data, status=status.HTTP_200_OK)
+        return Response({'products':data}, status=status.HTTP_200_OK)
 
 
 class categorylistview(generics.ListAPIView):
@@ -99,7 +99,7 @@ class categorylistview(generics.ListAPIView):
         if not queryset.exists():
             raise NotFound(detail="No Category found matching the criteria.")
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
 
 
 class categoryonedetail(generics.ListAPIView):
@@ -120,7 +120,7 @@ class categoryonedetail(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         category_serializer = CategorySerializer(cat, context={'request': request})
         lastdata = adddict(serializer)
-        return Response({'brand': category_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+        return Response({'products': category_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
 
 
 class brandlistview(generics.ListAPIView):
@@ -153,7 +153,7 @@ class brandonedetail(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         brand_serializer = BrandSerializer(brand, context={'request': request})
         lastdata = adddict(serializer)
-        return Response({'brand': brand_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+        return Response({'products': brand_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
 
 
 class vehiclelistview(generics.ListAPIView):
@@ -204,7 +204,7 @@ def vehicle_view(request):
     elif request.method == 'GET':
         queryset = Vehicle.objects.all()
         serializer = VehicleSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
 
 
 class vehicleoneview(generics.ListAPIView):
@@ -225,7 +225,7 @@ class vehicleoneview(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
         vehicle_serializer = VehicleSerializer(vehicle, context={'request': request})
         lastdata = adddict(serializer)
-        return Response({'brand': vehicle_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+        return Response({'products': vehicle_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
 
 
 def category_offer(data):
@@ -250,7 +250,7 @@ class allofferview(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         categorized_data = category_offer(serializer.data)
 
-        return Response({'Offer': categorized_data}, status=status.HTTP_200_OK)
+        return Response({'products': categorized_data}, status=status.HTTP_200_OK)
 
 
 
@@ -311,7 +311,7 @@ class WishallView(APIView):
             categorized_data[brand].append(product_info)
         categorized_data = dict(categorized_data)
         if bool(categorized_data) is not False:
-            return Response(categorized_data, status=status.HTTP_200_OK)
+            return Response({'products':categorized_data}, status=status.HTTP_200_OK)
         else:
             return Response({'Message': 'No Wishlist '}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -867,7 +867,7 @@ class BestSellingView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
         # page = self.paginate_queryset(self.get_queryset())
         # if page is not None:
         #     serializer = self.get_serializer(page, many=True, context={'request': request})
