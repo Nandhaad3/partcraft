@@ -63,7 +63,7 @@ class partslistview(generics.ListAPIView):
             serializer = self.get_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class partsonedetail(generics.RetrieveAPIView):
@@ -78,7 +78,7 @@ class partsonedetail(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         if not queryset.exists():
-            return Response({'details': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'data': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
 
         product = queryset.first()
         serializer = self.get_serializer(product)
@@ -87,7 +87,7 @@ class partsonedetail(generics.RetrieveAPIView):
         if data.get('is_in_wishlist'):
             data.pop('wishlist', None)
 
-        return Response({'products':data}, status=status.HTTP_200_OK)
+        return Response({'data':data}, status=status.HTTP_200_OK)
 
 
 class categorylistview(generics.ListAPIView):
@@ -99,7 +99,7 @@ class categorylistview(generics.ListAPIView):
         if not queryset.exists():
             raise NotFound(detail="No Category found matching the criteria.")
         serializer = self.get_serializer(queryset, many=True)
-        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class categoryonedetail(generics.ListAPIView):
@@ -120,7 +120,7 @@ class categoryonedetail(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         category_serializer = CategorySerializer(cat, context={'request': request})
         lastdata = adddict(serializer)
-        return Response({'products': category_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+        return Response({'data': category_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
 
 
 class brandlistview(generics.ListAPIView):
@@ -132,7 +132,7 @@ class brandlistview(generics.ListAPIView):
         if not queryset.exists():
             raise NotFound(detail="No Brand found matching the criteria.")
         serializer = self.get_serializer(queryset, many=True)
-        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class brandonedetail(generics.ListAPIView):
@@ -149,11 +149,11 @@ class brandonedetail(generics.ListAPIView):
         brand_id = self.kwargs.get('pk')
         brand = Brand.objects.get(id=brand_id)
         if not queryset.exists():
-            return Response({'details': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'data': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(queryset, many=True)
         brand_serializer = BrandSerializer(brand, context={'request': request})
         lastdata = adddict(serializer)
-        return Response({'products': brand_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+        return Response({'data': brand_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
 
 
 class vehiclelistview(generics.ListAPIView):
@@ -197,14 +197,14 @@ def vehicle_view(request):
                     print(f"{key}, {value}")
                 return response
             except Vehicle.DoesNotExist:
-                return Response({'detail': 'Vehicle not found.'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'data': 'Vehicle not found.'}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(vehicleserializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'GET':
         queryset = Vehicle.objects.all()
         serializer = VehicleSerializer(queryset, many=True, context={'request': request})
-        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class vehicleoneview(generics.ListAPIView):
@@ -225,7 +225,7 @@ class vehicleoneview(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
         vehicle_serializer = VehicleSerializer(vehicle, context={'request': request})
         lastdata = adddict(serializer)
-        return Response({'products': vehicle_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+        return Response({'data': vehicle_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
 
 
 def category_offer(data):
@@ -245,12 +245,12 @@ class allofferview(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
-            return Response({'details': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'data': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(queryset, many=True)
         categorized_data = category_offer(serializer.data)
 
-        return Response({'products': categorized_data}, status=status.HTTP_200_OK)
+        return Response({'data': categorized_data}, status=status.HTTP_200_OK)
 
 
 
@@ -647,10 +647,10 @@ class Carouselallview(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
-            return Response({'details': 'Carousel Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'data': 'Carousel Not Found'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response({'Carousel': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 
 class Carouseloneview(generics.ListAPIView):
@@ -669,11 +669,11 @@ class Carouseloneview(generics.ListAPIView):
         carousel_id = self.kwargs.get('pk')
         c = Carousel.objects.get(id=carousel_id)
         if not queryset.exists():
-            return Response({'details': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'data': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
         carousel_serilizer = Carouselserilizers(c, context={'request': request})
         lastdata = adddict(serializer)
-        return Response({'Carousel': carousel_serilizer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+        return Response({'data': carousel_serilizer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
 
 
 class BuyNowAPIView(APIView):
@@ -867,7 +867,7 @@ class BestSellingView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
-        return Response({'products':serializer.data}, status=status.HTTP_200_OK)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
         # page = self.paginate_queryset(self.get_queryset())
         # if page is not None:
         #     serializer = self.get_serializer(page, many=True, context={'request': request})
@@ -931,7 +931,7 @@ class ToptenView(generics.ListAPIView):
         if not queryset.exists():
             raise NotFound(detail="No Product")
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class ToptenProductView(generics.ListAPIView):
@@ -953,7 +953,7 @@ class ToptenProductView(generics.ListAPIView):
         cat = Category.objects.get(id=category_id)
 
         if not queryset.exists():
-            return Response({'details': 'No Products Found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'data': 'No Products Found'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(queryset, many=True)
         category_serializer = Toptenserializer(cat, context={'request': request})
@@ -962,3 +962,24 @@ class ToptenProductView(generics.ListAPIView):
             'Category': category_serializer.data,
             'parts': lastdata
         }, status=status.HTTP_200_OK)
+
+class FeedbackView(APIView):
+    def get(self, request):
+        feedbacks = Feedback.objects.all()
+        serializer = FeedbackSerializer(feedbacks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = FeedbackSerializer(data=request.data)
+        if serializer.is_valid():
+            p = request.data
+            print(p['email'])
+            f = Feedback.objects.all()
+            l = []
+            for i in f:
+                l.append(i.email)
+            if p['email'] in l:
+                return Response({'Error': 'Email already registered.'}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response({'message':'Feedback has successfully created','data':serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

@@ -64,3 +64,8 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(ProductOrderCount)
 class ProductOrderCountAdmin(admin.ModelAdmin):
     list_display = ['product', 'order_count']
+
+
+@admin.register(Feedback)
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ['id','name','company_name','designation','email','feedback']

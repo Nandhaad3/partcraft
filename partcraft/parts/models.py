@@ -179,3 +179,15 @@ class ProductOrderCount(models.Model):
 
     def __str__(self):
         return f'{self.product} - {self.order_count}'
+
+
+class Feedback(models.Model):
+    name=models.CharField(max_length=255)
+    company_name=models.CharField(max_length=255)
+    designation=models.CharField(max_length=255)
+    email=models.EmailField(max_length=255)
+    image=models.URLField(max_length=200)
+    feedback=models.CharField(max_length=255)
+
+    def __str__(self):
+        return f'{self.name} {self.company_name} {self.designation} {self.email} {self.image}'
