@@ -479,6 +479,8 @@ class OrderSerializer(serializers.ModelSerializer):
 class Bestsellingserializer(serializers.ModelSerializer):
     parts_type = serializers.SerializerMethodField(source='product.parts_type')
     parts_name = serializers.SerializerMethodField()
+    brand_logo = serializers.SerializerMethodField()
+    parts_no = serializers.SerializerMethodField()
     parts_price = serializers.SerializerMethodField()
     parts_offer = serializers.SerializerMethodField()
     final_price = serializers.SerializerMethodField()
@@ -488,7 +490,7 @@ class Bestsellingserializer(serializers.ModelSerializer):
     is_in_wishlist = serializers.SerializerMethodField()
     class Meta:
         model = ProductOrderCount
-        fields = ['id', 'parts_type', 'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail', 'wishlist', 'is_in_wishlist']
+        fields = ['id', 'parts_type', 'parts_name', 'brand_logo', 'parts_no', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail', 'wishlist', 'is_in_wishlist']
 
     def get_parts_type(self, obj):
         return obj.product.parts_type
@@ -519,6 +521,13 @@ class Bestsellingserializer(serializers.ModelSerializer):
 
     def get_main_image(self, obj):
         return obj.product.main_image
+
+
+    def get_brand_logo(self, obj):
+        return obj.product.parts_brand.brand_image
+
+    def get_parts_no(self, obj):
+        return obj.product.parts_no
 
     def get_is_in_wishlist(self, obj):
         request = self.context.get('request', None)
