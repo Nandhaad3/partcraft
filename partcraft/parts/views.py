@@ -967,19 +967,18 @@ class FeedbackView(APIView):
     def get(self, request):
         feedbacks = Feedback.objects.all()
         serializer = FeedbackSerializer(feedbacks, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = FeedbackSerializer(data=request.data)
         if serializer.is_valid():
             p = request.data
-            print(p['email'])
             f = Feedback.objects.all()
             l = []
             for i in f:
                 l.append(i.email)
             if p['email'] in l:
-                return Response({'Error': 'Email already registered.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'data': 'Email already registered.'}, status=status.HTTP_208_ALREADY_REPORTED)
             serializer.save()
-            return Response({'message':'Feedback has successfully created','data':serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({'data':'Feedback has successfully created'}, status=status.HTTP_201_CREATED)
         return Response({'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
