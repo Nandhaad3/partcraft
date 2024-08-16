@@ -14,7 +14,7 @@ class CategorySerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='onecategorydetails')
     class Meta:
         model = Category
-        fields = ['category_name','url']
+        fields = ['category_name','category_image','url']
 
 class VehicleSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='vehicleonedetail')
