@@ -239,6 +239,10 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'dhanushpathiprakash0511@gmail.com'
 EMAIL_HOST_PASSWORD = 'opghzxooktakptya'
 
+
+CORS_ALLOW_CREDENTIALS = True
+
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://partcraft-a2ti.onrender.com',
