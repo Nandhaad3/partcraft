@@ -240,11 +240,12 @@ class ProductoneSerializer(serializers.ModelSerializer):
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
     is_in_wishlist = serializers.SerializerMethodField()
+    addtocart = serializers.HyperlinkedIdentityField(view_name='Cartlistcreate')
     product_fit = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id','parts_type' ,'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail','wishlist','is_in_wishlist','product_fit']
+        fields = ['id','parts_type' ,'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail','wishlist','is_in_wishlist', 'addtocart', 'product_fit']
 
     def arrangename(self,obj):
         return (f"{obj.parts_brand.brand_name} "
@@ -487,10 +488,11 @@ class Bestsellingserializer(serializers.ModelSerializer):
     main_image = serializers.SerializerMethodField()
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
+    addtocart = serializers.HyperlinkedIdentityField(view_name='Cartlistcreate')
     is_in_wishlist = serializers.SerializerMethodField()
     class Meta:
         model = ProductOrderCount
-        fields = ['id', 'parts_type', 'parts_name', 'brand_logo', 'parts_no', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail', 'wishlist', 'is_in_wishlist']
+        fields = ['id', 'parts_type', 'parts_name', 'brand_logo', 'parts_no', 'parts_price', 'parts_offer', 'final_price', 'main_image', 'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart']
 
     def get_parts_type(self, obj):
         return obj.product.parts_type

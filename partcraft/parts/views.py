@@ -39,7 +39,9 @@ def adddict(serializer):
             data['is_in_wishlist'] = i['is_in_wishlist']
         elif i['is_in_wishlist'] is True:
             data['is_in_wishlist'] = i['is_in_wishlist']
+        data['addtocart'] = i['addtocart']
         data['product_fit'] = i['product_fit']
+
 
         last_data.append(data)
     return last_data
