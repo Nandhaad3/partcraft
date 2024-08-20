@@ -73,7 +73,7 @@ class ProductSerializer(serializers.ModelSerializer):
     is_in_wishlist = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
     similar_products = serializers.SerializerMethodField()
-    addtocart= serializers.HyperlinkedIdentityField(view_name='Cartlistcreate')
+    addtocart= serializers.HyperlinkedIdentityField(view_name='cart-add')
     buynow = serializers.HyperlinkedIdentityField(view_name='buy_now')
 
     class Meta:
@@ -240,7 +240,7 @@ class ProductoneSerializer(serializers.ModelSerializer):
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
     is_in_wishlist = serializers.SerializerMethodField()
-    addtocart = serializers.HyperlinkedIdentityField(view_name='Cartlistcreate')
+    addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
     product_fit = serializers.SerializerMethodField()
 
     class Meta:
@@ -488,7 +488,7 @@ class Bestsellingserializer(serializers.ModelSerializer):
     main_image = serializers.SerializerMethodField()
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
-    addtocart = serializers.HyperlinkedIdentityField(view_name='Cartlistcreate')
+    addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
     is_in_wishlist = serializers.SerializerMethodField()
     class Meta:
         model = ProductOrderCount

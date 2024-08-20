@@ -337,35 +337,84 @@ class DeleteAllWishlistItemsView(APIView):
 
 
 class BaseCartView(APIView):
-    COOKIE_NAME = 'cart_items'
+    COOKIE_NAME = 'cart_items'  # Single cookie for cart items
 
     def get_cart_items_from_cookie(self, request):
         cart_items_json = request.COOKIES.get(self.COOKIE_NAME, '[]')
         return json.loads(cart_items_json)
 
     def save_cart_items_to_cookie(self, response, cart_items):
-        response.set_cookie(self.COOKIE_NAME, json.dumps(cart_items), httponly=True, secure=True, max_age=3600,
-                            samesite='Lax')
+        response.set_cookie(
+            self.COOKIE_NAME,
+            json.dumps(cart_items),
+            httponly=True,
+            secure=True,
+            max_age=3600,
+            samesite='Lax'
+        )
 
-    def set_cart_item_cookie(self, request, response, product_id, quantity):
-        cookie_name = f'cart_product_{product_id}'
-        existing_quantity = int(request.COOKIES.get(cookie_name, 0))
-        new_quantity = existing_quantity + quantity
-        response.set_cookie(cookie_name, new_quantity, httponly=True, max_age=3600, secure=True, samesite='Lax')
-
-    def delete_cart_item_cookie(self, response, product_id):
-        cookie_name = f'cart_product_{product_id}'
-        response.delete_cookie(cookie_name, path='/')
-
-    def delete_all_cart_item_cookies(self, request, response):
-        cart_items = self.get_cart_items_from_cookie(request)
-        for item in cart_items:
-            product_id = item['product_id']
-            self.delete_cart_item_cookie(response, product_id)
+    def clear_cart(self, response):
         response.delete_cookie(self.COOKIE_NAME, path='/')
 
-    def clear_cart(self, request, response):
-        self.delete_all_cart_item_cookies(request, response)
+    def update_cart_cookie(self, request, response, product_id, quantity, code=None):
+        cart_items = self.get_cart_items_from_cookie(request)
+        item_exists = False
+
+        for item in cart_items:
+            if item['product_id'] == product_id:
+                item['quantity'] += quantity
+                if code:
+                    item.setdefault('code', []).append(code)
+                item_exists = True
+                break
+
+        if not item_exists:
+            cart_items.append({'product_id': product_id, 'quantity': quantity, 'code': [code] if code else []})
+
+        self.save_cart_items_to_cookie(response, cart_items)
+
+    def remove_item_from_cart_cookie(self, request, response, product_id):
+        cart_items = self.get_cart_items_from_cookie(request)
+        updated_cart_items = [item for item in cart_items if item['product_id'] != product_id]
+
+        if len(updated_cart_items) != len(cart_items):
+            self.save_cart_items_to_cookie(response, updated_cart_items)
+
+        return len(updated_cart_items) != len(cart_items)
+
+    def process_cart_data(self, cart_items):
+        cart_data = []
+        total_price = 0
+        savings = 0
+
+        for item in cart_items:
+            product = Product.objects.get(id=item['product_id'])
+            final_price = product.parts_price - (product.parts_price * product.parts_offer) / 100
+            carousel_saving = 0
+
+            if 'code' in item:
+                for code in item['code']:
+                    carousel = Carousel.objects.filter(carousel_code=code).first()
+                    if carousel:
+                        c_final_price = final_price - final_price * (carousel.carousel_offer / 100)
+                        carousel_saving += final_price - c_final_price
+                        final_price = c_final_price
+
+            total_price += final_price * item['quantity']
+            savings += carousel_saving * item['quantity']
+            cart_data.append({
+                'product': product.id,
+                'quantity': item['quantity'],
+                'parts_name': CartSerializer().arrangename(product),
+                'parts_price': product.parts_price,
+                'parts_offer': product.parts_offer,
+                'discount_amount': (product.parts_price * product.parts_offer) / 100,
+                'final_price': final_price,
+                'main_image': product.main_image,
+                'code': item.get('code', []),
+            })
+
+        return cart_data, total_price, savings
 
 
 class ViewCartView(BaseCartView):
@@ -378,130 +427,51 @@ class ViewCartView(BaseCartView):
             if not serializer.data:
                 return Response({'message': 'No cart items found.'}, status=status.HTTP_404_NOT_FOUND)
 
-            total_price = 0
-            savings = 0
-            for item in serializer.data:
-                product_id = item.get('product')
-                quantity = item.get('quantity', 0)
-                if product_id is None:
-                    continue
-                try:
-                    product = Product.objects.get(id=product_id)
-                except Product.DoesNotExist:
-                    continue
+            total_price, savings = self.calculate_totals(serializer.data)
+            response = Response({'cart': serializer.data, 'total_price': total_price, 'save': savings},
+                                status=status.HTTP_200_OK)
 
-                final_price = product.parts_price - (product.parts_price * product.parts_offer) / 100
-                carousel_saving = 0
-
-                if 'code' in item and item['code']:
-                    for code in item['code']:
-                        carousel = Carousel.objects.filter(carousel_code=code).first()
-                        if carousel:
-                            c_final_price = final_price - final_price * (carousel.carousel_offer / 100)
-                            savings_per_unit = final_price - c_final_price
-                            carousel_saving += savings_per_unit
-                            final_price = c_final_price
-                total_price += final_price * quantity
-                savings += carousel_saving * quantity
-            response = Response({'cart': serializer.data, 'total_price': total_price, 'save': savings},status=status.HTTP_200_OK)
-
-            for item in serializer.data:
-                self.set_cart_item_cookie(request, response, item["product"], item["quantity"])
+            self.save_cart_items_to_cookie(response, serializer.data)
             return response
         else:
             cart_items = self.get_cart_items_from_cookie(request)
-            cart_data = []
-            total_price = 0
-            savings = 0
-            for item in cart_items:
-                product = Product.objects.get(id=item['product_id'])
-                final_price = product.parts_price - (product.parts_price * product.parts_offer) / 100
-                carousel_saving = 0
-                if 'code' in item:
-                    for code in item['code']:
-                        carousel = Carousel.objects.filter(carousel_code=code).first()
-                        if carousel:
-                            c_final_price = final_price - final_price * (carousel.carousel_offer / 100)
-                            carousel_saving += final_price - c_final_price
-                            final_price = c_final_price
-
-                total_price += final_price * item['quantity']
-                savings += carousel_saving * item['quantity']
-                cart_data.append({
-                    'product': product.id,
-                    'quantity': item['quantity'],
-                    'parts_name': CartSerializer().arrangename(product),
-                    'parts_price': product.parts_price,
-                    'parts_offer': product.parts_offer,
-                    'discount_amount': (product.parts_price * product.parts_offer) / 100,
-                    'final_price': product.parts_price - (product.parts_price * product.parts_offer) / 100,
-                    'main_image': product.main_image,
-                    'code': item.get('code', []),
-                })
+            cart_data, total_price, savings = self.process_cart_data(cart_items)
 
             if not cart_data:
                 return Response({'message': 'No cart items found.'}, status=status.HTTP_404_NOT_FOUND)
+
             return Response({'cart': cart_data, 'total_price': total_price, 'save': savings}, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        if request.user.is_authenticated:
-            carouselserializer = Carouselpostserializer(data=request.data)
-            user = request.user
-            if carouselserializer.is_valid():
-                c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
-                b = Brand.objects.get(brand_name=c.carousel_brand)
-                ct = Category.objects.get(category_name=c.carousel_category)
-                p = Product.objects.filter(parts_brand=b, parts_category=ct)
-                pro = None
-                for i in p:
-                    crt = Cart.objects.filter(user=user)
-                    if crt:
-                        for j in crt:
-                            if i == j.product:
-                                j.code.add(c)
-                                return Response(data='Add successfully', status=status.HTTP_201_CREATED)
-                    else:
-                        return Response(data='Cart not found', status=status.HTTP_404_NOT_FOUND)
-            else:
-                return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response(data='Add successfully', status=status.HTTP_201_CREATED)
-        else:
-            carouselserializer = Carouselpostserializer(data=request.data)
-            if carouselserializer.is_valid():
-                c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
-                b = Brand.objects.get(brand_name=c.carousel_brand)
-                ct = Category.objects.get(category_name=c.carousel_category)
-                p = Product.objects.filter(parts_brand=b, parts_category=ct)
+    def calculate_totals(self, cart_items):
+        total_price = 0
+        savings = 0
 
-                cart_items = self.get_cart_items_from_cookie(request)
-                for i in p:
-                    for item in cart_items:
-                        if item['product_id'] == i.id:
-                            if 'code' in item and c.carousel_code in item['code']:
-                                return Response({'message': 'code is already applied'}, status=status.HTTP_200_OK)
-                            item.setdefault('code', []).append(c.carousel_code)
-                            cart_data = []
-                            for item in cart_items:
-                                product = Product.objects.get(id=item['product_id'])
-                                cart_data.append({
-                                    'product': product.id,
-                                    'quantity': item['quantity'],
-                                    'parts_name': CartSerializer().arrangename(product),
-                                    'parts_price': product.parts_price,
-                                    'parts_offer': product.parts_offer,
-                                    'discount_amount': (product.parts_price * product.parts_offer) / 100,
-                                    'final_price': product.parts_price - (
-                                            product.parts_price * product.parts_offer) / 100,
-                                    'main_image': product.main_image,
-                                    'code': item.get('code', []),
-                                })
-                            response = Response({'message': 'Added successfully', 'cart': cart_data},
-                                                status=status.HTTP_200_OK)
-                            self.save_cart_items_to_cookie(response, cart_items)
-                            return response
-                return Response({'message': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
-            else:
-                return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        for item in cart_items:
+            product_id = item.get('product')
+            quantity = item.get('quantity', 0)
+            if product_id is None:
+                continue
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                continue
+
+            final_price = product.parts_price - (product.parts_price * product.parts_offer) / 100
+            carousel_saving = 0
+
+            if 'code' in item and item['code']:
+                for code in item['code']:
+                    carousel = Carousel.objects.filter(carousel_code=code).first()
+                    if carousel:
+                        c_final_price = final_price - final_price * (carousel.carousel_offer / 100)
+                        savings_per_unit = final_price - c_final_price
+                        carousel_saving += savings_per_unit
+                        final_price = c_final_price
+
+            total_price += final_price * quantity
+            savings += carousel_saving * quantity
+
+        return total_price, savings
 
 
 class CartItemsCreateView(BaseCartView):
@@ -519,90 +489,71 @@ class CartItemsCreateView(BaseCartView):
             if not created:
                 cart_item.quantity += quantity
                 cart_item.save()
+
             serializer = CartSerializer(cart_item, context={'request': request})
             response = Response({'message': 'Product added/incremented in cart', 'cart': serializer.data},
                                 status=status.HTTP_200_OK)
-            self.set_cart_item_cookie(request, response, pk, quantity)
+
+            self.update_cart_cookie(request, response, pk, quantity)
             return response
         else:
-            cart_items = self.get_cart_items_from_cookie(request)
-            for item in cart_items:
-                if item['product_id'] == pk:
-                    item['quantity'] += quantity
-                    break
-            else:
-                cart_items.append({'product_id': pk, 'quantity': quantity})
-
-            cart_data = []
-            for item in cart_items:
-                product = Product.objects.get(id=item['product_id'])
-                cart_data.append({
-                    'product': product.id,
-                    'quantity': item['quantity'],
-                    'parts_name': CartSerializer().arrangename(product),
-                    'parts_price': product.parts_price,
-                    'parts_offer': product.parts_offer,
-                    'discount_amount': (product.parts_price * product.parts_offer) / 100,
-                    'final_price': product.parts_price - (product.parts_price * product.parts_offer) / 100,
-                    'main_image': product.main_image,
-                })
-            response = Response({'message': 'Product added/incremented in cart', 'cart': cart_data},
-                                status=status.HTTP_200_OK)
-            self.save_cart_items_to_cookie(response, cart_items)
-            self.set_cart_item_cookie(request, response, pk, quantity)
+            response = self.handle_unauthenticated_cart(request, pk, quantity)
             return response
+
+    def handle_unauthenticated_cart(self, request, product_id, quantity):
+        response = Response({'message': 'Product added/incremented in cart'}, status=status.HTTP_200_OK)
+        self.update_cart_cookie(request, response, product_id, quantity)
+        cart_items = self.get_cart_items_from_cookie(request)
+        cart_data, _, _ = self.process_cart_data(cart_items)
+        response.data.update({'cart': cart_data})
+        return response
 
     def patch(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         decrement_quantity = int(request.data.get('quantity', 1))
 
         if request.user.is_authenticated:
-            cart_item = Cart.objects.filter(user=request.user, product=product).first()
-            if cart_item:
-                if cart_item.quantity > decrement_quantity:
-                    cart_item.quantity -= decrement_quantity
-                    cart_item.save()
-                    serializer = CartSerializer(cart_item, context={'request': request})
-                    response = Response({'message': 'Product decremented in cart', 'cart': serializer.data},
-                                        status=status.HTTP_200_OK)
-                    self.set_cart_item_cookie(request, response, pk, -decrement_quantity)
-                    return response
-                else:
-                    cart_item.delete()
-                    return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
-            else:
-                return Response({'message': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+            return self.handle_authenticated_cart_patch(request, pk, product, decrement_quantity)
         else:
-            cart_items = self.get_cart_items_from_cookie(request)
-            for item in cart_items:
-                if item['product_id'] == pk:
-                    if item['quantity'] > decrement_quantity:
-                        item['quantity'] -= decrement_quantity
-                    else:
-                        cart_items.remove(item)
-                    break
+            return self.handle_unauthenticated_cart_patch(request, pk, decrement_quantity)
+
+    def handle_authenticated_cart_patch(self, request, pk, product, decrement_quantity):
+        cart_item = Cart.objects.filter(user=request.user, product=product).first()
+        if cart_item:
+            if cart_item.quantity > decrement_quantity:
+                cart_item.quantity -= decrement_quantity
+                cart_item.save()
+                serializer = CartSerializer(cart_item, context={'request': request})
+                response = Response({'message': 'Product decremented in cart', 'cart': serializer.data},
+                                    status=status.HTTP_200_OK)
+                self.update_cart_cookie(request, response, pk, -decrement_quantity)
+                return response
             else:
-                return Response({'message': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+                cart_item.delete()
+                response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+                self.remove_item_from_cart_cookie(request, response, pk)
+                return response
+        else:
+            return Response({'message': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
 
-            cart_data = []
-            for item in cart_items:
-                product = Product.objects.get(id=item['product_id'])
-                cart_data.append({
-                    'product': product.id,
-                    'quantity': item['quantity'],
-                    'parts_name': CartSerializer().arrangename(product),
-                    'parts_price': product.parts_price,
-                    'parts_offer': product.parts_offer,
-                    'discount_amount': (product.parts_price * product.parts_offer) / 100,
-                    'final_price': product.parts_price - (product.parts_price * product.parts_offer) / 100,
-                    'main_image': product.main_image,
-                })
+    def handle_unauthenticated_cart_patch(self, request, pk, decrement_quantity):
+        cart_items = self.get_cart_items_from_cookie(request)
+        response = Response({'message': 'Product decremented in cart'}, status=status.HTTP_200_OK)
 
-            response = Response({'message': 'Product decremented in cart', 'cart': cart_data},
-                                status=status.HTTP_200_OK)
-            self.save_cart_items_to_cookie(response, cart_items)
-            self.set_cart_item_cookie(request, response, pk, -decrement_quantity)
-            return response
+        for item in cart_items:
+            if item['product_id'] == pk:
+                if item['quantity'] > decrement_quantity:
+                    item['quantity'] -= decrement_quantity
+                else:
+                    cart_items.remove(item)
+                break
+        else:
+            return Response({'message': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+
+        self.save_cart_items_to_cookie(response, cart_items)
+        cart_data, _, _ = self.process_cart_data(cart_items)
+        response.data.update({'cart': cart_data})
+        return response
 
     def delete(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
@@ -611,35 +562,25 @@ class CartItemsCreateView(BaseCartView):
             cart_item = Cart.objects.filter(user=request.user, product=product).first()
             if cart_item:
                 cart_item.delete()
-                return Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
-            return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+                response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+                self.remove_item_from_cart_cookie(request, response, pk)
+                return response
+            else:
+                return Response({'message': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            cart_items = self.get_cart_items_from_cookie(request)
-            updated_cart_items = [item for item in cart_items if item['product_id'] != pk]
-            if len(updated_cart_items) == len(cart_items):
-                return Response({'error': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
-            response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
-            self.save_cart_items_to_cookie(response, updated_cart_items)
-            self.delete_cart_item_cookie(response, pk)
+            return self.handle_unauthenticated_cart_delete(request, pk)
+
+    def handle_unauthenticated_cart_delete(self, request, product_id):
+        response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+        item_removed = self.remove_item_from_cart_cookie(request, response, product_id)
+
+        if not item_removed:
+            return Response({'message': 'Product not in cart'}, status=status.HTTP_400_BAD_REQUEST)
+
+        cart_items = self.get_cart_items_from_cookie(request)
+        cart_data, _, _ = self.process_cart_data(cart_items)
+        response.data.update({'cart': cart_data})
         return response
-
-
-class RemoveFromCartView(BaseCartView):
-
-    def delete(self, request):
-        if request.user.is_authenticated:
-            Cart.objects.filter(user=request.user).delete()
-            response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
-            response.delete_cookie('cart')
-            return response
-
-        else:
-            cart_items = self.get_cart_items_from_cookie(request)
-            if not cart_items:
-                return Response({'error': 'Cart is already empty'}, status=status.HTTP_400_BAD_REQUEST)
-            response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
-            self.clear_cart(request, response)
-            return response
 
 
 class Carouselallview(generics.ListAPIView):
