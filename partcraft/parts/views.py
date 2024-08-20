@@ -438,7 +438,7 @@ class ViewCartView(BaseCartView):
             cart_data, total_price, savings = self.process_cart_data(cart_items)
 
             if not cart_data:
-                return Response({'message': 'No cart items found.'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'message': 'No cart items found.'}, status=status.HTTP_204_NO_CONTENT)
 
             return Response({'cart': cart_data, 'total_price': total_price, 'save': savings}, status=status.HTTP_200_OK)
 
