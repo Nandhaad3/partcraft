@@ -473,6 +473,66 @@ class ViewCartView(BaseCartView):
 
         return total_price, savings
 
+    def post(self, request):
+        if request.user.is_authenticated:
+            carouselserializer = Carouselpostserializer(data=request.data)
+            user = request.user
+            if carouselserializer.is_valid():
+                c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
+                b = Brand.objects.get(brand_name=c.carousel_brand)
+                ct = Category.objects.get(category_name=c.carousel_category)
+                p = Product.objects.filter(parts_brand=b, parts_category=ct)
+                pro = None
+                for i in p:
+                    crt = Cart.objects.filter(user=user)
+                    if crt:
+                        for j in crt:
+                            if i == j.product:
+                                j.code.add(c)
+                                return Response(data='Add successfully', status=status.HTTP_201_CREATED)
+                    else:
+                        return Response(data='Cart not found', status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data='Add successfully', status=status.HTTP_201_CREATED)
+        else:
+            carouselserializer = Carouselpostserializer(data=request.data)
+            if carouselserializer.is_valid():
+                c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
+                b = Brand.objects.get(brand_name=c.carousel_brand)
+                ct = Category.objects.get(category_name=c.carousel_category)
+                p = Product.objects.filter(parts_brand=b, parts_category=ct)
+
+                cart_items = self.get_cart_items_from_cookie(request)
+                for i in p:
+                    for item in cart_items:
+                        if item['product_id'] == i.id:
+                            if 'code' in item and c.carousel_code in item['code']:
+                                return Response({'message': 'code is already applied'}, status=status.HTTP_200_OK)
+                            item.setdefault('code', []).append(c.carousel_code)
+                            cart_data = []
+                            for item in cart_items:
+                                product = Product.objects.get(id=item['product_id'])
+                                cart_data.append({
+                                    'product': product.id,
+                                    'quantity': item['quantity'],
+                                    'parts_name': CartSerializer().arrangename(product),
+                                    'parts_price': product.parts_price,
+                                    'parts_offer': product.parts_offer,
+                                    'discount_amount': (product.parts_price * product.parts_offer) / 100,
+                                    'final_price': product.parts_price - (
+                                            product.parts_price * product.parts_offer) / 100,
+                                    'main_image': product.main_image,
+                                    'code': item.get('code', []),
+                                })
+                            response = Response({'message': 'Added successfully', 'cart': cart_data},
+                                                status=status.HTTP_200_OK)
+                            self.save_cart_items_to_cookie(response, cart_items)
+                            return response
+                return Response({'message': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CartItemsCreateView(BaseCartView):
 
