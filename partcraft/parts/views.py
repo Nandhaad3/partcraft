@@ -656,7 +656,7 @@ class RemoveFromCartView(BaseCartView):
             if not cart_items:
                 return Response({'error': 'Cart is already empty'}, status=status.HTTP_400_BAD_REQUEST)
             response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
-            self.clear_cart(request, response)
+            self.clear_cart(response)
             return response
 
 
