@@ -1042,3 +1042,9 @@ class FeedbackView(APIView):
             serializer.save()
             return Response({'data':'Feedback has successfully created'}, status=status.HTTP_201_CREATED)
         return Response({'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class DealerAddressView(APIView):
+    def get(self, request):
+        dealer_addrress = DealerAddress.objects.all()
+        serializer = DealerAddressSerializer(dealer_addrress, many=True)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)

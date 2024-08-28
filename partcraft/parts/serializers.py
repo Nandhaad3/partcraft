@@ -534,7 +534,6 @@ class Toptenserializer(serializers.ModelSerializer):
         fields = ['category_name', 'category_image', 'url']
 
 
-
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
