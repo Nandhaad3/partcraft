@@ -448,6 +448,10 @@ class Buynowserilizers(serializers.Serializer):
             "shipping_address": shipping_instance,
         }
 
+class DealerAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DealerAddress
+        fields = '__all__'
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
