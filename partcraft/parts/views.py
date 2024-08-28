@@ -642,6 +642,23 @@ class CartItemsCreateView(BaseCartView):
         response.data.update({'cart': cart_data})
         return response
 
+class RemoveFromCartView(BaseCartView):
+
+    def delete(self, request):
+        if request.user.is_authenticated:
+            Cart.objects.filter(user=request.user).delete()
+            response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+            response.delete_cookie('cart')
+            return response
+
+        else:
+            cart_items = self.get_cart_items_from_cookie(request)
+            if not cart_items:
+                return Response({'error': 'Cart is already empty'}, status=status.HTTP_400_BAD_REQUEST)
+            response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
+            self.clear_cart(request, response)
+            return response
+
 
 class Carouselallview(generics.ListAPIView):
     serializer_class = Carouselserilizers
