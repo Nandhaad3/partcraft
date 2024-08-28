@@ -353,16 +353,12 @@ class BaseCartView(APIView):
             samesite='None'
         )
 
-    def delete_all_cart_item_cookies(self, request, response):
-        cart_items = self.get_cart_items_from_cookie(request)
-        for item in cart_items:
-            product_id = item['product_id']
-            self.delete_cart_item_cookie(response, product_id)
-        response.delete_cookie(self.COOKIE_NAME)
-    def clear_cart(self, request):
-        response = Response({'message': 'Cart cleared'}, status=status.HTTP_200_OK)
-        self.delete_all_cart_item_cookies(request, response)
-        return response
+    def delete_cart_item_cookie(self, response, product_id):
+        cookie_name = f'cp_{product_id}'
+        response.delete_cookie(cookie_name)
+
+    def clear_cart(self, response):
+        response.delete_cookie(self.COOKIE_NAME, path='/')
 
     def update_cart_cookie(self, request, response, product_id, quantity, code=None):
         cart_items = self.get_cart_items_from_cookie(request)
@@ -653,15 +649,8 @@ class CartItemsCreateView(BaseCartView):
 class RemoveFromCartView(BaseCartView):
 
     def delete(self, request):
-        if request.user.is_authenticated:
-            Cart.objects.filter(user=request.user).delete()
-            response = Response({'message': 'Product removed from cart'}, status=status.HTTP_200_OK)
-            response.delete_cookie('cart')
-            return response
-
-        else:
-            response = self.clear_cart(request)
-            return response
+        response = self.clear_cart(request)
+        return response
 
 
 class Carouselallview(generics.ListAPIView):
