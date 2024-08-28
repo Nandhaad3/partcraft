@@ -120,8 +120,7 @@ class BillingAddress(models.Model):
     email = models.EmailField(max_length=255)
     billing_address = models.CharField(max_length=1000)
     contact = models.CharField(max_length=13)
-    use_same_address_for_shipping = models.BooleanField(default=False)
-    use_the_address_for_next_time = models.BooleanField(default=False)
+
 
     def __str__(self):
         return f'{self.billing_name} {self.billing_address}'
@@ -131,10 +130,13 @@ class ShippingAddress(models.Model):
     shipping_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
     shipping_address = models.CharField(max_length=1000)
+    city = models.CharField(max_length=255, blank=True, null=True)
     contact = models.CharField(max_length=13)
+    use_the_address_for_next_time = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.shipping_name} {self.shipping_address}'
+
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -191,3 +193,13 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f'{self.name} {self.company_name} {self.designation} {self.email} {self.image}'
+
+class DealerAddress(models.Model):
+    name = models.CharField(max_length=255)
+    gst_number = models.CharField(max_length=16, blank=True, null=True)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255)
+    phone = models.CharField(max_length=255)
+    def __str__(self):
+        return f'{self.name} {self.address} {self.city} {self.email}'
