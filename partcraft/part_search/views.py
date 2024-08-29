@@ -11,7 +11,6 @@ import json
 class CustomPagination(PageNumberPagination):
     page_size = 2
     page_size_query_param = 'size'
-    max_page_size = 10
 
 class partslistsDocumentView(DocumentViewSet):
     document = ProductDocument
@@ -38,6 +37,7 @@ class partslistsDocumentView(DocumentViewSet):
         max_offer = self.request.query_params.get('max_offer')
 
         search = self.document.search()
+        search = search.extra(size=1000)
         if search_query:
             search = search.query('bool', should=[
                 {'match': {'parts_brand': search_query}},
@@ -105,3 +105,5 @@ class partslistsDocumentView(DocumentViewSet):
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+

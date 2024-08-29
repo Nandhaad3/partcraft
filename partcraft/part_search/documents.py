@@ -4,8 +4,8 @@ from elasticsearch import Elasticsearch
 
 PUBLISHER_INDEX = Index('product')
 PUBLISHER_INDEX.settings(
-    number_of_shards=1,
-    number_of_replicas=1,
+    number_of_shards=2,
+    number_of_replicas=2,
 
     analysis={
         'analyzer': {
