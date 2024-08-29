@@ -25,6 +25,7 @@ urlpatterns = [
     path('carouselallview/',Carouselallview.as_view(),name='carouselallview'),
     path('carouseloneview/<int:pk>',Carouseloneview.as_view(),name='carouseloneview'),
     path('buynow/<int:pk>/', BuyNowAPIView.as_view(), name='buy_now'),
+    path('billing_address/', BillingDealerView.as_view(), name='billing_addres'),
     path('order_summary/', OrderSummaryAPIView.as_view(), name='order_summary'),
     path('place_order/', OrderAPIView.as_view(), name='place_order'),
     path('couponcodeapply/',ViewCartView.as_view(),name='couponcodeapply'),
@@ -34,5 +35,6 @@ urlpatterns = [
     path('top-ten/', ToptenView.as_view(), name='top-ten'),
     path('top-ten-product/<int:pk>/', ToptenProductView.as_view(), name='top-ten-product'),
     path('feedback/',FeedbackView.as_view(), name='feedback'),
+    path('dealers/', DealerAddressView.as_view(), name='dealers'),
 ]
 

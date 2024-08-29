@@ -698,14 +698,61 @@ class BuyNowAPIView(APIView):
         if serializer.is_valid():
             result = serializer.save()
             response_data = {
-                "message": "Addresses saved successfully.",
-                "billing_address": Billaddressserializer(result["billing_address"]).data,
-                "shipping_address": Shippingaddressserializer(result["shipping_address"]).data if result[
-                    "shipping_address"] else None
+                "message": "Shipping Addresses saved successfully.",
+                "shipping_address": Shippingaddressserializer(result["shipping_address"]).data
             }
             return Response(response_data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class BillingDealerView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        shipping_address = ShippingAddress.objects.filter(user=user).first()
+        if not shipping_address:
+            return Response({"message": "No addresses found for the user."}, status=status.HTTP_404_NOT_FOUND)
+        shipping_city = shipping_address.city
+        dealer_address = DealerAddress.objects.filter(city=shipping_city).distinct()
+        serializer = DealerAddressSerializer(dealer_address, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        shipping_address = ShippingAddress.objects.filter(user=user).first()
+
+        if not user.is_authenticated:
+            return Response({"message": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not shipping_address:
+            return Response({"message": "No shipping address found for the user."}, status=status.HTTP_404_NOT_FOUND)
+
+        shipping_city = shipping_address.city
+
+        dealer_address = DealerAddress.objects.filter(city=shipping_city).first()
+
+        if not dealer_address:
+            return Response({"message": "No dealers found in the shipping city."}, status=status.HTTP_404_NOT_FOUND)
+
+        billing_address_data = {
+            'user': user.id,
+            'billing_name': dealer_address.name,
+            'gst_number': dealer_address.gst_number,
+            'email': dealer_address.email,
+            'billing_address': dealer_address.address,
+            'contact': dealer_address.phone
+        }
+
+        serializer = Billaddressserializer(data=billing_address_data)
+
+        if serializer.is_valid():
+            billing_address = serializer.save()
+            return Response({
+                "message": "Billing address saved successfully.",
+                "billing_address": serializer.data
+            }, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderSummaryAPIView(BaseCartView):
@@ -995,3 +1042,9 @@ class FeedbackView(APIView):
             serializer.save()
             return Response({'data':'Feedback has successfully created'}, status=status.HTTP_201_CREATED)
         return Response({'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class DealerAddressView(APIView):
+    def get(self, request):
+        dealer_addrress = DealerAddress.objects.all()
+        serializer = DealerAddressSerializer(dealer_addrress, many=True)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
