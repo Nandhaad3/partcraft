@@ -49,9 +49,10 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
-    # 'django_elasticsearch_dsl',
-    # 'django_elasticsearch_dsl_drf',
+    'django_elasticsearch_dsl',
+    'django_elasticsearch_dsl_drf',
     'part_admin',
+    'part_search',
     'corsheaders',
 ]
 
@@ -61,11 +62,12 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',),
 }
 
-# ELASTICSEARCH_DSL = {
-#     'default' : {
-#         "hosts" : "localhost:9200",
-#     }
-# }
+ELASTICSEARCH_DSL = {
+    'default' : {
+        "hosts" : "https://site:6b8c6cb64d5368d6308e214199f0dbcd@oin-us-east-1.searchly.com",
+    }
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
