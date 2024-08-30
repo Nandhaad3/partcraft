@@ -301,22 +301,67 @@ class WishallView(APIView):
         wishlists = Wishlist.objects.filter(wishlist_name=self.request.user)
 
         categorized_data = defaultdict(list)
+        delete_all_wishlist_url = request.build_absolute_uri(reverse('delete-all-wishlistitems'))
+
         for wishlist in wishlists:
             wishlist_data = WishallSerializer(wishlist, context={'request': request}).data
             brand = wishlist_data['wishlist_name']
             product_info = {
+                'product_id': wishlist_data['wishlist_product']['id'],
                 'wishlist_product': f"{wishlist_data['wishlist_product']['parts_brand']['brand_name']} {wishlist_data['wishlist_product']['parts_category']['category_name']} {wishlist_data['wishlist_product']['subcategory_name']}",
+                'parts_no': wishlist_data['parts_no'],
+                'brand_logo': wishlist_data['brand_logo'],
+                'parts_type': wishlist_data['parts_type'],
+                'parts_price': wishlist_data['parts_price'],
+                'parts_offer': wishlist_data['parts_offer'],
+                'final_price': wishlist_data['final_price'],
+                'main_image': wishlist_data['main_image'],
                 'url': wishlist_data['wishlist_product']['url'],
-                'Wishlistdel': wishlist_data['wishlist_delete']
+                'addtocart': wishlist_data['addtocart'],
+                'Wishlistdel': wishlist_data['wishlist_delete'],
             }
 
             categorized_data[brand].append(product_info)
         categorized_data = dict(categorized_data)
+        response = Response({
+            'Product': categorized_data,
+            'delete_all_wishlist': delete_all_wishlist_url,
+             },
+            status=status.HTTP_200_OK)
         if bool(categorized_data) is not False:
-            return Response({'products':categorized_data}, status=status.HTTP_200_OK)
+            return response
         else:
             return Response({'Message': 'No Wishlist '}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class MoveToCartView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        product_ids = request.data.get('product_ids', [])
+
+        if not product_ids:
+            return Response({"detail": "Product IDs are required in the request body."},status=status.HTTP_400_BAD_REQUEST)
+
+        messages = []
+
+        for product_id in product_ids:
+            product_id = int(product_id)
+            product = get_object_or_404(Product, pk=product_id)
+
+            wishlist_item = Wishlist.objects.filter(wishlist_name=user, wishlist_product=product).first()
+            if not wishlist_item:
+                messages.append({"product_id": product_id, "message": "Product not found in wishlist."})
+                continue
+
+            cart_item, created = Cart.objects.get_or_create(user=user, product=wishlist_item.wishlist_product)
+            cart_item.save()
+
+            wishlist_item.delete()
+            messages.append({"product_id": product_id, "message": "Item moved to cart successfully."})
+        return Response({"messages": messages}, status=status.HTTP_200_OK)
 
 class DeleteWishlistItemView(APIView):
     permission_classes = [IsAuthenticated]
