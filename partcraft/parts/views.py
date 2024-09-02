@@ -583,6 +583,61 @@ class ViewCartView(BaseCartView):
                 return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class RemoveCarouselView(APIView):
+    COOKIE_NAME = 'cart_items'
+    def get_cart_items_from_cookie(self, request):
+        cart_items_json = request.COOKIES.get(self.COOKIE_NAME, '[]')
+        return json.loads(cart_items_json)
+    def save_cart_items_to_cookie(self, response, cart_items):
+        response.set_cookie(self.COOKIE_NAME,json.dumps(cart_items),
+            httponly=True,secure=True,
+            max_age=3600,samesite='None')
+
+    def _remove_carousel_from_products(self, carousel, products, request, user=None):
+        if user and user.is_authenticated:
+            carts = Cart.objects.filter(user=user)
+            if not carts:
+                return {'message': 'Cart not found'}, status.HTTP_404_NOT_FOUND
+
+            for product in products:
+                for cart in carts:
+                    if product == cart.product:
+                        if carousel in cart.code.all():
+                            cart.code.remove(carousel)
+                            return {'message': 'Removed successfully'}, status.HTTP_200_OK
+            return {'message': 'Code not found in cart'}, status.HTTP_404_NOT_FOUND
+        else:
+            cart_items = self.get_cart_items_from_cookie(request)
+            code_removed = False
+            for item in cart_items:
+                if 'code' in item and carousel.carousel_code in item['code']:
+                    item['code'].remove(carousel.carousel_code)
+                    code_removed = True
+
+            if not code_removed:
+                return {'message': 'Code not found in cart'}, status.HTTP_404_NOT_FOUND
+
+            response = Response({'message': 'Removed successfully'},
+                                status=status.HTTP_200_OK)
+            self.save_cart_items_to_cookie(response, cart_items)
+            return response, status.HTTP_200_OK
+
+    def delete(self, request):
+        carousel_serializer = Carouselpostserializer(data=request.data)
+
+        if carousel_serializer.is_valid():
+            carousel = get_object_or_404(Carousel, carousel_code=carousel_serializer.validated_data['carousel_code'])
+            brand = get_object_or_404(Brand, brand_name=carousel.carousel_brand)
+            category = get_object_or_404(Category, category_name=carousel.carousel_category)
+            products = Product.objects.filter(parts_brand=brand, parts_category=category)
+            response_data, status_code = self._remove_carousel_from_products(carousel, products, request,user=request.user)
+            if isinstance(response_data, dict):
+                return Response(response_data, status=status_code)
+            return response_data
+        else:
+            return Response(carousel_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CartItemsCreateView(BaseCartView):
 
     def post(self, request, pk):
@@ -919,7 +974,6 @@ class OrderAPIView(BaseCartView):
                 billing_address=user_profile.preferred_billing_address,
                 shipping_address=user_profile.preferred_shipping_address,
             )
-
             product_order_count, created = ProductOrderCount.objects.get_or_create(product=product)
             product_order_count.order_count += quantity
             product_order_count.save()

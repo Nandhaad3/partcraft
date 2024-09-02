@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-
 from django.conf import settings
 import os
 import dj_database_url
@@ -137,7 +136,7 @@ DATABASES = {
 #         'PORT': os.environ.get("DB_PORT"),
 #     }
 # }
-DATABASES["default"]=dj_database_url.parse("postgresql://postgres.bjtqyojwojqfmxrxcqcv:gmJqKZh3XxcW8KCF@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres")
+DATABASES["default"] = dj_database_url.parse("postgresql://postgres.bjtqyojwojqfmxrxcqcv:gmJqKZh3XxcW8KCF@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres")
 
 # DATABASES["default"]=dj_database_url.parse("postgres://partcraft_render_l8s8_user:RcJrxzEJMoDmraOc0jJcJRXLmGKoaA5n@dpg-cppu4ddds78s73ees2q0-a.oregon-postgres.render.com/partcraft_render_l8s8")
 

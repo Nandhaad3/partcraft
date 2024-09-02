@@ -23,6 +23,7 @@ urlpatterns = [
     path('cart/view/', ViewCartView.as_view(), name='cart-view'),  # View the items in the cart
     path('cart/remove/<int:pk>/', CartItemsCreateView.as_view(), name='cart-remove'),# Decrement or remove an item from the cart
     path('cart/clear/', RemoveFromCartView.as_view(), name='cart-clear'),# Clear all items from the cart
+    path('remove/code/', RemoveCarouselView.as_view(), name='remove-code'),
     path('carouselallview/',Carouselallview.as_view(),name='carouselallview'),
     path('carouseloneview/<int:pk>',Carouseloneview.as_view(),name='carouseloneview'),
     path('buynow/<int:pk>/', BuyNowAPIView.as_view(), name='buy_now'),
