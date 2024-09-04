@@ -55,7 +55,7 @@ class UserLoginView(APIView):
             if user:
                 if user.check_password(password):
                     token = get_token_for_user(user)
-                    return Response({"status": "success", "message": "User Login Successfully", "username": user.email, "token": token}, status=status.HTTP_200_OK)
+                    return Response({"status": "success", "message": "User Login Successfully", "username": user.email, "full name":user.name, "token": token}, status=status.HTTP_200_OK)
                 else:
                     return Response({"status": "error", "message": "Password has been changed. Please login with the new password"}, status=status.HTTP_400_BAD_REQUEST)
             else:
