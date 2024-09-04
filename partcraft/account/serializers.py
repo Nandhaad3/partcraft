@@ -1,3 +1,4 @@
+import json
 from tokenize import TokenError
 from rest_framework import serializers
 from rest_framework.authtoken.admin import User
@@ -147,7 +148,14 @@ class UserPasswordResetSerializer(serializers.Serializer):
             raise serializers.ValidationError({"status": "error", "message": "Invalid token."})
 
 class UserLogoutSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
+    refresh = serializers.SerializerMethodField()
+    class Meta:
+        fields = ['refresh']
+
+    COOKIE_NAME = 'refresh_token'
+    def get_refresh(self, request):
+        token = request.COOKIES.get(self.COOKIE_NAME, '[]')
+        return json.loads(token)
 
     def validate(self, attrs):
         self.token = attrs.get('refresh')

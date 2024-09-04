@@ -55,7 +55,9 @@ class UserLoginView(APIView):
             if user:
                 if user.check_password(password):
                     token = get_token_for_user(user)
-                    return Response({"status": "success", "message": "User Login Successfully", "username": user.email, "full name":user.name, "token": token}, status=status.HTTP_200_OK)
+                    response = Response({"status": "success", "message": "User Login Successfully", "username": user.email, "full name":user.name, "token": token}, status=status.HTTP_200_OK)
+                    response.set_cookie('refresh_token', str(token.get('refresh')), httponly=True, secure=True, max_age=3600, samesite='None')
+                    return response
                 else:
                     return Response({"status": "error", "message": "Password has been changed. Please login with the new password"}, status=status.HTTP_400_BAD_REQUEST)
             else:
@@ -101,5 +103,7 @@ class UserLogoutView(APIView):
     def post(self, request):
         serializer = UserLogoutSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            return Response({"status": "success", "message": "User Logout Successfully"}, status=status.HTTP_200_OK)
+            response =  Response({"status": "success", "message": "User Logout Successfully"}, status=status.HTTP_200_OK)
+            response.delete_cookie('refresh_token')
+            return response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
