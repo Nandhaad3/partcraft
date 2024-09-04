@@ -13,10 +13,10 @@ class Vehicle(models.Model):
     vehicle_name = models.CharField(max_length=50)
     vehicle_model = models.CharField(max_length=50)
     vehicle_year = models.IntegerField()
-    vehicle_type = models.CharField(choices=STATUS_CHOICES, max_length=50)
+    vehicle_variant = models.CharField(choices=STATUS_CHOICES, max_length=50)
 
     def __str__(self):
-        return f'{self.vehicle_name} {self.vehicle_model} {self.vehicle_year} {self.vehicle_type}'
+        return f'{self.vehicle_name} {self.vehicle_model} {self.vehicle_year} {self.vehicle_variant}'
 
 
 class Brand(models.Model):

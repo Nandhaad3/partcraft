@@ -95,7 +95,7 @@ class ProductDocument(Document):
         'vehicle_name': fields.TextField(fields={'raw': {'type': 'keyword'}}),
         'vehicle_model': fields.TextField(fields={'raw': {'type': 'keyword'}}),
         'vehicle_year': fields.TextField(fields={'raw': {'type': 'keyword'}}),
-        'vehicle_type': fields.TextField(fields={'raw': {'type': 'keyword'}})
+        'vehicle_variant': fields.TextField(fields={'raw': {'type': 'keyword'}})
     })
     class Django(object):
         model = Product
@@ -138,7 +138,7 @@ class ProductDocument(Document):
                 'vehicle_name': fits.vehicle_name,
                 'vehicle_model': fits.vehicle_model,
                 'vehicle_year': fits.vehicle_year,
-                'vehicle_type': fits.vehicle_type
+                'vehicle_variant': fits.vehicle_variant
             } for fits in instance.this_parts_fits.all()]
         return []
 

@@ -26,13 +26,13 @@ class VehicleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vehicle
-        fields = ['vehicle_name', 'vehicle_model', 'vehicle_year', 'vehicle_type', 'url']
+        fields = ['vehicle_name', 'vehicle_model', 'vehicle_year', 'vehicle_variant', 'url']
 
 
 class VehicleoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
-        fields = ['vehicle_name', 'vehicle_model', 'vehicle_year', 'vehicle_type']
+        fields = ['vehicle_name', 'vehicle_model', 'vehicle_year', 'vehicle_variant']
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -162,7 +162,7 @@ class ProductSerializer(serializers.ModelSerializer):
                             vehicle.get('vehicle_name') == fit.vehicle_name and
                             vehicle.get('vehicle_model') == fit.vehicle_model and
                             vehicle.get('vehicle_year') == fit.vehicle_year and
-                            vehicle.get('vehicle_type') == fit.vehicle_type
+                            vehicle.get('vehicle_variant') == fit.vehicle_variant
                     ):
                         return True
                 return False
@@ -307,7 +307,7 @@ class ProductoneSerializer(serializers.ModelSerializer):
                 if (vehicle.vehicle_name == v.get('vehicle_name') and
                         vehicle.vehicle_model == v.get('vehicle_model') and
                         vehicle.vehicle_year == v.get('vehicle_year') and
-                        vehicle.vehicle_type == v.get('vehicle_type')):
+                        vehicle.vehicle_variant == v.get('vehicle_variant')):
                     return "Guarantee fit"
         return "NOT Guarantee fit"
 

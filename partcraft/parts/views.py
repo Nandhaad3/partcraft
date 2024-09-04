@@ -178,7 +178,7 @@ def vehicle_view(request):
             try:
                 vehicle = Vehicle.objects.filter(
                     vehicle_name=vehicleserializer.validated_data['vehicle_name'],
-                    vehicle_type=vehicleserializer.validated_data['vehicle_type'],
+                    vehicle_variant=vehicleserializer.validated_data['vehicle_variant'],
                     vehicle_model=vehicleserializer.validated_data['vehicle_model'],
                     vehicle_year=vehicleserializer.validated_data['vehicle_year'],
                 )
@@ -228,6 +228,32 @@ class vehicleoneview(generics.ListAPIView):
         vehicle_serializer = VehicleSerializer(vehicle, context={'request': request})
         lastdata = adddict(serializer)
         return Response({'data': vehicle_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+
+
+class MatchVehicle(APIView):
+    def post(self, request, *args, **kwargs):
+        year = request.data.get('year')
+        model = request.data.get('model')
+
+        filters = {}
+        if year:
+            if isinstance(year,(int,str)):
+                year = int(year)
+                filters['vehicle_year'] = year
+            else:
+                return Response({'details': 'Invalid format of year'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if model:
+            if isinstance(model, str):
+                filters['vehicle_model'] = model
+            else:
+                return Response({'details': 'Invalid of model'}, status=status.HTTP_400_BAD_REQUEST)
+
+        vehicles = Vehicle.objects.filter(**filters)
+        if not vehicles.exists():
+            return Response({'details': 'Vehicle Not Found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = VehicleSerializer(vehicles, many=True, context={'request': request})
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 
 def category_offer(data):

@@ -18,7 +18,7 @@ class ProductImageAdmin(admin.ModelAdmin):
 
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
-    list_display = ['vehicle_name', 'vehicle_model', 'vehicle_year', 'vehicle_type']
+    list_display = ['vehicle_name', 'vehicle_model', 'vehicle_year', 'vehicle_variant']
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):

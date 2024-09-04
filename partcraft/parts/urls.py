@@ -12,6 +12,7 @@ urlpatterns = [
     path('allvehicles/',vehiclelistview.as_view(),name='allvehicles'),
     path('vehiclegetview/',vehicle_view,name='vechilegetview'),
     path('vehicleonedetail/<int:pk>/',vehicleoneview.as_view(),name='vehicleonedetail'),
+    path('vehicle/match/', MatchVehicle.as_view(), name='match'),
     path('alloffer/',allofferview.as_view(),name='alloffer'),
     path('offerproduct/<int:pk>/',partsonedetail.as_view(),name='offerproduct'),
     path('wishlistcreate/<int:pk>/',WishlistCreateView.as_view(),name='wishlistcreate'),
