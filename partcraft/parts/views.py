@@ -9,7 +9,6 @@ from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
-from django.core.cache import cache
 from .serializers import *
 from collections import defaultdict
 from account.emails import send_confirmation_email
@@ -60,13 +59,9 @@ class partslistview(generics.ListAPIView):
     pagination_class = CustomPagination
     queryset = Product.objects.all()
     def list(self, request, *args, **kwargs):
-        cache_key = 'partslist'
-        partscache = cache.get(cache_key)
         queryset = self.get_queryset()
         page = self.paginate_queryset(self.get_queryset())
         if page is not None:
-            partscache=Product.objects.all()
-            cache.set(cache_key, partscache, timeout=60 * 15)
             serializer = self.get_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
@@ -102,14 +97,9 @@ class categorylistview(generics.ListAPIView):
     serializer_class = CategorySerializer
 
     def list(self, request, *args, **kwargs):
-        cache_key = 'catlist'
-        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
-
             raise NotFound(detail="No Category found matching the criteria.")
-        partscache = Category.objects.all()
-        cache.set(cache_key, partscache, timeout=60 * 15)
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
@@ -140,13 +130,9 @@ class brandlistview(generics.ListAPIView):
     serializer_class = BrandSerializer
 
     def list(self, request, *args, **kwargs):
-        cache_key = 'brandlist'
-        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             raise NotFound(detail="No Brand found matching the criteria.")
-        partscache = Brand.objects.all()
-        cache.set(cache_key, partscache, timeout=60 * 15)
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
@@ -177,13 +163,9 @@ class vehiclelistview(generics.ListAPIView):
     serializer_class = VehicleSerializer
 
     def list(self, request, *args, **kwargs):
-        cache_key = 'vehiclelist'
-        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             raise NotFound(detail="No Vehicle found matching the criteria.")
-        partscache = Vehicle.objects.all()
-        cache.set(cache_key, partscache, timeout=60 * 15)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -289,13 +271,10 @@ class allofferview(generics.ListAPIView):
     queryset = Product.objects.all()
 
     def list(self, request, *args, **kwargs):
-        cache_key = 'offerlist'
-        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             return Response({'data': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
-        partscache = Product.objects.all()
-        cache.set(cache_key, partscache, timeout=60 * 15)
+
         serializer = self.get_serializer(queryset, many=True)
         categorized_data = category_offer(serializer.data)
 
@@ -345,11 +324,10 @@ class WishallView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        cache_key = 'wishlist'
-        partscache = cache.get(cache_key)
         wishlists = Wishlist.objects.filter(wishlist_name=self.request.user)
 
         categorized_data = defaultdict(list)
+        move_to_cart_url = request.build_absolute_uri(reverse('move-to-cart'))
         delete_all_wishlist_url = request.build_absolute_uri(reverse('delete-all-wishlistitems'))
 
         for wishlist in wishlists:
@@ -374,12 +352,11 @@ class WishallView(APIView):
         categorized_data = dict(categorized_data)
         response = Response({
             'Product': categorized_data,
+            'move_to_cart': move_to_cart_url,
             'delete_all_wishlist': delete_all_wishlist_url,
              },
             status=status.HTTP_200_OK)
         if bool(categorized_data) is not False:
-            partscache = wishlists.objects.all()
-            cache.set(cache_key, partscache, timeout=60 * 15)
             return response
         else:
             return Response({'Message': 'No Wishlist '}, status=status.HTTP_400_BAD_REQUEST)
@@ -520,18 +497,16 @@ class BaseCartView(APIView):
 class ViewCartView(BaseCartView):
 
     def get(self, request):
-        cache_key = 'cartlist'
-        partscache = cache.get(cache_key)
         if request.user.is_authenticated:
             cart_items = Cart.objects.filter(user=request.user)
             serializer = CartSerializer(cart_items, many=True, context={'request': request})
 
             if not serializer.data:
                 return Response({'message': 'No cart items found.'}, status=status.HTTP_404_NOT_FOUND)
-            partscache = Cart.objects.filter(user=request.user)
-            cache.set(cache_key, partscache, timeout=60 * 15)
+
             total_price, savings = self.calculate_totals(serializer.data)
-            response = Response({'cart': serializer.data, 'total_price': total_price, 'save': savings},
+            checkout_url = request.build_absolute_uri(reverse('billing_addres'))
+            response = Response({'cart': serializer.data, 'check_out:': checkout_url,'total_price': total_price, 'save': savings},
                                 status=status.HTTP_200_OK)
 
             self.save_cart_items_to_cookie(response, serializer.data)
@@ -539,11 +514,14 @@ class ViewCartView(BaseCartView):
         else:
             cart_items = self.get_cart_items_from_cookie(request)
             cart_data, total_price, savings = self.process_cart_data(cart_items)
+            print(cart_items)
+            print("cart data:", cart_data)
+            checkout_url = request.build_absolute_uri(reverse('billing_addres'))
 
             if not cart_data:
                 return Response({'message': 'No cart items found.'}, status=status.HTTP_204_NO_CONTENT)
 
-            return Response({'cart': cart_data, 'total_price': total_price, 'save': savings}, status=status.HTTP_200_OK)
+            return Response({'cart': cart_data, 'check_out':checkout_url,'total_price': total_price, 'save': savings}, status=status.HTTP_200_OK)
 
     def calculate_totals(self, cart_items):
         total_price = 0
@@ -812,13 +790,10 @@ class Carouselallview(generics.ListAPIView):
     queryset = Carousel.objects.all()
 
     def list(self, request, *args, **kwargs):
-        cache_key = 'carousallist'
-        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             return Response({'data': 'Carousel Not Found'}, status=status.HTTP_404_NOT_FOUND)
-        partscache = Carousel.objects.all()
-        cache.set(cache_key, partscache, timeout=60 * 15)
+
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
@@ -897,7 +872,6 @@ class BillingDealerView(APIView):
             'gst_number': dealer_address.gst_number,
             'email': dealer_address.email,
             'billing_address': dealer_address.address,
-            'contact': dealer_address.phone
         }
 
         serializer = Billaddressserializer(data=billing_address_data)
@@ -928,17 +902,17 @@ class OrderSummaryAPIView(BaseCartView):
         order_items = []
         grand_total = 0
 
-        def parse_cookie_data():
-            items = []
-            for key, value in request.COOKIES.items():
-                if key.startswith('cart_product_'):
-                    try:
-                        product_id = int(key.split('_')[2])
-                        quantity = int(value)
-                        items.append({"product_id": product_id, "quantity": quantity})
-                    except (IndexError, ValueError):
-                        continue
-            return items
+        # def parse_cookie_data():
+        #     items = []
+        #     for key, value in request.COOKIES.items():
+        #         if key.startswith('cart_product_'):
+        #             try:
+        #                 product_id = int(key.split('_')[2])
+        #                 quantity = int(value)
+        #                 items.append({"product_id": product_id, "quantity": quantity})
+        #             except (IndexError, ValueError):
+        #                 continue
+        #     return items
 
         def parse_url_parameter_data(products_data):
             items = []
@@ -950,7 +924,9 @@ class OrderSummaryAPIView(BaseCartView):
                     continue
             return items
 
-        order_items.extend(parse_cookie_data())
+        order_item = self.get_cart_items_from_cookie(request)
+        order_data, _, _ = self.process_cart_data(order_item)
+        order_items.extend(order_data)
         if products_data:
             order_items.extend(parse_url_parameter_data(products_data))
 
@@ -962,7 +938,7 @@ class OrderSummaryAPIView(BaseCartView):
 
         for item in order_items:
             try:
-                product = Product.objects.get(id=item["product_id"])
+                product = Product.objects.get(id=item["product"])
             except Product.DoesNotExist:
                 continue
 
@@ -983,18 +959,17 @@ class OrderSummaryAPIView(BaseCartView):
                 "total": total,
             })
 
-        response = Response(status=status.HTTP_200_OK)
         for item in detailed_order_items:
-            self.set_cart_item_cookie(request, response, item["product_id"], item["quantity"])
-
-        response.data = {
-            "preferred_billing_address": Billaddressserializer(
-                preferred_billing_address).data if preferred_billing_address else None,
-            "preferred_shipping_address": Shippingaddressserializer(
+            order_item = self.get_cart_items_from_cookie(request)
+            order_data, _, _ = self.process_cart_data(order_item)
+        datas = {"preferred_billing_address": Shippingaddressserializer(
                 preferred_shipping_address).data if preferred_shipping_address else None,
             "order_items": detailed_order_items,
-            "grand_total": grand_total,
-        }
+            "grand_total": grand_total}
+        response = Response(
+            datas, status=status.HTTP_200_OK
+        )
+        response.set_cookie('order_summary', json.dumps(datas))
         return response
 
 
@@ -1007,19 +982,15 @@ class OrderAPIView(BaseCartView):
         if not user_profile:
             return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        order_items = []
-        for key, value in request.COOKIES.items():
-            if key.startswith('product_') or key.startswith('cart_product_'):
-                split_index = 2 if key.startswith('cart_product_') else 1
-                product_id = int(key.split('_')[split_index])
-                quantity = int(value)
-                order_items.append({"product_id": product_id, "quantity": quantity})
+        order_items = request.COOKIES['order_summary']
+        j=json.loads(order_items)
+        order_item=j['order_items']
 
         if not order_items:
             return Response({"detail": "No order items."}, status=status.HTTP_400_BAD_REQUEST)
 
         orders = []
-        for item in order_items:
+        for item in order_item:
             product_id = item['product_id']
             quantity = item['quantity']
 
@@ -1064,10 +1035,9 @@ class OrderAPIView(BaseCartView):
 
         response = Response(response_data, status=status.HTTP_201_CREATED)
 
-        for item in order_items:
-            self.delete_cart_item_cookie(response, item["product_id"])
 
-        self.delete_all_cart_item_cookies(request, response)
+        self.clear_cart(response)
+        response.delete_cookie('order_summary')
 
         return response
 
