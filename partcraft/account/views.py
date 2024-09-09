@@ -25,13 +25,25 @@ class UserRegistrationView(APIView):
             send_otp_via_email(serializer.data['email'])
             email = serializer.validated_data['email']
             if User.objects.filter(email=email).exists():
-                return Response({"status": "success","OTP":'SEND SUCCESSFULLY', "message": "User registered successfully", 'data': serializer.data }, status=status.HTTP_201_CREATED)
+                em=request.data['email']
+                print(em)
+                response = Response({"status": "success","OTP":'SEND SUCCESSFULLY', "message": "User registered successfully", 'data': serializer.data }, status=status.HTTP_201_CREATED)
+                response.set_cookie('email', str(em), httponly=True, secure=True,
+                                    max_age=3600, samesite='None')
+                return response
+
         return Response({"status": "error", "message": serializer.errors }, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyEmailView(APIView):
     serializer_class = VerifyEmailSerializer
     def post(self, request):
-        serializer = VerifyEmailSerializer(data=request.data)
+        cookies_email=request.COOKIES.get('email')
+        print(cookies_email)
+        datas = request.data.copy()
+        datas['email']=cookies_email
+        datas['otp']=request.data.get('otp')
+        serializer = VerifyEmailSerializer(data=datas)
+        # serializer = VerifyEmailSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             otp = serializer.data['otp']
             email = serializer.data['email']
@@ -41,7 +53,9 @@ class VerifyEmailView(APIView):
                 return Response({"status": "error", "message": "Invalid OTP", 'data': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
             user.is_verified = True
             user.save()
-            return Response({"status": "success", "message": "OTP verified successfully", "email": user.email}, status=status.HTTP_200_OK)
+            response = Response({"status": "success", "message": "OTP verified successfully", "email": user.email}, status=status.HTTP_200_OK)
+            response.delete_cookie('email')
+            return response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserLoginView(APIView):

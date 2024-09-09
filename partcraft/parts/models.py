@@ -203,3 +203,6 @@ class DealerAddress(models.Model):
     phone = models.CharField(max_length=255)
     def __str__(self):
         return f'{self.name} {self.address} {self.city} {self.email}'
+
+
+

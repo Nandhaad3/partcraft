@@ -9,6 +9,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
+from django.core.cache import cache
 from .serializers import *
 from collections import defaultdict
 from account.emails import send_confirmation_email
@@ -59,9 +60,13 @@ class partslistview(generics.ListAPIView):
     pagination_class = CustomPagination
     queryset = Product.objects.all()
     def list(self, request, *args, **kwargs):
+        cache_key = 'partslist'
+        partscache = cache.get(cache_key)
         queryset = self.get_queryset()
         page = self.paginate_queryset(self.get_queryset())
         if page is not None:
+            partscache=Product.objects.all()
+            cache.set(cache_key, partscache, timeout=60 * 15)
             serializer = self.get_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
@@ -97,9 +102,14 @@ class categorylistview(generics.ListAPIView):
     serializer_class = CategorySerializer
 
     def list(self, request, *args, **kwargs):
+        cache_key = 'catlist'
+        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
+
             raise NotFound(detail="No Category found matching the criteria.")
+        partscache = Category.objects.all()
+        cache.set(cache_key, partscache, timeout=60 * 15)
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
@@ -130,9 +140,13 @@ class brandlistview(generics.ListAPIView):
     serializer_class = BrandSerializer
 
     def list(self, request, *args, **kwargs):
+        cache_key = 'brandlist'
+        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             raise NotFound(detail="No Brand found matching the criteria.")
+        partscache = Brand.objects.all()
+        cache.set(cache_key, partscache, timeout=60 * 15)
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
@@ -163,9 +177,13 @@ class vehiclelistview(generics.ListAPIView):
     serializer_class = VehicleSerializer
 
     def list(self, request, *args, **kwargs):
+        cache_key = 'vehiclelist'
+        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             raise NotFound(detail="No Vehicle found matching the criteria.")
+        partscache = Vehicle.objects.all()
+        cache.set(cache_key, partscache, timeout=60 * 15)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -271,10 +289,13 @@ class allofferview(generics.ListAPIView):
     queryset = Product.objects.all()
 
     def list(self, request, *args, **kwargs):
+        cache_key = 'offerlist'
+        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             return Response({'data': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
-
+        partscache = Product.objects.all()
+        cache.set(cache_key, partscache, timeout=60 * 15)
         serializer = self.get_serializer(queryset, many=True)
         categorized_data = category_offer(serializer.data)
 
@@ -324,6 +345,8 @@ class WishallView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        cache_key = 'wishlist'
+        partscache = cache.get(cache_key)
         wishlists = Wishlist.objects.filter(wishlist_name=self.request.user)
 
         categorized_data = defaultdict(list)
@@ -355,6 +378,8 @@ class WishallView(APIView):
              },
             status=status.HTTP_200_OK)
         if bool(categorized_data) is not False:
+            partscache = wishlists.objects.all()
+            cache.set(cache_key, partscache, timeout=60 * 15)
             return response
         else:
             return Response({'Message': 'No Wishlist '}, status=status.HTTP_400_BAD_REQUEST)
@@ -495,13 +520,16 @@ class BaseCartView(APIView):
 class ViewCartView(BaseCartView):
 
     def get(self, request):
+        cache_key = 'cartlist'
+        partscache = cache.get(cache_key)
         if request.user.is_authenticated:
             cart_items = Cart.objects.filter(user=request.user)
             serializer = CartSerializer(cart_items, many=True, context={'request': request})
 
             if not serializer.data:
                 return Response({'message': 'No cart items found.'}, status=status.HTTP_404_NOT_FOUND)
-
+            partscache = Cart.objects.filter(user=request.user)
+            cache.set(cache_key, partscache, timeout=60 * 15)
             total_price, savings = self.calculate_totals(serializer.data)
             response = Response({'cart': serializer.data, 'total_price': total_price, 'save': savings},
                                 status=status.HTTP_200_OK)
@@ -784,10 +812,13 @@ class Carouselallview(generics.ListAPIView):
     queryset = Carousel.objects.all()
 
     def list(self, request, *args, **kwargs):
+        cache_key = 'carousallist'
+        partscache = cache.get(cache_key)
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             return Response({'data': 'Carousel Not Found'}, status=status.HTTP_404_NOT_FOUND)
-
+        partscache = Carousel.objects.all()
+        cache.set(cache_key, partscache, timeout=60 * 15)
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 

@@ -116,6 +116,21 @@ WSGI_APPLICATION = 'partcraft.wsgi.application'
 # }
 
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "rediss://red-crfd0cij1k6c73dkkvag:mJY0M3bkRjABZFEFvW9ymYKVvhdWPWrO@oregon-redis.render.com:6379/1",  # Use the appropriate REDIS_HOST, REDIS_PORT, and REDIS_PASSWORD
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "mJY0M3bkRjABZFEFvW9ymYKVvhdWPWrO"  # Add password if Redis is password protected
+        }
+    }
+}
+
+# Optional: Session storage with Redis
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -194,7 +209,7 @@ AUTH_USER_MODEL = 'account.User'
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=10),
-    "ROTATE_REFRESH_TOKENS": False,
+    "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": False,
 
@@ -240,6 +255,9 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'dhanushpathiprakash0511@gmail.com'
 EMAIL_HOST_PASSWORD = 'opghzxooktakptya'
 
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
 
 CORS_ALLOW_CREDENTIALS = True
 
