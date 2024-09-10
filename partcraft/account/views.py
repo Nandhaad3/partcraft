@@ -28,8 +28,7 @@ class UserRegistrationView(APIView):
                 em=request.data['email']
                 print(em)
                 response = Response({"status": "success","OTP":'SEND SUCCESSFULLY', "message": "User registered successfully", 'data': serializer.data }, status=status.HTTP_201_CREATED)
-                response.set_cookie('email', str(em), httponly=True, secure=True,
-                                    max_age=3600, samesite='None')
+                response.set_cookie('email', str(em), httponly=True, secure=True, max_age=3600, samesite='None')
                 return response
 
         return Response({"status": "error", "message": serializer.errors }, status=status.HTTP_400_BAD_REQUEST)

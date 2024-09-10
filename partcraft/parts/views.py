@@ -824,8 +824,7 @@ class Carouseloneview(generics.ListAPIView):
 class BuyNowAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, pk, *args, **kwargs):
-        product = get_object_or_404(Product, pk=pk)
+    def post(self, request, *args, **kwargs):
         serializer = Buynowserilizers(data=request.data, context={'request': request})
         if serializer.is_valid():
             result = serializer.save()
