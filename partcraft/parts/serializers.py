@@ -87,7 +87,8 @@ class ProductSerializer(serializers.ModelSerializer):
     related_products = serializers.SerializerMethodField()
     similar_products = serializers.SerializerMethodField()
     addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
-    buynow = serializers.HyperlinkedIdentityField(view_name='buy_now')
+    buynow = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Product
@@ -174,6 +175,12 @@ class ProductSerializer(serializers.ModelSerializer):
             return 'Guarantee Fit'
 
         return 'Not Guarantee Fit'
+
+    def get_buynow(self, obj):
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(f'/api/buynow/')
+        return None
 
     def create(self, validated_data):
         brand_data = validated_data.pop('parts_brand')
@@ -615,3 +622,25 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = '__all__'
+
+class RandomSerializer(serializers.ModelSerializer):
+    parts_name = serializers.SerializerMethodField()
+    brand_logo = serializers.SerializerMethodField()
+    main_image = serializers.SerializerMethodField()
+    class Meta:
+        model = Product
+        fields = ['id', 'parts_name', 'brand_logo', 'main_image']
+
+    def get_parts_name(self, obj):
+        return (f"{obj.parts_brand.brand_name} "
+                f"{obj.parts_category.category_name} "
+                f"{obj.subcategory_name} "
+                f"{obj.parts_voltage}V "
+                f"{obj.parts_fits} "
+                f"{obj.parts_litre}L")
+
+    def get_main_image(self, obj):
+        return obj.main_image
+
+    def get_brand_logo(self, obj):
+        return obj.parts_brand.brand_image

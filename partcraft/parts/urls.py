@@ -39,5 +39,6 @@ urlpatterns = [
     path('top-ten-product/<int:pk>/', ToptenProductView.as_view(), name='top-ten-product'),
     path('feedback/',FeedbackView.as_view(), name='feedback'),
     path('dealers/', DealerAddressView.as_view(), name='dealers'),
+    path('randomproduct/', RandomProductView.as_view(), name='random-product')
 ]
 

@@ -1,4 +1,6 @@
 import json
+import random
+
 from django.db.migrations import serializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from .serializers import *
 from collections import defaultdict
 from account.emails import send_confirmation_email
+from django.db.models import Max
 
 def adddict(serializer):
     last_data = []
@@ -1173,3 +1176,18 @@ class DealerAddressView(APIView):
         dealer_addrress = DealerAddress.objects.all()
         serializer = DealerAddressSerializer(dealer_addrress, many=True)
         return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+
+def get_random_id(model):
+    ids = model.objects.values_list('id', flat=True)
+    if not ids:
+        return None
+    return random.choice(ids)
+
+class RandomProductView(APIView):
+    def get(self, request):
+        random_id = get_random_id(Product)
+        if random_id:
+            instance = Product.objects.get(id=random_id)
+            serializer = RandomSerializer(instance, context={'request': request})
+            return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'data': None}, status=status.HTTP_404_NOT_FOUND)
