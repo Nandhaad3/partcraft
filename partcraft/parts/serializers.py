@@ -498,11 +498,14 @@ class Buynowserilizers(serializers.Serializer):
     def create(self, validated_data):
         billing_address_data = validated_data.pop('billing_address')
         user = self.context['request'].user
+
         billing_address_data['user'] = user
         billing_instance = BillingAddress.objects.create(**billing_address_data)
+
         return {
             "billing_address": billing_instance,
         }
+
 
 class Shippingaddressserializer(serializers.ModelSerializer):
     class Meta:

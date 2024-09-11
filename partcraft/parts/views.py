@@ -686,7 +686,6 @@ class CartItemsCreateView(BaseCartView):
             if not created:
                 cart_item.quantity += quantity
                 cart_item.save()
-
             serializer = CartSerializer(cart_item, context={'request': request})
             response = Response({'message': 'Product added/incremented in cart', 'cart': serializer.data},
                                 status=status.HTTP_200_OK)
@@ -789,15 +788,12 @@ class RemoveFromCartView(BaseCartView):
 class Carouselallview(generics.ListAPIView):
     serializer_class = Carouselserilizers
     queryset = Carousel.objects.all()
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             return Response({'data': 'Carousel Not Found'}, status=status.HTTP_404_NOT_FOUND)
-
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
-
 
 class Carouseloneview(generics.ListAPIView):
     serializer_class = ProductSerializer
@@ -824,7 +820,6 @@ class Carouseloneview(generics.ListAPIView):
 
 class BuyNowAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
     def post(self, request, *args, **kwargs):
         serializer = Buynowserilizers(data=request.data, context={'request': request})
         if serializer.is_valid():
@@ -841,11 +836,11 @@ class BillingDealerView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         user = request.user
-        shipping_address = ShippingAddress.objects.filter(user=user).first()
-        if not shipping_address:
+        billing_address = BillingAddress.objects.filter(user=user).first()
+        if not billing_address:
             return Response({"message": "No addresses found for the user."}, status=status.HTTP_404_NOT_FOUND)
-        shipping_city = shipping_address.city
-        dealer_address = DealerAddress.objects.filter(city=shipping_city).distinct()
+        billing_city = billing_address.city
+        dealer_address = DealerAddress.objects.filter(city=billing_city).distinct()
         serializer = DealerAddressSerializer(dealer_address, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
