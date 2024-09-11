@@ -489,43 +489,25 @@ class Carouselserilizers(serializers.ModelSerializer):
 class Billaddressserializer(serializers.ModelSerializer):
     class Meta:
         model = BillingAddress
-        fields = ['user', 'billing_name', 'gst_number', 'email', 'billing_address', 'contact']
+        fields = '__all__'
+        extra_kwargs = {'user': {'required': False}}
 
+class Buynowserilizers(serializers.Serializer):
+    billing_address = Billaddressserializer(required=True)
+
+    def create(self, validated_data):
+        billing_address_data = validated_data.pop('billing_address')
+        user = self.context['request'].user
+        billing_address_data['user'] = user
+        billing_instance = BillingAddress.objects.create(**billing_address_data)
+        return {
+            "billing_address": billing_instance,
+        }
 
 class Shippingaddressserializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingAddress
         fields = '__all__'
-
-
-class Buynowserilizers(serializers.Serializer):
-    shipping_address = Shippingaddressserializer(required=True)
-    use_the_address_for_next_time = serializers.BooleanField(default=False)
-
-    def to_internal_value(self, data):
-        return_user = self.context["request"].user
-        if 'shipping_address' in data:
-            data['shipping_address']['user'] = return_user.id
-
-        return super().to_internal_value(data)
-
-    def create(self, validated_data):
-        shipping_address_data = validated_data.pop('shipping_address')
-        use_the_address_for_next_time = validated_data.pop('use_the_address_for_next_time', False)
-        user = self.context['request'].user
-
-        shipping_address_data['user'] = user
-        shipping_instance = ShippingAddress.objects.create(**shipping_address_data)
-
-        if use_the_address_for_next_time:
-            user_profile, created = Profile.objects.get_or_create(user=user)
-            user_profile.preferred_shipping_address = shipping_instance
-            user_profile.save()
-
-        return {
-            "shipping_address": shipping_instance,
-        }
-
 
 class DealerAddressSerializer(serializers.ModelSerializer):
     class Meta:

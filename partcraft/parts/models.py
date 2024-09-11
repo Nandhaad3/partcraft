@@ -119,7 +119,8 @@ class BillingAddress(models.Model):
     gst_number = models.CharField(max_length=16, blank=True, null=True)
     email = models.EmailField(max_length=255)
     billing_address = models.CharField(max_length=1000)
-    contact = models.CharField(max_length=13)
+    city = models.CharField(max_length=255, blank=True, null=True)
+    #contact = models.CharField(max_length=13, blank=True, null=True)
 
 
     def __str__(self):

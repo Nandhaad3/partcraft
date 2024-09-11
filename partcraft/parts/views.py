@@ -1,6 +1,5 @@
 import json
 import random
-
 from django.db.migrations import serializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,7 +13,6 @@ from django.shortcuts import get_object_or_404
 from .serializers import *
 from collections import defaultdict
 from account.emails import send_confirmation_email
-from django.db.models import Max
 
 def adddict(serializer):
     last_data = []
@@ -832,8 +830,8 @@ class BuyNowAPIView(APIView):
         if serializer.is_valid():
             result = serializer.save()
             response_data = {
-                "message": "Shipping Addresses saved successfully.",
-                "shipping_address": Shippingaddressserializer(result["shipping_address"]).data
+                "message": "Billing Addresses saved successfully.",
+                "billing_address": Billaddressserializer(result["billing_address"]).data
             }
             return Response(response_data, status=status.HTTP_200_OK)
         else:
