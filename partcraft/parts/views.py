@@ -327,14 +327,11 @@ class WishallView(APIView):
 
     def get(self, request, *args, **kwargs):
         wishlists = Wishlist.objects.filter(wishlist_name=self.request.user)
-
-        categorized_data = defaultdict(list)
         move_to_cart_url = request.build_absolute_uri(reverse('move-to-cart'))
         delete_all_wishlist_url = request.build_absolute_uri(reverse('delete-all-wishlistitems'))
-
+        product_info={}
         for wishlist in wishlists:
             wishlist_data = WishallSerializer(wishlist, context={'request': request}).data
-            brand = wishlist_data['wishlist_name']
             product_info = {
                 'product_id': wishlist_data['wishlist_product']['id'],
                 'wishlist_product': f"{wishlist_data['wishlist_product']['parts_brand']['brand_name']} {wishlist_data['wishlist_product']['parts_category']['category_name']} {wishlist_data['wishlist_product']['subcategory_name']}",
@@ -349,9 +346,7 @@ class WishallView(APIView):
                 'addtocart': wishlist_data['addtocart'],
                 'Wishlistdel': wishlist_data['wishlist_delete'],
             }
-
-            categorized_data[brand].append(product_info)
-        categorized_data = dict(categorized_data)
+        categorized_data = dict(product_info)
         response = Response({
             'Product': categorized_data,
             'move_to_cart': move_to_cart_url,
