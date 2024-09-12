@@ -878,9 +878,9 @@ class OrderSummaryAPIView(BaseCartView):
 
     def get(self, request):
         user = request.user
-        user_profile = Profile.objects.filter(user=user).first()
-        if not user_profile:
-            return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+        # user_profile = Profile.objects.filter(user=user).first()
+        # if not user_profile:
+        #     return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
         billing_address = BillingAddress.objects.filter(user=user).order_by('-id').first()
         dealer_id = request.session.get('dealer_id')
@@ -894,6 +894,7 @@ class OrderSummaryAPIView(BaseCartView):
 
         products_data = request.query_params.getlist('products')
         order_items = []
+        print(order_items)
         grand_total = 0
 
         # def parse_cookie_data():
@@ -918,8 +919,10 @@ class OrderSummaryAPIView(BaseCartView):
                     continue
             return items
 
+
         order_item = self.get_cart_items_from_cookie(request)
         order_data, _, _ = self.process_cart_data(order_item)
+        print(order_data)
         order_items.extend(order_data)
         if products_data:
             order_items.extend(parse_url_parameter_data(products_data))
