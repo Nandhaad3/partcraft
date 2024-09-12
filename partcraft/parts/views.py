@@ -878,36 +878,21 @@ class OrderSummaryAPIView(BaseCartView):
 
     def get(self, request):
         user = request.user
-        # user_profile = Profile.objects.filter(user=user).first()
-        # if not user_profile:
-        #     return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
         billing_address = BillingAddress.objects.filter(user=user).order_by('-id').first()
         dealer_id = request.session.get('dealer_id')
         if not dealer_id:
-            return Response({"message": "No dealer please select the dealer."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "No dealer, please select the dealer."}, status=status.HTTP_400_BAD_REQUEST)
+
         data_dealer_address = DealerAddress.objects.filter(id=dealer_id).first()
         if not data_dealer_address:
-            return  Response({"message": "No dealer found with the provided ID."}, status=status.HTTP_404_NOT_FOUND)
-        dealer_address = DealerAddressSerializer(data_dealer_address, context={'request': request})
+            return Response({"message": "No dealer found with the provided ID."}, status=status.HTTP_404_NOT_FOUND)
 
+        dealer_address = DealerAddressSerializer(data_dealer_address, context={'request': request}).data  # Correctly serialize
 
         products_data = request.query_params.getlist('products')
         order_items = []
-        print(order_items)
         grand_total = 0
-
-        # def parse_cookie_data():
-        #     items = []
-        #     for key, value in request.COOKIES.items():
-        #         if key.startswith('cart_product_'):
-        #             try:
-        #                 product_id = int(key.split('_')[2])
-        #                 quantity = int(value)
-        #                 items.append({"product_id": product_id, "quantity": quantity})
-        #             except (IndexError, ValueError):
-        #                 continue
-        #     return items
 
         def parse_url_parameter_data(products_data):
             items = []
@@ -919,14 +904,22 @@ class OrderSummaryAPIView(BaseCartView):
                     continue
             return items
 
+        if request.user.is_authenticated:
+            cart_items = Cart.objects.filter(user=user)
+            if cart_items.exists():
+                for item in cart_items:
+                    order_items.append({
+                        "product": item.product.id,
+                        "quantity": item.quantity,
+                        "code": list(item.code.values_list('id', flat=True))  # Convert to a list for serialization
+                    })
+        else:
+            order_item = self.get_cart_items_from_cookie(request)
+            order_data, _, _ = self.process_cart_data(order_item)
+            order_items.extend(order_data)
 
-        order_item = self.get_cart_items_from_cookie(request)
-        order_data, _, _ = self.process_cart_data(order_item)
-        print(order_data)
-        order_items.extend(order_data)
         if products_data:
             order_items.extend(parse_url_parameter_data(products_data))
-
 
         if not order_items:
             return Response({"detail": "No products."}, status=status.HTTP_400_BAD_REQUEST)
@@ -939,7 +932,7 @@ class OrderSummaryAPIView(BaseCartView):
             except Product.DoesNotExist:
                 continue
 
-            product_serializer = ProductSerializer(product, context={'request': request})
+            product_serializer = TestProductSerializer(product, context={'request': request})
             product_data = product_serializer.data
             total = product_data['final_price'] * item["quantity"]
             grand_total += total
@@ -956,29 +949,37 @@ class OrderSummaryAPIView(BaseCartView):
                 "total": total,
             })
 
-        for item in detailed_order_items:
-            order_item = self.get_cart_items_from_cookie(request)
-            order_data, _, _ = self.process_cart_data(order_item)
-        datas = {"billing_address": Billaddressserializer(
-                billing_address).data if billing_address else None,
-                 "dealer_address": dealer_address.data,
+        datas = {
+            "billing_address": Billaddressserializer(billing_address).data if billing_address else None,  # Ensure serialized data
+            "dealer_address": dealer_address,  # Already serialized above
             "order_items": detailed_order_items,
-            "grand_total": grand_total}
-        response = Response(
-            datas, status=status.HTTP_200_OK
-        )
-        response.set_cookie('order_summary', json.dumps(datas))
-        return response
+            "grand_total": grand_total
+        }
 
+        # Serialize the order summary to a JSON string
+        order_summary_data = {
+            "billing_address": datas["billing_address"],
+            "dealer_address": datas["dealer_address"],
+            "order_items": detailed_order_items,
+            "grand_total": grand_total
+        }
+
+        # Ensure everything is serializable
+        order_summary_json = json.dumps(order_summary_data)
+
+        # Create the response
+        response = Response(datas, status=status.HTTP_200_OK)
+
+        # Set the serialized order summary data in the cookies
+        response.set_cookie('order_summary', order_summary_json, max_age=3600, httponly=True)
+
+        return response
 
 class OrderAPIView(BaseCartView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         user = request.user
-        user_profile = Profile.objects.filter(user=user).first()
-        if not user_profile:
-            return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
         order_items = request.COOKIES['order_summary']
         j=json.loads(order_items)
@@ -997,8 +998,6 @@ class OrderAPIView(BaseCartView):
                 user=user,
                 product=product,
                 quantity=quantity,
-                billing_address=user_profile.preferred_billing_address,
-                shipping_address=user_profile.preferred_shipping_address,
             )
             product_order_count, created = ProductOrderCount.objects.get_or_create(product=product)
             product_order_count.order_count += quantity
@@ -1032,7 +1031,6 @@ class OrderAPIView(BaseCartView):
             Cart.objects.filter(user=user).delete()
 
         response = Response(response_data, status=status.HTTP_201_CREATED)
-
 
         self.clear_cart(response)
         response.delete_cookie('order_summary')
@@ -1068,7 +1066,7 @@ class MyOrderView(APIView):
 
         def get_order_details(order):
             product = order.product
-            product_data = ProductSerializer(product, context={'request': request}).data
+            product_data = TestProductSerializer(product, context={'request': request}).data
             order_details = {
                 'order_id': order.order_id,
                 'order_date': order.order_date,

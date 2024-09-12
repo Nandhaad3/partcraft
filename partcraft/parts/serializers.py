@@ -627,3 +627,78 @@ class RandomSerializer(serializers.ModelSerializer):
 
     def get_brand_logo(self, obj):
         return obj.parts_brand.brand_image
+
+
+class TestProductSerializer(serializers.ModelSerializer):
+    parts_brand = BrandSerializer()
+    parts_category = CategorySerializer()
+    images = ProductImageSerializer(many=True)
+    parts_name = serializers.SerializerMethodField()
+    final_price = serializers.SerializerMethodField()
+    url = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
+    wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
+    is_in_wishlist = serializers.SerializerMethodField()
+    related_products = serializers.SerializerMethodField()
+    similar_products = serializers.SerializerMethodField()
+    addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
+    buynow = serializers.SerializerMethodField()
+
+
+    class Meta:
+        model = Product
+        fields = ['id', 'url', 'parts_name', 'parts_voltage', 'subcategory_name',
+                  'parts_litre', 'parts_type', 'parts_description', 'parts_no', 'parts_price', 'parts_offer',
+                  'final_price',
+                  'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
+                  'main_image', 'images', 'parts_brand', 'parts_category', 'wishlist',
+                  'is_in_wishlist', 'related_products', 'similar_products', 'addtocart', 'buynow']
+
+    def arrangename(self, obj):
+        return (f"{obj.parts_brand.brand_name} "
+                f"{obj.parts_category.category_name} "
+                f"{obj.subcategory_name} "
+                f"{obj.parts_voltage}V "
+                f"{obj.parts_fits} "
+                f"{obj.parts_litre}L")
+
+    def get_parts_name(self, obj):
+        b = self.arrangename(obj)
+        return b.replace('NoneL', '').strip()
+
+    def get_final_price(self, obj):
+        discount_amount = obj.parts_price * (obj.parts_offer / 100)
+        final_price = obj.parts_price - discount_amount
+        return final_price
+
+    def get_related_products(self, obj):
+        related_product_qs = RelatedProduct.objects.filter(related_product1=obj)
+        related_products = set()
+        for related_product in related_product_qs:
+            related_products.update(related_product.related_product2.all())
+
+        related_products = list(related_products)
+        sample_size = min(4, len(related_products))
+        random_related_products = random.sample(related_products, sample_size)
+        serializer = ProductoneSerializer(random_related_products, many=True, context=self.context)
+        return serializer.data
+
+    def get_similar_products(self, obj):
+        related_products = Product.objects.filter(
+            subcategory_name=obj.subcategory_name
+        ).exclude(id=obj.id)
+        serializer = ProductoneSerializer(related_products, many=True, context=self.context)
+        return serializer.data
+
+    def get_is_in_wishlist(self, obj):
+        request = self.context.get('request', None)
+        if not request.user.is_authenticated:
+            return 'SIGN IN REQUEST'
+        elif request is None:
+            return False
+        return Wishlist.objects.filter(wishlist_name=request.user.id, wishlist_product=obj).exists()
+
+    def get_buynow(self, obj):
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(f'/api/buynow/')
+        return None
