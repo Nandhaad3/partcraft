@@ -492,20 +492,18 @@ class Billaddressserializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {'user': {'required': False}}
 
-class Buynowserilizers(serializers.Serializer):
-    billing_address = Billaddressserializer(required=True)
-
     def create(self, validated_data):
-        billing_address_data = validated_data.pop('billing_address')
         user = self.context['request'].user
+        billing_instance = BillingAddress.objects.create(user=user, **validated_data)
+        return billing_instance
 
-        billing_address_data['user'] = user
-        billing_instance = BillingAddress.objects.create(**billing_address_data)
+    def validate(self, data):
+        return data
 
-        return {
-            "billing_address": billing_instance,
-        }
-
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop('city', None)  # Remove 'city' from the serialized output
+        return representation
 
 class Shippingaddressserializer(serializers.ModelSerializer):
     class Meta:

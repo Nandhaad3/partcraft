@@ -1,5 +1,6 @@
 import json
 import random
+from django.utils.timezone import now
 from django.db.migrations import serializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -674,23 +675,31 @@ class RemoveCarouselView(APIView):
 class CartItemsCreateView(BaseCartView):
 
     def post(self, request, pk):
+        # Retrieve the product by primary key
         product = get_object_or_404(Product, pk=pk)
+        # Get the quantity from the request, default to 1 if not provided
         quantity = int(request.data.get('quantity', 1))
 
+        # Check if the user is authenticated
         if request.user.is_authenticated:
+            # Get or create a cart item for the user and product
             cart_item, created = Cart.objects.get_or_create(
                 user=request.user,
                 product=product,
                 defaults={'quantity': quantity}
             )
+            # If the cart item already exists, increment the quantity
             if not created:
                 cart_item.quantity += quantity
                 cart_item.save()
-            serializer = CartSerializer(cart_item, context={'request': request})
-            response = Response({'message': 'Product added/incremented in cart', 'cart': serializer.data},
-                                status=status.HTTP_200_OK)
 
-            self.update_cart_cookie(request, response, pk, quantity)
+            # Serialize the cart item
+            serializer = CartSerializer(cart_item, context={'request': request})
+            response = Response({
+                'message': 'Product added/incremented in cart',
+                'cart': serializer.data
+            }, status=status.HTTP_200_OK)
+
             return response
         else:
             response = self.handle_unauthenticated_cart(request, pk, quantity)
@@ -820,13 +829,14 @@ class Carouseloneview(generics.ListAPIView):
 
 class BuyNowAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
-        serializer = Buynowserilizers(data=request.data, context={'request': request})
+        serializer = Billaddressserializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             result = serializer.save()
             response_data = {
-                "message": "Billing Addresses saved successfully.",
-                "billing_address": Billaddressserializer(result["billing_address"]).data
+                "message": "Billing Address saved successfully.",
+                "billing_address": Billaddressserializer(result).data
             }
             return Response(response_data, status=status.HTTP_200_OK)
         else:
@@ -836,7 +846,7 @@ class BillingDealerView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         user = request.user
-        billing_address = BillingAddress.objects.filter(user=user).first()
+        billing_address = BillingAddress.objects.filter(user=user).order_by('-id').first()
         if not billing_address:
             return Response({"message": "No addresses found for the user."}, status=status.HTTP_404_NOT_FOUND)
         billing_city = billing_address.city
@@ -846,39 +856,26 @@ class BillingDealerView(APIView):
 
     def post(self, request, *args, **kwargs):
         user = request.user
-        shipping_address = ShippingAddress.objects.filter(user=user).first()
-
         if not user.is_authenticated:
             return Response({"message": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if not shipping_address:
-            return Response({"message": "No shipping address found for the user."}, status=status.HTTP_404_NOT_FOUND)
+        dealer_id = request.data.get('dealer_id')
+        if not dealer_id:
+            return Response({"message": "Dealer ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        shipping_city = shipping_address.city
-
-        dealer_address = DealerAddress.objects.filter(city=shipping_city).first()
-
+        dealer_address = DealerAddress.objects.filter(id=dealer_id).first()
         if not dealer_address:
-            return Response({"message": "No dealers found in the shipping city."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": "No dealer found with the provided ID."}, status=status.HTTP_404_NOT_FOUND)
 
-        billing_address_data = {
-            'user': user.id,
-            'billing_name': dealer_address.name,
-            'gst_number': dealer_address.gst_number,
-            'email': dealer_address.email,
-            'billing_address': dealer_address.address,
-        }
+        request.session['dealer_id'] = dealer_id
 
-        serializer = Billaddressserializer(data=billing_address_data)
+        # Pass the dealer_address instance to the serializer
+        serializer = DealerAddressSerializer(dealer_address, context={'request': request})
 
-        if serializer.is_valid():
-            billing_address = serializer.save()
-            return Response({
-                "message": "Billing address saved successfully.",
-                "billing_address": serializer.data
-            }, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "message": "Dealer address retrieved successfully.",
+            "dealer_address": serializer.data
+        }, status=status.HTTP_200_OK)
 
 
 class OrderSummaryAPIView(BaseCartView):
@@ -890,8 +887,15 @@ class OrderSummaryAPIView(BaseCartView):
         if not user_profile:
             return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        preferred_billing_address = user_profile.preferred_billing_address
-        preferred_shipping_address = user_profile.preferred_shipping_address
+        billing_address = BillingAddress.objects.filter(user=user).order_by('-id').first()
+        dealer_id = request.session.get('dealer_id')
+        if not dealer_id:
+            return Response({"message": "No dealer please select the dealer."}, status=status.HTTP_400_BAD_REQUEST)
+        data_dealer_address = DealerAddress.objects.filter(id=dealer_id).first()
+        if not data_dealer_address:
+            return  Response({"message": "No dealer found with the provided ID."}, status=status.HTTP_404_NOT_FOUND)
+        dealer_address = DealerAddressSerializer(data_dealer_address, context={'request': request})
+
 
         products_data = request.query_params.getlist('products')
         order_items = []
@@ -957,8 +961,9 @@ class OrderSummaryAPIView(BaseCartView):
         for item in detailed_order_items:
             order_item = self.get_cart_items_from_cookie(request)
             order_data, _, _ = self.process_cart_data(order_item)
-        datas = {"preferred_billing_address": Shippingaddressserializer(
-                preferred_shipping_address).data if preferred_shipping_address else None,
+        datas = {"billing_address": Billaddressserializer(
+                billing_address).data if billing_address else None,
+                 "dealer_address": dealer_address.data,
             "order_items": detailed_order_items,
             "grand_total": grand_total}
         response = Response(

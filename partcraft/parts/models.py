@@ -126,6 +126,14 @@ class BillingAddress(models.Model):
     def __str__(self):
         return f'{self.billing_name} {self.billing_address}'
 
+class DBillingAddress(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    billing_name = models.CharField(max_length=255)
+    gst_number = models.CharField(max_length=16, blank=True, null=True)
+    email = models.EmailField(max_length=255)
+    billing_address = models.CharField(max_length=1000)
+    contact = models.CharField(max_length=13, blank=True, null=True)
+
 class ShippingAddress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shipping_name = models.CharField(max_length=255)
