@@ -26,13 +26,15 @@ class Application_category(models.Model):
 
 class Vehicle(models.Model):
     Vehicle_category = models.ForeignKey(verbose_name='Application_category', to=Application_category, on_delete=models.CASCADE, default=1)
-    vehicle_make = models.ForeignKey(Manufacturer, on_delete=models.CASCADE, limit_choices_to={'is_vehicle_manufacturer': True})
-    vehicle_model = models.CharField(max_length=500)
-    vehicle_year = models.IntegerField()
-    vehicle_variant = models.CharField(max_length=500, blank=True)
+    vehicle_make = models.ForeignKey(verbose_name='make', to=Manufacturer, on_delete=models.CASCADE, limit_choices_to={'is_vehicle_manufacturer': True})
+    vehicle_model = models.CharField(verbose_name='model', max_length=500)
+    vehicle_year = models.IntegerField(verbose_name='year')
+    vehicle_variant = models.CharField(verbose_name='variant', max_length=500, blank=True)
 
     def __str__(self):
         return f'{self.vehicle_make} {self.vehicle_model} {self.vehicle_year} {self.vehicle_variant}'
+    class Meta:
+        db_table = 'Application'
 
 
 class Brand(models.Model):
@@ -219,15 +221,43 @@ class Feedback(models.Model):
     def __str__(self):
         return f'{self.name} {self.company_name} {self.designation} {self.email} {self.image}'
 
-class DealerAddress(models.Model):
+# class DealerAddress(models.Model):
+#     name = models.CharField(max_length=255)
+#     gst_number = models.CharField(max_length=16, blank=True, null=True)
+#     address = models.CharField(max_length=255)
+#     city = models.CharField(max_length=255)
+#     email = models.EmailField(max_length=255)
+#     phone = models.CharField(max_length=255)
+#     def __str__(self):
+#         return f'{self.name} {self.address} {self.city} {self.email}'
+
+
+class SellerGroup(models.Model):
+    GROUP_CHOICES = [
+        ('City', 'City'),
+        ('State', 'State'),
+        ('Group of State', 'Group of State'),
+        ('South India', 'South India'),
+        ('North India', 'North India'),
+        ('Other', 'Other')
+    ]
+    group = models.CharField(choices=GROUP_CHOICES, max_length=255)
+
+class Seller(models.Model):
+    TYPE_CHOICES = [
+        ('Manufacturer', 'Manufacturer'),
+        ('Dealer', 'Dealer'),
+    ]
     name = models.CharField(max_length=255)
-    gst_number = models.CharField(max_length=16, blank=True, null=True)
-    address = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
+    seller_type = models.CharField(choices=TYPE_CHOICES, max_length=255)
+    tin = models.CharField(max_length=20)
+    address = models.CharField(max_length=1023),
+    group_by = models.ForeignKey(SellerGroup, on_delete=models.CASCADE),
     email = models.EmailField(max_length=255)
-    phone = models.CharField(max_length=255)
+    mobile_no = models.CharField(max_length=10)
     def __str__(self):
-        return f'{self.name} {self.address} {self.city} {self.email}'
+        return f'{self.name} {self.address}'
+
 
 
 
