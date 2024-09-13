@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+class Cost_Code(models.Model):
+    name = models.CharField(max_length=255)
+    def __str__(self):
+        return self.name
 
 class UserManager(BaseUserManager):
     def create_user(self, email, name, tc, password=None, password2=None, **extra_fields):
@@ -33,6 +37,7 @@ class User(AbstractBaseUser):
     tc = models.BooleanField()
     is_verified = models.BooleanField(default=False)
     otp = models.CharField(verbose_name="OTP", max_length=255, blank=True)
+    cost_type = models.ForeignKey(Cost_Code, on_delete=models.CASCADE, default=1, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)  # Changed from property to field
@@ -56,3 +61,4 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+

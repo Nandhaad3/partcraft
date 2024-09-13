@@ -22,9 +22,9 @@ class ApplicationTypeAdmin(admin.ModelAdmin):
 class ApplicationCategoryAdmin(admin.ModelAdmin):
     list_display = ['type_name','category_name']
 
-@admin.register(Vehicle_make)
-class VehicleMakeAdmin(admin.ModelAdmin):
-    list_display = ['vehiclemake']
+@admin.register(Manufacturer)
+class ManufacturerAdmin(admin.ModelAdmin):
+    list_display = ['name']
 
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):

@@ -5,7 +5,14 @@ import os
 import uuid
 from datetime import datetime
 import random
+class Manufacturer(models.Model):
+    name = models.CharField(max_length=50,unique=True)
+    is_vehicle_manufacturer = models.BooleanField(default=False)
+    is_product_manufacturer = models.BooleanField(default=False)
+    logo = models.URLField()
 
+    def __str__(self):
+        return self.name
 
 class Application_type(models.Model):
     type_name = models.CharField(max_length=100)
@@ -16,14 +23,10 @@ class Application_category(models.Model):
     category_name = models.CharField(max_length=100)
     def __str__(self):
         return self.category_name
-class Vehicle_make(models.Model):
-    vehiclemake = models.CharField(max_length=100)
-    def __str__(self):
-        return self.vehiclemake
 
 class Vehicle(models.Model):
     Vehicle_category = models.ForeignKey(Application_category, on_delete=models.CASCADE, default=1)
-    vehicle_make = models.ForeignKey(Vehicle_make, on_delete=models.CASCADE)
+    vehicle_make = models.ForeignKey(Manufacturer, on_delete=models.CASCADE, limit_choices_to={'is_vehicle_manufacturer': True})
     vehicle_model = models.CharField(max_length=500)
     vehicle_year = models.IntegerField()
     vehicle_variant = models.CharField(max_length=500, blank=True)
