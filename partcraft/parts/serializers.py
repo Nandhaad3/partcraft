@@ -1,7 +1,7 @@
 import json
 from django.urls import reverse
 from rest_framework import serializers
-from .models import *
+from .models.models import *
 import random
 
 
@@ -521,10 +521,10 @@ class Shippingaddressserializer(serializers.ModelSerializer):
         model = ShippingAddress
         fields = '__all__'
 
-class DealerAddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DealerAddress
-        fields = '__all__'
+# class DealerAddressSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = DealerAddress
+#         fields = '__all__'
 
 
 class OrderSerializer(serializers.ModelSerializer):

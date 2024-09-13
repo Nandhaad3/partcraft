@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import *
+from .models.models import *
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -81,6 +81,14 @@ class FeedbackAdmin(admin.ModelAdmin):
     list_display = ['id','name','company_name','designation','email','feedback']
 
 
-@admin.register(DealerAddress)
-class DealerAddressAdmin(admin.ModelAdmin):
-    list_display = ['name']
+# @admin.register(DealerAddress)
+# class DealerAddressAdmin(admin.ModelAdmin):
+#     list_display = ['name']
+
+@admin.register(SellerGroup)
+class SellerGroupAdmin(admin.ModelAdmin):
+    list_display = ['group']
+
+@admin.register(Seller)
+class SellerAdmin(admin.ModelAdmin):
+    list_display = ['name', 'seller_type', 'group_by']

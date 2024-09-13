@@ -9,12 +9,15 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os.path
 from pathlib import Path
 from datetime import timedelta
+
 from django.conf import settings
 import os
 import dj_database_url
+
+
 # from dotenv import load_dotenv
 # load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -139,8 +142,23 @@ DATABASES = {
         'PASSWORD': 'gmJqKZh3XxcW8KCF',
         'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
         'PORT': '6543',
+    },
+    'nonrel': {
+        'ENGINE': 'djongo',
+        'NAME': 'partscraft',
+        'ENFORCE_SCHEMA': False,
+        'CLIENT': {
+            'host': 'mongodb+srv://admin:kWwviQLhdkbL5MQE@admindash.zvg2l7k.mongodb.net/?retryWrites=true&w=majority',
+        },
     }
 }
+
+DATABASE_ROUTERS = ['parts.utils.db_routers.NonRelRouter']
+MONGOENGINE = {
+    'db': 'partscraft',
+    'host': 'mongodb+srv://admin:kWwviQLhdkbL5MQE@admindash.zvg2l7k.mongodb.net/?retryWrites=true&w=majority',
+}
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -151,7 +169,7 @@ DATABASES = {
 #         'PORT': os.environ.get("DB_PORT"),
 #     }
 # }
-DATABASES["default"] = dj_database_url.parse("postgresql://postgres.bjtqyojwojqfmxrxcqcv:gmJqKZh3XxcW8KCF@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres")
+# DATABASES["default"] = dj_database_url.parse("postgresql://postgres.bjtqyojwojqfmxrxcqcv:gmJqKZh3XxcW8KCF@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres")
 
 # DATABASES["default"]=dj_database_url.parse("postgres://partcraft_render_l8s8_user:RcJrxzEJMoDmraOc0jJcJRXLmGKoaA5n@dpg-cppu4ddds78s73ees2q0-a.oregon-postgres.render.com/partcraft_render_l8s8")
 
@@ -254,6 +272,14 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'dhanushpathiprakash0511@gmail.com'
 EMAIL_HOST_PASSWORD = 'opghzxooktakptya'
+
+import mongoengine
+
+mongoengine.connect(
+    db=MONGOENGINE['db'],
+    host=MONGOENGINE['host'],
+    alias='nonrel',
+)
 
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
