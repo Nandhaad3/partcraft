@@ -22,12 +22,15 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class VehicleSerializer(serializers.ModelSerializer):
+    vehicle_make=serializers.SerializerMethodField()
     # url = serializers.HyperlinkedIdentityField(view_name='vehicleonedetail')
 
     class Meta:
         model = Vehicle
-        fields = ['vehicle_make', 'vehicle_model', 'vehicle_year', 'vehicle_variant', 'url']
+        fields = ['vehicle_make', 'vehicle_model', 'vehicle_year', 'vehicle_variant']
 
+    def get_vehicle_make(self, obj):
+        return obj.vehicle_make.vehiclemake
 
 class VehicleoneSerializer(serializers.ModelSerializer):
     class Meta:
