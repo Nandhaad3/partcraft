@@ -22,8 +22,8 @@ def adddict(serializer):
         data['id'] = i['id']
         data['parts_type'] = i['parts_type']
         data['main_image'] = i['main_image']
-        data['brand_image'] = i['parts_brand']['brand_image']
-        d = (f"{i['parts_brand']['brand_name']} "
+        data['brand_image'] = i['parts_brand']['brand_manufacturer.image']
+        d = (f"{i['parts_brand']['brand_manufacturer.name']} "
              f"{i['parts_category']['category_name']} "
              f'{i["subcategory_name"]}'
              f"{i['parts_voltage']} "
@@ -345,7 +345,7 @@ class WishallView(APIView):
             wishlist_data = WishallSerializer(wishlist, context={'request': request}).data
             product_info = {
                 'product_id': wishlist_data['wishlist_product']['id'],
-                'wishlist_product': f"{wishlist_data['wishlist_product']['parts_brand']['brand_name']} {wishlist_data['wishlist_product']['parts_category']['category_name']} {wishlist_data['wishlist_product']['subcategory_name']}",
+                'wishlist_product': f"{wishlist_data['wishlist_product']['parts_brand']['brand_manufacturer.name']} {wishlist_data['wishlist_product']['parts_category']['category_name']} {wishlist_data['wishlist_product']['subcategory_name']}",
                 'parts_no': wishlist_data['parts_no'],
                 'brand_logo': wishlist_data['brand_logo'],
                 'parts_type': wishlist_data['parts_type'],

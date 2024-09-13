@@ -32,7 +32,8 @@ class VehicleAdmin(admin.ModelAdmin):
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ['brand_name', 'brand_image']
+    list_display = ['brand_manufacturer']
+
 
 
 @admin.register(Category)

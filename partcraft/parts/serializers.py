@@ -10,7 +10,8 @@ class BrandSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Brand
-        fields = ['brand_name', 'brand_image', 'url']
+        fields= ['brand_manufacturer']
+        # fields = ['brand_name', 'brand_image', 'url']
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -69,7 +70,7 @@ class OfferSerializer(serializers.ModelSerializer):
     parts_name = serializers.SerializerMethodField()
 
     def arrangename(self, obj):
-        return (f"{obj.parts_brand.brand_name} "
+        return (f"{obj.parts_brand.brand_manufacturer.name} "
                 f"{obj.parts_category.category_name} "
                 f"{obj.subcategory_name} "
                 f"{obj.parts_voltage}V "
@@ -114,7 +115,7 @@ class ProductSerializer(serializers.ModelSerializer):
                   'is_in_wishlist', 'related_products', 'similar_products', 'addtocart', 'buynow']
 
     def arrangename(self, obj):
-        return (f"{obj.parts_brand.brand_name} "
+        return (f"{obj.parts_brand.brand_manufacturer.name} "
                 f"{obj.parts_category.category_name} "
                 f"{obj.subcategory_name} "
                 f"{obj.parts_voltage}V "
@@ -288,7 +289,7 @@ class ProductoneSerializer(serializers.ModelSerializer):
                   'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart', 'product_fit']
 
     def arrangename(self, obj):
-        return (f"{obj.parts_brand.brand_name} "
+        return (f"{obj.parts_brand.brand_manufacturer.name} "
                 f"{obj.parts_category.category_name} "
                 f"{obj.subcategory_name} "
                 f"{obj.parts_voltage}V "
@@ -354,7 +355,7 @@ class WishallSerializer(serializers.ModelSerializer):
         read_only_fields = ['wishlist_name']
 
     def arrangename(self, obj):
-        return (f"{obj.parts_brand.brand_name} "
+        return (f"{obj.parts_brand.brand_manufacturer.name} "
                 f"{obj.parts_category.category_name} "
                 f"{obj.subcategory_name} "
                 f"{obj.parts_voltage}V "
@@ -372,7 +373,7 @@ class WishallSerializer(serializers.ModelSerializer):
         return obj.wishlist_product.parts_no
 
     def get_brand_logo(self, obj):
-        return obj.wishlist_product.parts_brand.brand_image
+        return obj.wishlist_product.parts_brand.brand_manufacturer.logo
 
     def get_parts_type(self, obj):
         return obj.wishlist_product.parts_type
@@ -419,7 +420,7 @@ class CartSerializer(serializers.ModelSerializer):
             return None
 
     def arrangename(self, product):
-        return (f"{product.parts_brand.brand_name} "
+        return (f"{product.parts_brand.brand_manufacturer.name} "
                 f"{product.parts_category.category_name} "
                 f"{product.subcategory_name} "
                 f"{product.parts_voltage}V "
@@ -497,7 +498,7 @@ class Carouselserilizers(serializers.ModelSerializer):
         return f'{obj.carousel_offer}% off {obj.carousel_category.category_name}'
 
     def get_brand(self, obj):
-        return f'{obj.carousel_brand.brand_name} brand only'
+        return f'{obj.carousel_brand.brand_manufacturer.name} brand only'
 
 
 class Billaddressserializer(serializers.ModelSerializer):
@@ -560,7 +561,7 @@ class Bestsellingserializer(serializers.ModelSerializer):
 
     def arrangename(self, obj):
         product = obj.product
-        return (f"{product.parts_brand.brand_name} "
+        return (f"{product.parts_brand.brand_manufacturer.name} "
                 f"{product.parts_category.category_name} "
                 f"{product.subcategory_name} "
                 f"{product.parts_voltage}V "
@@ -587,7 +588,7 @@ class Bestsellingserializer(serializers.ModelSerializer):
         return obj.product.main_image
 
     def get_brand_logo(self, obj):
-        return obj.product.parts_brand.brand_image
+        return obj.product.parts_brand.brand_manufacturer.name
 
     def get_parts_no(self, obj):
         return obj.product.parts_no
@@ -629,7 +630,7 @@ class RandomSerializer(serializers.ModelSerializer):
         fields = ['id', 'parts_name', 'brand_logo', 'main_image']
 
     def get_parts_name(self, obj):
-        return (f"{obj.parts_brand.brand_name} "
+        return (f"{obj.parts_brand.brand_manufacturer.name} "
                 f"{obj.parts_category.category_name} "
                 f"{obj.subcategory_name} "
                 f"{obj.parts_voltage}V "
@@ -640,7 +641,7 @@ class RandomSerializer(serializers.ModelSerializer):
         return obj.main_image
 
     def get_brand_logo(self, obj):
-        return obj.parts_brand.brand_image
+        return obj.parts_brand.brand_manufacturer.logo
 
 
 class TestProductSerializer(serializers.ModelSerializer):
@@ -668,7 +669,7 @@ class TestProductSerializer(serializers.ModelSerializer):
                   'is_in_wishlist', 'related_products', 'similar_products', 'addtocart', 'buynow']
 
     def arrangename(self, obj):
-        return (f"{obj.parts_brand.brand_name} "
+        return (f"{obj.parts_brand.brand_manufacturer.name} "
                 f"{obj.parts_category.category_name} "
                 f"{obj.subcategory_name} "
                 f"{obj.parts_voltage}V "

@@ -4,7 +4,12 @@ from django.conf import settings
 import os
 import uuid
 from datetime import datetime
+from account.models import Cost_Code
 import random
+
+from account.models import User
+
+
 class Manufacturer(models.Model):
     name = models.CharField(max_length=50,unique=True)
     is_vehicle_manufacturer = models.BooleanField(default=False)
@@ -24,8 +29,11 @@ class Application_category(models.Model):
     def __str__(self):
         return self.category_name
 
+<<<<<<< Updated upstream
     class Meta:
         verbose_name = 'Application_category'
+=======
+>>>>>>> Stashed changes
 
 class Vehicle(models.Model):
     Vehicle_category = models.ForeignKey(verbose_name='Application_category', to=Application_category, on_delete=models.CASCADE, default=1)
@@ -41,14 +49,26 @@ class Vehicle(models.Model):
         verbose_name = 'Application'
 
 
+# class Brand(models.Model):
+#     brand_name = models.CharField(max_length=50)
+#     brand_image = models.URLField(max_length=200)
+#
+#     def __str__(self):
+#         return self.brand_name
+
+
 class Brand(models.Model):
-    brand_name = models.CharField(max_length=50)
-    brand_image = models.URLField(max_length=200)
+    brand_manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE,limit_choices_to=({'is_product_manufacturer': True}))
 
     def __str__(self):
+<<<<<<< Updated upstream
         return self.brand_name
     class Meta:
         verbose_name = 'Product Brand'
+=======
+        return self.brand_manufacturer.name
+
+>>>>>>> Stashed changes
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50)
@@ -103,9 +123,14 @@ class Product(models.Model):
 
 
 class RelatedProduct(models.Model):
+    STATUS_CHOICES = (
+        ('similar', 'similar'),
+        ('related', 'related'),
+    )
     related_product1 = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='related_product1_set')
     related_product2 = models.ManyToManyField(Product,related_name='related_product2_set')
-    retated_type = models.CharField(max_length=255)
+    retated_type = models.CharField(choices=STATUS_CHOICES, max_length=255)
+    Isbidirectional = models.BooleanField()
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
@@ -269,6 +294,14 @@ class Seller(models.Model):
     mobile_no = models.CharField(max_length=10)
     def __str__(self):
         return f'{self.name} {self.address}'
+class Product_cost(models.Model):
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_cost = models.IntegerField(default=0)
+    product_currency = models.CharField(max_length=255)#model
+    cost_code=models.ForeignKey(Cost_Code, on_delete=models.CASCADE,default=1)
+    effective_from=models.DateTimeField()
+    def __str__(self):
+        return f'{self.product_id} {self.product_cost} {self.product_currency}'
 
 class Product_btc_partners(models.Model):
     partner_name = models.CharField(max_length=255)
@@ -287,6 +320,7 @@ class MerchandisingSlot(models.Model):
     Aspect_ratio_threshold = models.IntegerField(default=10)
 
 
+<<<<<<< Updated upstream
 class MerchandisingContent(models.Model):
     LINK_TYPE_CHOICES = [
         ('Internal', 'Internal'),
@@ -298,3 +332,103 @@ class MerchandisingContent(models.Model):
     # image_storage = models.ForeignKey(Storage, on_delete=models.CASCADE, null=True, blank=True)
     click_link = models.CharField(max_length=255, null=True, blank=True)
     click_link_type = models.CharField(choices=LINK_TYPE_CHOICES, null=False)
+=======
+class Tags(models.Model):
+    ID=models.CharField(max_length=255,primary_key=True)
+    tag_name=models.CharField(max_length=255,unique=True)
+    is_active=models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.tag_name
+
+class ProductTags(models.Model):
+    ID=models.CharField(max_length=255,primary_key=True)
+    product=models.ForeignKey(Product, on_delete=models.CASCADE)
+    Tags=models.ManyToManyField(Tags)
+
+    def __str__(self):
+        return self.ID
+
+class ProductInventory(models.Model):
+    product=models.ForeignKey(Product, on_delete=models.CASCADE)
+    user_alert_threshold=models.IntegerField(default=0)
+    back_order_threshold=models.IntegerField(default=0)
+    reorder_threshold=models.IntegerField(default=0)
+    instock_count=models.IntegerField(default=0)
+    reversed_count=models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.product
+
+
+class Productsummary(models.Model):
+    product_id=models.ForeignKey(Product, on_delete=models.CASCADE)
+    title=models.CharField(max_length=255)
+    content=models.TextField()
+
+    def __str__(self):
+        return self.title
+
+class Costtypes(models.Model):
+    COST_CATEGORY_CHOICES = [
+        ('Product', 'Product'),
+        ('Nonproduct', 'Nonproduct'),
+        ('Tax', 'Tax'),
+        ('Discount', 'Discount'),
+    ]
+    Transaction_choices=[
+        ('D','Debit'),
+        ('C','Credit'),
+    ]
+    ID=models.CharField(max_length=255,primary_key=True)
+    name=models.CharField(max_length=255)
+    cost_category=models.CharField(choices=COST_CATEGORY_CHOICES,max_length=255)#model
+    is_order_level_cost=models.BooleanField()
+    is_order_item_level_cost=models.BooleanField()
+    transaction_type=models.CharField(choices=Transaction_choices,max_length=255)
+
+    def __str__(self):
+        return self.name
+
+class orders(models.Model):
+    STATUS_CHOICES = [
+        ('New', 'New'),
+        ('InProgress', 'InProgress'),
+        ('Completed', 'Completed'),
+    ]
+    ID=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    orderedby=models.ForeignKey(User, on_delete=models.CASCADE)
+    orderedon=models.DateTimeField(auto_now_add=True)
+    orderstatus=models.CharField(choices=STATUS_CHOICES,max_length=255)#model
+
+    def __str__(self):
+        return self.ID
+
+class orderitems(models.Model):
+    order=models.ForeignKey(orders, on_delete=models.CASCADE)
+    ID=models.IntegerField(primary_key=True)
+    product=models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity=models.IntegerField(default=1)
+
+    def __str__(self):
+        return self.ID
+
+class orderitemcost(models.Model):
+    orderitem=models.ForeignKey(orderitems, on_delete=models.CASCADE)
+    cost_type=models.ForeignKey(Costtypes, on_delete=models.CASCADE,limit_choices_to={'is_order_item_level_cost': True})
+    amount=models.IntegerField(default=0)
+    currency_code=models.CharField(max_length=255)#model
+
+    def __str__(self):
+        return f'{self.orderitem}'
+
+class ordercosts(models.Model):
+    order=models.ForeignKey(orders, on_delete=models.CASCADE)
+    cost_type = models.ForeignKey(Costtypes, on_delete=models.CASCADE,limit_choices_to={'is_order_item_level_cost': True})
+    amount = models.IntegerField(default=0)
+    currency_code = models.CharField(max_length=255)#model
+
+    def __str__(self):
+        return f'{self.order}'
+
+>>>>>>> Stashed changes
