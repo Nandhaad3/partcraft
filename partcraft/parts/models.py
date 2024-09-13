@@ -20,12 +20,12 @@ class Application_type(models.Model):
         return self.type_name
 class Application_category(models.Model):
     type_name = models.ForeignKey(Application_type, on_delete=models.CASCADE)
-    category_name = models.CharField(max_length=100)
+    category_name = models.CharField(verbose_name="categories_name", max_length=100)
     def __str__(self):
         return self.category_name
 
 class Vehicle(models.Model):
-    Vehicle_category = models.ForeignKey(Application_category, on_delete=models.CASCADE, default=1)
+    Vehicle_category = models.ForeignKey(verbose_name='Application_category', to=Application_category, on_delete=models.CASCADE, default=1)
     vehicle_make = models.ForeignKey(Manufacturer, on_delete=models.CASCADE, limit_choices_to={'is_vehicle_manufacturer': True})
     vehicle_model = models.CharField(max_length=500)
     vehicle_year = models.IntegerField()
