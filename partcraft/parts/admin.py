@@ -14,11 +14,21 @@ class ProductImageAdmin(admin.ModelAdmin):
     list_display = ['product', 'image']
 
 # admin.site.register(Product)
+@admin.register(Application_type)
+class ApplicationTypeAdmin(admin.ModelAdmin):
+    list_display = ['type_name']
 
+@admin.register(Application_category)
+class ApplicationCategoryAdmin(admin.ModelAdmin):
+    list_display = ['type_name','category_name']
+
+@admin.register(Vehicle_make)
+class VehicleMakeAdmin(admin.ModelAdmin):
+    list_display = ['vehiclemake']
 
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
-    list_display = ['vehicle_name', 'vehicle_model', 'vehicle_year', 'vehicle_variant']
+    list_display = ['vehicle_make', 'vehicle_model', 'vehicle_year', 'vehicle_variant']
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
@@ -69,3 +79,8 @@ class ProductOrderCountAdmin(admin.ModelAdmin):
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
     list_display = ['id','name','company_name','designation','email','feedback']
+
+
+@admin.register(DealerAddress)
+class DealerAddressAdmin(admin.ModelAdmin):
+    list_display = ['name']

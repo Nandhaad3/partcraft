@@ -22,18 +22,29 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class VehicleSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='vehicleonedetail')
+    # url = serializers.HyperlinkedIdentityField(view_name='vehicleonedetail')
 
     class Meta:
         model = Vehicle
-        fields = ['vehicle_name', 'vehicle_model', 'vehicle_year', 'vehicle_variant', 'url']
+        fields = ['vehicle_make', 'vehicle_model', 'vehicle_year', 'vehicle_variant', 'url']
 
 
 class VehicleoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
-        fields = ['vehicle_name', 'vehicle_model', 'vehicle_year', 'vehicle_variant']
+        fields = ['vehicle_make', 'vehicle_model', 'vehicle_year', 'vehicle_variant']
 
+class ApplicationtypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Application_type
+        fields = '__all__'
+
+class ApplicationcategorySerializer(serializers.ModelSerializer):
+    vehicle=VehicleSerializer(many=True,source='vehicle_set',read_only=True)
+
+    class Meta:
+        model=Application_category
+        fields=['category_name','vehicle']
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:

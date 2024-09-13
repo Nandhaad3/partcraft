@@ -5,18 +5,31 @@ import os
 import uuid
 from datetime import datetime
 import random
+
+
+class Application_type(models.Model):
+    type_name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.type_name
+class Application_category(models.Model):
+    type_name = models.ForeignKey(Application_type, on_delete=models.CASCADE)
+    category_name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.category_name
+class Vehicle_make(models.Model):
+    vehiclemake = models.CharField(max_length=100)
+    def __str__(self):
+        return self.vehiclemake
+
 class Vehicle(models.Model):
-    STATUS_CHOICES = (
-        ('petrol', 'petrol'),
-        ('diesel', 'diesel')
-    )
-    vehicle_name = models.CharField(max_length=50)
-    vehicle_model = models.CharField(max_length=50)
+    Vehicle_category = models.ForeignKey(Application_category, on_delete=models.CASCADE, default=1)
+    vehicle_make = models.ForeignKey(Vehicle_make, on_delete=models.CASCADE)
+    vehicle_model = models.CharField(max_length=500)
     vehicle_year = models.IntegerField()
-    vehicle_variant = models.CharField(choices=STATUS_CHOICES, max_length=50)
+    vehicle_variant = models.CharField(max_length=500, blank=True)
 
     def __str__(self):
-        return f'{self.vehicle_name} {self.vehicle_model} {self.vehicle_year} {self.vehicle_variant}'
+        return f'{self.vehicle_make} {self.vehicle_model} {self.vehicle_year} {self.vehicle_variant}'
 
 
 class Brand(models.Model):

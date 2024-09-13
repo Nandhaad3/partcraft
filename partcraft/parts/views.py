@@ -179,7 +179,7 @@ def vehicle_view(request):
         if vehicleserializer.is_valid():
             try:
                 vehicle = Vehicle.objects.filter(
-                    vehicle_name=vehicleserializer.validated_data['vehicle_name'],
+                    vehicle_make=vehicleserializer.validated_data['vehicle_make'],
                     vehicle_variant=vehicleserializer.validated_data['vehicle_variant'],
                     vehicle_model=vehicleserializer.validated_data['vehicle_model'],
                     vehicle_year=vehicleserializer.validated_data['vehicle_year'],
@@ -256,6 +256,17 @@ class MatchVehicle(APIView):
             return Response({'details': 'Vehicle Not Found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = VehicleSerializer(vehicles, many=True, context={'request': request})
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+
+class VehicleTypeView(generics.ListAPIView):
+    serializer_class = ApplicationcategorySerializer
+    queryset = Application_category.objects.all()
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        if queryset:
+            serializer = self.serializer_class(queryset, many=True)
+            return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+        return Response({'message': 'Data Not Found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 def category_offer(data):
