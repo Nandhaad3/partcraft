@@ -315,8 +315,8 @@ class WishlistCreateView(generics.ListCreateAPIView):
         if not product:
             return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        if Wishlist.objects.filter(wishlist_name=request.user, wishlist_product=product).exists():
-            return Response({"error": "Product already exists in the wishlist."}, status=status.HTTP_400_BAD_REQUEST)
+        # if Wishlist.objects.filter(wishlist_name=request.user, wishlist_product=product).exists():
+        #     return Response({"error": "Product already exists in the wishlist."}, status=status.HTTP_400_BAD_REQUEST)
 
         data = {
             'wishlist_name': self.request.user,
