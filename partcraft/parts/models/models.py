@@ -24,6 +24,9 @@ class Application_category(models.Model):
     def __str__(self):
         return self.category_name
 
+    class Meta:
+        verbose_name = 'Application_category'
+
 class Vehicle(models.Model):
     Vehicle_category = models.ForeignKey(verbose_name='Application_category', to=Application_category, on_delete=models.CASCADE, default=1)
     vehicle_make = models.ForeignKey(verbose_name='make', to=Manufacturer, on_delete=models.CASCADE, limit_choices_to={'is_vehicle_manufacturer': True})
@@ -35,6 +38,7 @@ class Vehicle(models.Model):
         return f'{self.vehicle_make} {self.vehicle_model} {self.vehicle_year} {self.vehicle_variant}'
     class Meta:
         db_table = 'Application'
+        verbose_name = 'Application'
 
 
 class Brand(models.Model):
@@ -43,11 +47,19 @@ class Brand(models.Model):
 
     def __str__(self):
         return self.brand_name
-
+    class Meta:
+        verbose_name = 'Product Brand'
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50)
     category_image = models.URLField(max_length=200,blank=True)
+
+    def __str__(self):
+        return self.category_name
+
+    class Meta:
+        verbose_name = 'Product Categories'
+
 
     def __str__(self):
         return self.category_name
@@ -258,6 +270,31 @@ class Seller(models.Model):
     def __str__(self):
         return f'{self.name} {self.address}'
 
+class Product_btc_partners(models.Model):
+    partner_name = models.CharField(max_length=255)
+    partner_logo = models.URLField(max_length=511)
+
+class Product_btc_links(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    bzc_partner = models.ForeignKey(Product_btc_partners, on_delete=models.CASCADE)
+    url = models.URLField(max_length=511)
+
+class MerchandisingSlot(models.Model):
+    id = models.AutoField(primary_key=True)
+    code = models.CharField(max_length=255, unique=True, null=False)
+    width = models.IntegerField(null=False)
+    height = models.IntegerField(null=False)
+    Aspect_ratio_threshold = models.IntegerField(default=10)
 
 
-
+class MerchandisingContent(models.Model):
+    LINK_TYPE_CHOICES = [
+        ('Internal', 'Internal'),
+        ('External', 'External')
+    ]
+    id = models.AutoField(primary_key=True)
+    slot = models.ForeignKey(MerchandisingSlot, on_delete=models.CASCADE, null=False)
+    image_url = models.URLField(max_length=510, null=True, blank=True)
+    # image_storage = models.ForeignKey(Storage, on_delete=models.CASCADE, null=True, blank=True)
+    click_link = models.CharField(max_length=255, null=True, blank=True)
+    click_link_type = models.CharField(choices=LINK_TYPE_CHOICES, null=False)
