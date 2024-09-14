@@ -29,11 +29,9 @@ class Application_category(models.Model):
     def __str__(self):
         return self.category_name
 
-<<<<<<< Updated upstream
     class Meta:
         verbose_name = 'Application_category'
-=======
->>>>>>> Stashed changes
+
 
 class Vehicle(models.Model):
     Vehicle_category = models.ForeignKey(verbose_name='Application_category', to=Application_category, on_delete=models.CASCADE, default=1)
@@ -61,14 +59,12 @@ class Brand(models.Model):
     brand_manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE,limit_choices_to=({'is_product_manufacturer': True}))
 
     def __str__(self):
-<<<<<<< Updated upstream
-        return self.brand_name
+        return self.brand_manufacturer.name
     class Meta:
         verbose_name = 'Product Brand'
-=======
-        return self.brand_manufacturer.name
 
->>>>>>> Stashed changes
+
+
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50)
@@ -319,8 +315,6 @@ class MerchandisingSlot(models.Model):
     height = models.IntegerField(null=False)
     Aspect_ratio_threshold = models.IntegerField(default=10)
 
-
-<<<<<<< Updated upstream
 class MerchandisingContent(models.Model):
     LINK_TYPE_CHOICES = [
         ('Internal', 'Internal'),
@@ -332,7 +326,7 @@ class MerchandisingContent(models.Model):
     # image_storage = models.ForeignKey(Storage, on_delete=models.CASCADE, null=True, blank=True)
     click_link = models.CharField(max_length=255, null=True, blank=True)
     click_link_type = models.CharField(choices=LINK_TYPE_CHOICES, null=False)
-=======
+
 class Tags(models.Model):
     ID=models.CharField(max_length=255,primary_key=True)
     tag_name=models.CharField(max_length=255,unique=True)
@@ -431,4 +425,3 @@ class ordercosts(models.Model):
     def __str__(self):
         return f'{self.order}'
 
->>>>>>> Stashed changes
