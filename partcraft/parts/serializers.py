@@ -6,12 +6,19 @@ import random
 
 
 class BrandSerializer(serializers.ModelSerializer):
+    brand_name = serializers.SerializerMethodField()
+    brand_image = serializers.SerializerMethodField()
     url = serializers.HyperlinkedIdentityField(view_name='brandonedetails')
 
     class Meta:
         model = Brand
-        fields= ['brand_manufacturer']
-        # fields = ['brand_name', 'brand_image', 'url']
+        # fields= ['brand_manufacturer']
+        fields = ['brand_name', 'brand_image', 'url']
+
+    def get_brand_name(self, obj):
+        return obj.brand_manufacturer.name
+    def get_brand_image(self, obj):
+        return obj.brand_manufacturer.logo
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -91,6 +98,7 @@ class OfferSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     parts_brand = BrandSerializer()
     parts_category = CategorySerializer()
+    brand_image = serializers.SerializerMethodField()
     this_parts_fits = VehicleSerializer(many=True)
     images = ProductImageSerializer(many=True)
     parts_name = serializers.SerializerMethodField()
@@ -107,13 +115,14 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'url', 'parts_name', 'parts_voltage', 'subcategory_name',
+        fields = ['id','brand_image', 'url', 'parts_name', 'parts_voltage', 'subcategory_name',
                   'parts_litre', 'parts_type', 'parts_description', 'parts_no', 'parts_price', 'parts_offer',
                   'final_price',
                   'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
                   'main_image', 'images', 'parts_brand', 'parts_category', 'this_parts_fits', 'product_fit', 'wishlist',
                   'is_in_wishlist', 'related_products', 'similar_products', 'addtocart', 'buynow']
-
+    def get_brand_image(self,obj):
+        return obj.parts_brand.brand_manufacturer.logo
     def arrangename(self, obj):
         return (f"{obj.parts_brand.brand_manufacturer.name} "
                 f"{obj.parts_category.category_name} "
@@ -276,6 +285,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ProductoneSerializer(serializers.ModelSerializer):
     parts_name = serializers.SerializerMethodField()
+    brand_image = serializers.SerializerMethodField()
     final_price = serializers.SerializerMethodField()
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
@@ -283,11 +293,13 @@ class ProductoneSerializer(serializers.ModelSerializer):
     addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
     product_fit = serializers.SerializerMethodField()
 
+
     class Meta:
         model = Product
-        fields = ['id', 'parts_type', 'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image',
+        fields = ['id', 'parts_type','brand_image' ,'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image',
                   'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart', 'product_fit']
-
+    def get_brand_image(self,obj):
+        return obj.parts_brand.brand_manufacturer.logo
     def arrangename(self, obj):
         return (f"{obj.parts_brand.brand_manufacturer.name} "
                 f"{obj.parts_category.category_name} "

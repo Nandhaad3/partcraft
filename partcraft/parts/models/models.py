@@ -6,8 +6,10 @@ import uuid
 from datetime import datetime
 from account.models import Cost_Code
 import random
-
 from account.models import User
+from django.core.exceptions import ValidationError
+from djongo import models as djongo_models
+import mongoengine as me
 
 
 class Manufacturer(models.Model):
@@ -95,7 +97,7 @@ class Product(models.Model):
         ('Refurbished','Refurbished'),
     )
 
-
+    product_code=models.CharField(max_length=10)
     parts_brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     parts_category = models.ForeignKey(Category, on_delete=models.CASCADE)
     subcategory_name = models.CharField(max_length=255)
@@ -115,7 +117,7 @@ class Product(models.Model):
     main_image = models.URLField(max_length=200)
 
     def __str__(self):
-        return f'{self.parts_brand}-{self.parts_category}-{self.subcategory_name}'
+        return self.product_code
 
 
 class RelatedProduct(models.Model):
@@ -290,6 +292,7 @@ class Seller(models.Model):
     mobile_no = models.CharField(max_length=10)
     def __str__(self):
         return f'{self.name} {self.address}'
+
 class Product_cost(models.Model):
     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
     product_cost = models.IntegerField(default=0)
@@ -325,7 +328,7 @@ class MerchandisingContent(models.Model):
     image_url = models.URLField(max_length=510, null=True, blank=True)
     # image_storage = models.ForeignKey(Storage, on_delete=models.CASCADE, null=True, blank=True)
     click_link = models.CharField(max_length=255, null=True, blank=True)
-    click_link_type = models.CharField(choices=LINK_TYPE_CHOICES, null=False)
+    click_link_type = models.CharField(choices=LINK_TYPE_CHOICES,max_length=255, null=False)
 
 class Tags(models.Model):
     ID=models.CharField(max_length=255,primary_key=True)
@@ -424,4 +427,146 @@ class ordercosts(models.Model):
 
     def __str__(self):
         return f'{self.order}'
+
+
+
+# class Attribute_Tab(models.Model):
+#     ID=models.CharField(max_length=255,primary_key=True)
+#     tabcode=models.CharField(max_length=255)
+#     name=models.CharField(max_length=255)
+#
+#     def __str__(self):
+#         return self.tabcode
+#
+# class Attribute_Section(models.Model):
+#     ID=models.CharField(max_length=255,primary_key=True)
+#     tab=models.ForeignKey(Attribute_Tab, on_delete=models.CASCADE)
+#     sectioncode=models.CharField(max_length=255)
+#     name=models.CharField(max_length=255)
+#
+#     def __str__(self):
+#         return self.sectioncode
+
+class Choice(models.Model):
+    ID=models.CharField(max_length=255,primary_key=True)
+    group_name=models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.group_name
+
+class Choice_name(models.Model):
+    ID=models.CharField(max_length=255,primary_key=True)
+    choice_name=models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.choice_name
+
+class Choice_group(models.Model):
+    ID=models.CharField(max_length=255,primary_key=True)
+    group_name=models.ForeignKey(Choice, on_delete=models.CASCADE)
+    choice_name=models.ManyToManyField(Choice_name)
+
+    def __str__(self):
+        return f'{self.group_name} - {self.choice_name}'
+
+    @staticmethod
+    def already_exists(group_name):
+        return Choice_group.objects.filter(group_name=group_name).exists()
+
+
+
+
+class Attribute(models.Model):
+    DATATYPE_CHOICES = [
+        ('Text', 'Text'),
+        ('Number', 'Number'),
+        ('Date', 'Date'),
+        ('Time', 'Time'),
+        ('single_choice', 'Single Choice'), # Static choices,
+        ('multi_choice', 'Multi Choice'),
+    ]
+
+    ID=models.CharField(max_length=255,primary_key=True)
+    attributecode=models.CharField(max_length=255)
+    name=models.CharField(max_length=255)
+    datatype=models.CharField(choices=DATATYPE_CHOICES,max_length=255)
+    min_value=models.IntegerField(blank=True)
+    max_value=models.IntegerField(blank=True)
+    dataformat=models.DateField(blank=True)
+    timeformat=models.TimeField(blank=True)
+    # choice_group=models.ForeignKey('Choice_group')
+
+    def clean(self):
+        # Date and time format lists
+        date_formats = [
+            '%Y', '%y', '%m%Y', '%m%y', '%b%Y', '%b%y', '%d%m%y', '%d%m%Y'
+        ]
+        time_formats = [
+            '%H:%M', '%H:%M:%S'
+        ]
+
+        # Validate time format
+        if self.timeformat:
+            self.timeformat = self._validate_format(self.timeformat, time_formats, 'time')
+
+        # Validate date format
+        if self.dataformat:
+            self.dataformat = self._validate_format(self.dataformat, date_formats, 'date')
+
+    def _validate_format(self, value, formats, field_type):
+
+        for fmt in formats:
+            try:
+                if field_type == 'date':
+                    return datetime.strptime(str(value), fmt).date()
+                elif field_type == 'time':
+                    return datetime.strptime(str(value), fmt).time()
+            except (ValueError, TypeError):
+                continue
+        raise ValidationError(f"Invalid {field_type} format: {value}. Please use a valid format.")
+
+class ProductAttribute(models.Model):
+    product_attribute_id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    productcode = models.ForeignKey(Product, on_delete=models.CASCADE)
+    attributecode = models.ForeignKey(Attribute, on_delete=models.CASCADE)
+    tabcode = models.CharField(max_length=10)
+    sectioncode = models.CharField(max_length=10, null=True, blank=True)
+
+
+    def __str__(self):
+        return self.productcode
+
+class ProductAttributeValue(models.Model):
+    product_attribute_id=models.ForeignKey(ProductAttribute, on_delete=models.CASCADE)
+    value=models.CharField(max_length=255)
+    choice_value=models.ForeignKey(Choice, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.value
+
+
+#####JSON
+# class Attribute(djongo_models.Model):
+#     Attributecode = models.CharField(max_length=10)
+#     class Meta:
+#         abstract = True
+# #
+# class Section(djongo_models.Model):
+#     Sectioncode = models.CharField(max_length=10, null=True, blank=True)
+#     Attributes = models.ArrayField(model_container=Attribute)
+#     class Meta:
+#         abstract = True
+#
+# class Tab(djongo_models.Model):
+#     Tabcode = models.CharField(max_length=10)
+#     Sections = models.ArrayField(model_container=Section)
+#     class Meta:
+#         abstract = True
+#
+# class Product(djongo_models.Model):
+#     Productcode = models.CharField(max_length=10)
+#     Tabs = models.ArrayField(model_container=Tab)
+
+
+
 

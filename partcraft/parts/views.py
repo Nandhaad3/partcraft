@@ -22,7 +22,7 @@ def adddict(serializer):
         data['id'] = i['id']
         data['parts_type'] = i['parts_type']
         data['main_image'] = i['main_image']
-        data['brand_image'] = i['parts_brand']['brand_manufacturer.image']
+        data['brand_image'] = i['parts_brand']['brand_manufacturer.logo']
         d = (f"{i['parts_brand']['brand_manufacturer.name']} "
              f"{i['parts_category']['category_name']} "
              f'{i["subcategory_name"]}'
