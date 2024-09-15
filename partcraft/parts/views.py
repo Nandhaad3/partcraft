@@ -254,7 +254,7 @@ class MatchVehicle(APIView):
         vehicles = Vehicle.objects.filter(**filters)
         if not vehicles.exists():
             return Response({'details': 'Vehicle Not Found'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = VehicleSerializer(vehicles, many=True, context={'request': request})
+        serializer = ApplicationSerializer(vehicles, many=True, context={'request': request})
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 
