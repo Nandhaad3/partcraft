@@ -729,3 +729,26 @@ class TestProductSerializer(serializers.ModelSerializer):
         if request:
             return request.build_absolute_uri(f'/api/buynow/')
         return None
+
+class ProductTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductTags
+        fields = '__all__'
+
+
+class ApplicationTypeSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='application-category', lookup_field='id', lookup_url_kwarg='id')
+    class Meta:
+        model = Application_type
+        fields = ['type_name', 'url']
+
+class ApplicationCategorySerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='application', lookup_field='id', lookup_url_kwarg='id')
+    class Meta:
+        model = Application_category
+        fields = ['category_name', 'url']
+
+class ApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = '__all__'

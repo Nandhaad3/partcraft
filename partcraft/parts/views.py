@@ -1196,3 +1196,38 @@ class RandomProductView(APIView):
             serializer = RandomSerializer(instance, context={'request': request})
             return Response({'data': serializer.data}, status=status.HTTP_200_OK)
         return Response({'data': None}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ProductTagsApiView(APIView):
+    def get(self, request):
+        product_tags = ProductTags.objects.all()
+        serializer = ProductTagSerializer(product_tags, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ApplicationTypeView(APIView):
+    def get(self, request):
+        application_types = Application_type.objects.all()
+        serializer = ApplicationTypeSerializer(application_types, many=True, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ApplicationCategoryView(APIView):
+    def get(self, request, id=None):
+        if id:
+            application_type = Application_type.objects.get(id=id)
+            application_categories = Application_category.objects.filter(type_name=application_type)
+        else:
+            application_categories = Application_category.objects.all()
+        serializer = ApplicationCategorySerializer(application_categories, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ApplicationView(APIView):
+    def get(self, request, id=None):
+        if id:
+            applications_categories = Application_category.objects.get(id=id)
+            application = Vehicle.objects.filter(Vehicle_category=applications_categories)
+        else:
+            application = Vehicle.objects.all()
+
+        serializer = ApplicationSerializer(application, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
