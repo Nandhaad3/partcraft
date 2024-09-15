@@ -8,8 +8,8 @@ from account.models import Cost_Code
 import random
 from account.models import User
 from django.core.exceptions import ValidationError
-from djongo import models as djongo_models
-import mongoengine as me
+# from djongo import models as djongo_models
+# import mongoengine as me
 
 
 class Manufacturer(models.Model):
