@@ -101,3 +101,4 @@ validation==0.8.3
 virtualenv==20.26.2
 whitenoise==6.6.0
 zipp==3.17.0
+mongoengine==0.29.0
