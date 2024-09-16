@@ -240,7 +240,7 @@ class Feedback(models.Model):
     feedback=models.CharField(max_length=255)
 
     def __str__(self):
-        return f'{self.name} {self.company_name} {self.designation} {self.email} {self.image}'
+        return f'{self.name} {self.company_name} {self.designation} {self.image}'
 
 # class DealerAddress(models.Model):
 #     name = models.CharField(max_length=255)

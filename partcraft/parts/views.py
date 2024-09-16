@@ -13,6 +13,7 @@ from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from .serializers import *
 from collections import defaultdict
+from rest_framework.parsers import MultiPartParser, FormParser
 from account.emails import send_confirmation_email
 
 def adddict(serializer):
@@ -1121,6 +1122,7 @@ class ToptenProductView(generics.ListAPIView):
         }, status=status.HTTP_200_OK)
 
 class FeedbackView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
     def get(self, request):
         feedbacks = Feedback.objects.all()
         serializer = FeedbackSerializer(feedbacks, many=True)
