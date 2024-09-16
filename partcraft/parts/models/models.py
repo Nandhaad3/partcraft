@@ -268,15 +268,10 @@ class Feedback(models.Model):
 
 
 class SellerGroup(models.Model):
-    GROUP_CHOICES = [
-        ('City', 'City'),
-        ('State', 'State'),
-        ('Group of State', 'Group of State'),
-        ('South India', 'South India'),
-        ('North India', 'North India'),
-        ('Other', 'Other')
-    ]
-    group = models.CharField(choices=GROUP_CHOICES, max_length=255)
+    group = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.group
 
 class Seller(models.Model):
     TYPE_CHOICES = [
@@ -285,9 +280,9 @@ class Seller(models.Model):
     ]
     name = models.CharField(max_length=255)
     seller_type = models.CharField(choices=TYPE_CHOICES, max_length=255)
+    group = models.ForeignKey(SellerGroup, on_delete=models.CASCADE)
     tin = models.CharField(max_length=20)
-    address = models.CharField(max_length=1023),
-    group_by = models.ForeignKey(SellerGroup, on_delete=models.CASCADE),
+    address = models.CharField(max_length=1023)
     email = models.EmailField(max_length=255)
     mobile_no = models.CharField(max_length=10)
     def __str__(self):

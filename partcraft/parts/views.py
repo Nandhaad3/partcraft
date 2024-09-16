@@ -869,14 +869,14 @@ class BillingDealerView(APIView):
         if not dealer_id:
             return Response({"message": "Dealer ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        dealer_address = DealerAddress.objects.filter(id=dealer_id).first()
+        dealer_address = SellerSerializer.objects.filter(id=dealer_id).first()
         if not dealer_address:
             return Response({"message": "No dealer found with the provided ID."}, status=status.HTTP_404_NOT_FOUND)
 
         request.session['dealer_id'] = dealer_id
 
         # Pass the dealer_address instance to the serializer
-        serializer = DealerAddressSerializer(dealer_address, context={'request': request})
+        serializer = SellerSerializer(dealer_address, context={'request': request})
 
         return Response({
             "message": "Dealer address retrieved successfully.",
@@ -1176,11 +1176,6 @@ class FeedbackView(APIView):
             return Response({'data':'Feedback has successfully created'}, status=status.HTTP_201_CREATED)
         return Response({'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-class DealerAddressView(APIView):
-    def get(self, request):
-        dealer_addrress = DealerAddress.objects.all()
-        serializer = DealerAddressSerializer(dealer_addrress, many=True)
-        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
 def get_random_id(model):
     ids = model.objects.values_list('id', flat=True)
@@ -1231,3 +1226,51 @@ class ApplicationView(APIView):
         serializer = ApplicationSerializer(application, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class SellerView(APIView):
+    def get(self, request, id=None):
+        seller = Seller.objects.all()
+        serializer = SellerSerializer(seller, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GetSellersByGroupNameAPIView(APIView):
+    def post(self, request):
+        group_name = request.data.get('group')
+
+        if not group_name:
+            return Response({'message': 'Group name not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        seller_group = SellerGroup.objects.filter(group__iexact=group_name).first()
+
+        if not seller_group:
+            return Response({'message': 'Group does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        sellers = Seller.objects.filter(group=seller_group)
+
+        if sellers.exists():
+            serializer = SellerSerializer(sellers, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response({'message': 'No sellers found in this group'}, status=status.HTTP_404_NOT_FOUND)
+
+class SelectSellerAddressAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        def post(self, request, *args, **kwargs):
+            seller_id = request.data.get('seller_id')
+
+            if not seller_id:
+                return Response({'message': 'Seller ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                seller = Seller.objects.get(id=seller_id)
+            except Seller.DoesNotExist:
+                return Response({'message': 'Seller not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            request.session['selected_seller_id'] = seller_id
+
+            serializer = SellerSerializer(seller, context={'request': request})
+
+            return Response({
+                "message": "Seller selected successfully.",
+                "selected_seller": serializer.data
+            }, status=status.HTTP_200_OK)

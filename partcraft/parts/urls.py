@@ -39,7 +39,6 @@ urlpatterns = [
     path('top-ten/', ToptenView.as_view(), name='top-ten'),
     path('top-ten-product/<int:pk>/', ToptenProductView.as_view(), name='top-ten-product'),
     path('feedback/',FeedbackView.as_view(), name='feedback'),
-    path('dealers/', DealerAddressView.as_view(), name='dealers'),
     path('randomproduct/', RandomProductView.as_view(), name='random-product'),
     path('tag/', ProductTagsApiView.as_view(), name='tag-list'),
     path('application/type/', ApplicationTypeView.as_view(), name='application-type'),
@@ -47,5 +46,8 @@ urlpatterns = [
     path('application/category/<int:id>/', ApplicationCategoryView.as_view(), name='application-category'),
     path('application/', ApplicationView.as_view(), name='application'),
     path('application/<int:id>/', ApplicationView.as_view(), name='application'),
+    path('seller/', SellerView.as_view(), name='seller'),
+    path('sellers/group/', GetSellersByGroupNameAPIView.as_view(), name='sellers-by-group'),
+    path('select/seller/', SelectSellerAddressAPIView.as_view(), name='select-seller'),
 ]
 

@@ -92,7 +92,7 @@ class SellerGroupAdmin(admin.ModelAdmin):
 
 @admin.register(Seller)
 class SellerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'seller_type', 'group_by']
+    list_display = ['name', 'seller_type']
 
 
 @admin.register(Product_cost)
@@ -177,12 +177,6 @@ class ProductAttributeAdmin(admin.ModelAdmin):
 @admin.register(ProductAttributeValue)
 class ProductAttributeValueAdmin(admin.ModelAdmin):
     list_display = ['product_attribute_id', 'value', 'choice_value']
-
-
-
-
-
-
 
 
 

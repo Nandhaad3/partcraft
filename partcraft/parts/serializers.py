@@ -749,6 +749,19 @@ class ApplicationCategorySerializer(serializers.ModelSerializer):
         fields = ['category_name', 'url']
 
 class ApplicationSerializer(serializers.ModelSerializer):
+    vehicle_make = serializers.SerializerMethodField()
+    Vehicle_category = serializers.SerializerMethodField()
+
     class Meta:
         model = Vehicle
         fields = '__all__'
+    def get_vehicle_make(self, obj):
+        return obj.vehicle_make.name
+
+    def get_Vehicle_category(self, obj):
+        return obj.Vehicle_category.category_name
+
+class SellerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seller
+        fields = ['name', 'seller_type', 'tin', 'address', 'email', 'mobile_no']
