@@ -22,8 +22,9 @@ def adddict(serializer):
         data['id'] = i['id']
         data['parts_type'] = i['parts_type']
         data['main_image'] = i['main_image']
-        data['brand_image'] = i['parts_brand']['brand_manufacturer.logo']
-        d = (f"{i['parts_brand']['brand_manufacturer.name']} "
+        data['brand_image'] = i['parts_brand']['brand_image']
+        data['brand'] = i['parts_brand']
+        d = (f"{i['parts_brand']['brand_name']} "
              f"{i['parts_category']['category_name']} "
              f'{i["subcategory_name"]}'
              f"{i['parts_voltage']} "
@@ -43,8 +44,6 @@ def adddict(serializer):
             data['is_in_wishlist'] = i['is_in_wishlist']
         data['addtocart'] = i['addtocart']
         data['product_fit'] = i['product_fit']
-
-
         last_data.append(data)
     return last_data
 
@@ -833,56 +832,19 @@ class Carouseloneview(generics.ListAPIView):
         return Response({'data': carousel_serilizer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
 
 
-class BuyNowAPIView(APIView):
+class ShippingAdressAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
     def post(self, request, *args, **kwargs):
-        serializer = Billaddressserializer(data=request.data, context={'request': request})
+        serializer = Shippingaddressserializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             result = serializer.save()
             response_data = {
-                "message": "Billing Address saved successfully.",
-                "billing_address": Billaddressserializer(result).data
+                "message": "Shipping Address saved successfully.",
+                "shipping_address": Shippingaddressserializer(result).data
             }
             return Response(response_data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class BillingDealerView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        billing_address = BillingAddress.objects.filter(user=user).order_by('-id').first()
-        if not billing_address:
-            return Response({"message": "No addresses found for the user."}, status=status.HTTP_404_NOT_FOUND)
-        billing_city = billing_address.city
-        dealer_address = DealerAddress.objects.filter(city=billing_city).distinct()
-        serializer = DealerAddressSerializer(dealer_address, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        if not user.is_authenticated:
-            return Response({"message": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
-
-        dealer_id = request.data.get('dealer_id')
-        if not dealer_id:
-            return Response({"message": "Dealer ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        dealer_address = SellerSerializer.objects.filter(id=dealer_id).first()
-        if not dealer_address:
-            return Response({"message": "No dealer found with the provided ID."}, status=status.HTTP_404_NOT_FOUND)
-
-        request.session['dealer_id'] = dealer_id
-
-        # Pass the dealer_address instance to the serializer
-        serializer = SellerSerializer(dealer_address, context={'request': request})
-
-        return Response({
-            "message": "Dealer address retrieved successfully.",
-            "dealer_address": serializer.data
-        }, status=status.HTTP_200_OK)
-
 
 class OrderSummaryAPIView(BaseCartView):
     permission_classes = [IsAuthenticated]

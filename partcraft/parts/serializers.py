@@ -527,20 +527,18 @@ class Billaddressserializer(serializers.ModelSerializer):
     def validate(self, data):
         return data
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop('city', None)  # Remove 'city' from the serialized output
-        return representation
-
 class Shippingaddressserializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingAddress
         fields = '__all__'
+        extra_kwargs = {'user': {'required': False}}
 
-# class DealerAddressSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = DealerAddress
-#         fields = '__all__'
+    def create(self, validated_data):
+        user = self.context['request'].user
+        shipping_instance = ShippingAddress.objects.create(user=user, **validated_data)
+        return shipping_instance
+    def validate(self, data):
+        return data
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -765,3 +763,4 @@ class SellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
         fields = ['name', 'seller_type', 'tin', 'address', 'email', 'mobile_no']
+

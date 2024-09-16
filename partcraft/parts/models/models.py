@@ -61,7 +61,7 @@ class Brand(models.Model):
     brand_manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE,limit_choices_to=({'is_product_manufacturer': True}))
 
     def __str__(self):
-        return self.brand_manufacturer.name
+        return f"{self.brand_manufacturer.name}, {self.brand_manufacturer.logo}"
     class Meta:
         verbose_name = 'Product Brand'
 
@@ -169,32 +169,23 @@ class Cart(models.Model):
 class BillingAddress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     billing_name = models.CharField(max_length=255)
-    gst_number = models.CharField(max_length=16, blank=True, null=True)
+    tin = models.CharField(max_length=16, blank=True, null=True)
     email = models.EmailField(max_length=255)
     billing_address = models.CharField(max_length=1000)
-    city = models.CharField(max_length=255, blank=True, null=True)
-    #contact = models.CharField(max_length=13, blank=True, null=True)
-
+    # city = models.CharField(max_length=255, blank=True, null=True)
+    contact = models.CharField(max_length=13, blank=True, null=True)
+    use_the_billing_address = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.billing_name} {self.billing_address}'
-
-class DBillingAddress(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    billing_name = models.CharField(max_length=255)
-    gst_number = models.CharField(max_length=16, blank=True, null=True)
-    email = models.EmailField(max_length=255)
-    billing_address = models.CharField(max_length=1000)
-    contact = models.CharField(max_length=13, blank=True, null=True)
 
 class ShippingAddress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     shipping_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
     shipping_address = models.CharField(max_length=1000)
-    city = models.CharField(max_length=255, blank=True, null=True)
     contact = models.CharField(max_length=13)
-    use_the_address_for_next_time = models.BooleanField(default=False)
+
 
     def __str__(self):
         return f'{self.shipping_name} {self.shipping_address}'
