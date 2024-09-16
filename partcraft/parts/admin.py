@@ -79,7 +79,7 @@ class ProductOrderCountAdmin(admin.ModelAdmin):
 
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
-    list_display = ['id','name','company_name','designation','email','feedback']
+    list_display = ['id','name','company_name','designation','feedback']
 
 
 # @admin.register(DealerAddress)

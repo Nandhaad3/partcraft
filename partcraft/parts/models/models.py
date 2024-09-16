@@ -36,7 +36,7 @@ class Application_category(models.Model):
 
 
 class Vehicle(models.Model):
-    Vehicle_category = models.ForeignKey(verbose_name='Application_category', to=Application_category, on_delete=models.CASCADE, default=1)
+    vehicle_category = models.ForeignKey(verbose_name='Application_category', to=Application_category, on_delete=models.CASCADE, default=1)
     vehicle_make = models.ForeignKey(verbose_name='make', to=Manufacturer, on_delete=models.CASCADE, limit_choices_to={'is_vehicle_manufacturer': True})
     vehicle_model = models.CharField(verbose_name='model', max_length=500)
     vehicle_year = models.IntegerField(verbose_name='year')
@@ -65,9 +65,6 @@ class Brand(models.Model):
     class Meta:
         verbose_name = 'Product Brand'
 
-
-
-
 class Category(models.Model):
     category_name = models.CharField(max_length=50)
     category_image = models.URLField(max_length=200,blank=True)
@@ -77,7 +74,6 @@ class Category(models.Model):
 
     class Meta:
         verbose_name = 'Product Categories'
-
 
     def __str__(self):
         return self.category_name
@@ -174,7 +170,6 @@ class BillingAddress(models.Model):
     billing_address = models.CharField(max_length=1000)
     # city = models.CharField(max_length=255, blank=True, null=True)
     contact = models.CharField(max_length=13, blank=True, null=True)
-    use_the_billing_address = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.billing_name} {self.billing_address}'
@@ -240,8 +235,8 @@ class Feedback(models.Model):
     name=models.CharField(max_length=255)
     company_name=models.CharField(max_length=255)
     designation=models.CharField(max_length=255)
-    email=models.EmailField(max_length=255)
-    image=models.URLField(max_length=200)
+    # email=models.EmailField(max_length=255, blank=True, null=True)
+    image=models.FileField(max_length=200)
     feedback=models.CharField(max_length=255)
 
     def __str__(self):
@@ -459,16 +454,13 @@ class Choice_group(models.Model):
     def already_exists(group_name):
         return Choice_group.objects.filter(group_name=group_name).exists()
 
-
-
-
 class Attribute(models.Model):
     DATATYPE_CHOICES = [
         ('Text', 'Text'),
         ('Number', 'Number'),
         ('Date', 'Date'),
         ('Time', 'Time'),
-        ('single_choice', 'Single Choice'), # Static choices,
+        ('single_choice', 'Single Choice'),
         ('multi_choice', 'Multi Choice'),
     ]
 
@@ -480,7 +472,6 @@ class Attribute(models.Model):
     max_value=models.IntegerField(blank=True)
     dataformat=models.DateField(blank=True)
     timeformat=models.TimeField(blank=True)
-    # choice_group=models.ForeignKey('Choice_group')
 
     def clean(self):
         # Date and time format lists
@@ -491,7 +482,6 @@ class Attribute(models.Model):
             '%H:%M', '%H:%M:%S'
         ]
 
-        # Validate time format
         if self.timeformat:
             self.timeformat = self._validate_format(self.timeformat, time_formats, 'time')
 

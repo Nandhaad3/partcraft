@@ -93,7 +93,7 @@ class ProductDocument(Document):
         }
     )
     this_parts_fits = fields.NestedField(properties={
-        'vehicle_name': fields.TextField(fields={'raw': {'type': 'keyword'}}),
+        'vehicle_make': fields.TextField(fields={'raw': {'type': 'keyword'}}),
         'vehicle_model': fields.TextField(fields={'raw': {'type': 'keyword'}}),
         'vehicle_year': fields.TextField(fields={'raw': {'type': 'keyword'}}),
         'vehicle_variant': fields.TextField(fields={'raw': {'type': 'keyword'}})
@@ -133,10 +133,13 @@ class ProductDocument(Document):
     def prepare_parts_type(self, instance):
         return instance.parts_type if instance.parts_type else None
 
+    def prepare_vehicle_make(self, instance):
+        return instance.vehicle_make if instance.vehicle_make else None
+
     def prepare_this_parts_fits(self, instance):
         if instance.this_parts_fits.exists():
             return [{
-                'vehicle_name': fits.vehicle_name,
+                'vehicle_make': fits.vehicle_make.name,
                 'vehicle_model': fits.vehicle_model,
                 'vehicle_year': fits.vehicle_year,
                 'vehicle_variant': fits.vehicle_variant

@@ -174,14 +174,14 @@ class vehiclelistview(generics.ListAPIView):
 @api_view(['POST', 'GET'])
 def vehicle_view(request):
     if request.method == 'POST':
-        vehicleserializer = VehicleoneSerializer(data=request.data)
-        if vehicleserializer.is_valid():
+        applicationserializer = ApplicationSerializer(data=request.data)
+        if applicationserializer.is_valid():
             try:
                 vehicle = Vehicle.objects.filter(
-                    vehicle_make=vehicleserializer.validated_data['vehicle_make'],
-                    vehicle_variant=vehicleserializer.validated_data['vehicle_variant'],
-                    vehicle_model=vehicleserializer.validated_data['vehicle_model'],
-                    vehicle_year=vehicleserializer.validated_data['vehicle_year'],
+                    vehicle_make=applicationserializer.validated_data['vehicle_make'],
+                    vehicle_variant=applicationserializer.validated_data['vehicle_variant'],
+                    vehicle_model=applicationserializer.validated_data['vehicle_model'],
+                    vehicle_year=applicationserializer.validated_data['vehicle_year'],
                 )
                 v = []
                 for i in vehicle:
@@ -193,7 +193,7 @@ def vehicle_view(request):
 
                 vehicle_data = VehicleoneSerializer(vehicle, many=True, context={'request': request}).data
 
-                response = Response({'vehicle': vehicleserializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+                response = Response({'vehicle': applicationserializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
                 response.set_cookie('vehicle', json.dumps(vehicle_data))
                 print("cookies set response:")
                 for key, value in response.cookies.items():
@@ -202,11 +202,11 @@ def vehicle_view(request):
             except Vehicle.DoesNotExist:
                 return Response({'data': 'Vehicle not found.'}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(vehicleserializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(applicationserializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'GET':
         queryset = Vehicle.objects.all()
-        serializer = VehicleSerializer(queryset, many=True, context={'request': request})
+        serializer = ApplicationSerializer(queryset, many=True, context={'request': request})
         return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
 
@@ -793,11 +793,9 @@ class CartItemsCreateView(BaseCartView):
         return response
 
 class RemoveFromCartView(BaseCartView):
-
     def delete(self, request):
         response = self.clear_cart(request)
         return response
-
 
 class Carouselallview(generics.ListAPIView):
     serializer_class = Carouselserilizers
@@ -831,7 +829,6 @@ class Carouseloneview(generics.ListAPIView):
         lastdata = adddict(serializer)
         return Response({'data': carousel_serilizer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
 
-
 class ShippingAdressAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
@@ -839,10 +836,30 @@ class ShippingAdressAPIView(APIView):
         if serializer.is_valid():
             result = serializer.save()
             response_data = {
-                "message": "Shipping Address saved successfully.",
+                "message": "shipping address saved successfully.",
                 "shipping_address": Shippingaddressserializer(result).data
             }
-            return Response(response_data, status=status.HTTP_200_OK)
+            return Response({'data': response_data}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            shipping_address = ShippingAddress.objects.filter(user=request.user).order_by('-id').first()
+            if shipping_address:
+                serializer = Shippingaddressserializer(shipping_address)
+                return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response()
+class BillingAddressAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        serializer = Billaddressserializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            result = serializer.save()
+            response_data = {
+                "billing_address": Billaddressserializer(result).data
+            }
+            return Response({"message": "billing address saved successfully.", 'data': response_data}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -851,18 +868,6 @@ class OrderSummaryAPIView(BaseCartView):
 
     def get(self, request):
         user = request.user
-
-        billing_address = BillingAddress.objects.filter(user=user).order_by('-id').first()
-        dealer_id = request.session.get('dealer_id')
-        if not dealer_id:
-            return Response({"message": "No dealer, please select the dealer."}, status=status.HTTP_400_BAD_REQUEST)
-
-        data_dealer_address = DealerAddress.objects.filter(id=dealer_id).first()
-        if not data_dealer_address:
-            return Response({"message": "No dealer found with the provided ID."}, status=status.HTTP_404_NOT_FOUND)
-
-        dealer_address = DealerAddressSerializer(data_dealer_address, context={'request': request}).data  # Correctly serialize
-
         products_data = request.query_params.getlist('products')
         order_items = []
         grand_total = 0
@@ -923,13 +928,10 @@ class OrderSummaryAPIView(BaseCartView):
             })
 
         datas = {
-            "billing_address": Billaddressserializer(billing_address).data if billing_address else None,  # Ensure serialized data
-            "dealer_address": dealer_address,  # Already serialized above
             "order_items": detailed_order_items,
             "grand_total": grand_total
         }
 
-        # Serialize the order summary to a JSON string
         order_summary_data = {
             "billing_address": datas["billing_address"],
             "dealer_address": datas["dealer_address"],
@@ -941,7 +943,7 @@ class OrderSummaryAPIView(BaseCartView):
         order_summary_json = json.dumps(order_summary_data)
 
         # Create the response
-        response = Response(datas, status=status.HTTP_200_OK)
+        response = Response({'data': datas}, status=status.HTTP_200_OK)
 
         # Set the serialized order summary data in the cookies
         response.set_cookie('order_summary', order_summary_json, max_age=3600, httponly=True)
@@ -1127,13 +1129,6 @@ class FeedbackView(APIView):
     def post(self, request):
         serializer = FeedbackSerializer(data=request.data)
         if serializer.is_valid():
-            p = request.data
-            f = Feedback.objects.all()
-            l = []
-            for i in f:
-                l.append(i.email)
-            if p['email'] in l:
-                return Response({'data': 'Email already registered.'}, status=status.HTTP_208_ALREADY_REPORTED)
             serializer.save()
             return Response({'data':'Feedback has successfully created'}, status=status.HTTP_201_CREATED)
         return Response({'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -1219,7 +1214,6 @@ class SelectSellerAddressAPIView(APIView):
     def post(self, request, *args, **kwargs):
         def post(self, request, *args, **kwargs):
             seller_id = request.data.get('seller_id')
-
             if not seller_id:
                 return Response({'message': 'Seller ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1227,11 +1221,8 @@ class SelectSellerAddressAPIView(APIView):
                 seller = Seller.objects.get(id=seller_id)
             except Seller.DoesNotExist:
                 return Response({'message': 'Seller not found.'}, status=status.HTTP_404_NOT_FOUND)
-
             request.session['selected_seller_id'] = seller_id
-
             serializer = SellerSerializer(seller, context={'request': request})
-
             return Response({
                 "message": "Seller selected successfully.",
                 "selected_seller": serializer.data
