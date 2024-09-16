@@ -21,6 +21,7 @@ class BrandSerializer(serializers.ModelSerializer):
         return obj.brand_manufacturer.logo
 
 
+
 class CategorySerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='onecategorydetails')
 

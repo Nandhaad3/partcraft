@@ -66,7 +66,7 @@ REST_FRAMEWORK = {
 
 ELASTICSEARCH_DSL = {
     'default' : {
-        "hosts" : "https://site:6b8c6cb64d5368d6308e214199f0dbcd@oin-us-east-1.searchly.com",
+        "hosts" : "https://site:bcc6798cdf8064c30f8f94c0a74c66e6@oin-us-east-1.searchly.com",
     }
 }
 

@@ -1,7 +1,6 @@
 from django_elasticsearch_dsl import Document, fields, Index
 # from parts.models import *
 from elasticsearch import Elasticsearch
-
 from parts.models.models import *
 
 PUBLISHER_INDEX = Index('product')
@@ -104,7 +103,7 @@ class ProductDocument(Document):
         queryset = Product.objects.filter()
 
     def prepare_parts_brand(self, instance):
-        return instance.parts_brand.brand_name if instance.parts_brand else None
+        return instance.parts_brand.brand_manufacturer.name if instance.parts_brand else None
 
     def prepare_parts_category(self, instance):
         return instance.parts_category.category_name if instance.parts_category else None
