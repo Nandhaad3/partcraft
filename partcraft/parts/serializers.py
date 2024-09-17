@@ -550,6 +550,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class Bestsellingserializer(serializers.ModelSerializer):
+    product_id=serializers.SerializerMethodField()
     parts_type = serializers.SerializerMethodField(source='product.parts_type')
     parts_name = serializers.SerializerMethodField()
     brand_logo = serializers.SerializerMethodField()
@@ -565,7 +566,7 @@ class Bestsellingserializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductOrderCount
-        fields = ['id', 'parts_type', 'parts_name', 'brand_logo', 'parts_no', 'parts_price', 'parts_offer',
+        fields = ['product_id', 'parts_type', 'parts_name', 'brand_logo', 'parts_no', 'parts_price', 'parts_offer',
                   'final_price', 'main_image', 'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart']
 
     def get_parts_type(self, obj):
@@ -579,6 +580,11 @@ class Bestsellingserializer(serializers.ModelSerializer):
                 f"{product.parts_voltage}V "
                 f"{product.parts_fits} "
                 f"{product.parts_litre}L")
+
+    def get_product_id(self,obj):
+        print(obj.product.product_code)
+        return obj.product.id
+
 
     def get_parts_name(self, obj):
         b = self.arrangename(obj)
