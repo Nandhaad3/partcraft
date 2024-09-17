@@ -359,7 +359,7 @@ class WishallView(APIView):
             }
         categorized_data = dict(product_info)
         response = Response({
-            'Product': categorized_data,
+            'product': categorized_data,
             'move_to_cart': move_to_cart_url,
             'delete_all_wishlist': delete_all_wishlist_url,
              },

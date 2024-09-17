@@ -185,3 +185,7 @@ class OrderStatusAdmin(admin.ModelAdmin):
 @admin.register(CurrencyCode)
 class CurrencyCodeAdmin(admin.ModelAdmin):
     list_display = ['currency_code']
+
+@admin.register(CostCategory)
+class CostCategoryAdmin(admin.ModelAdmin):
+    list_display = ['cost_category']
