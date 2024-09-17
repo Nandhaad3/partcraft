@@ -11,6 +11,10 @@ from django.core.exceptions import ValidationError
 # from djongo import models as djongo_models
 # import mongoengine as me
 
+class CurrencyCode(models.Model):
+    currency_code=models.CharField(max_length=255)
+    def __str__(self):
+        return self.currency_code
 
 class Manufacturer(models.Model):
     name = models.CharField(max_length=50,unique=True)
@@ -277,7 +281,7 @@ class Seller(models.Model):
 class Product_cost(models.Model):
     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
     product_cost = models.IntegerField(default=0)
-    product_currency = models.CharField(max_length=255)#model
+    product_currency = models.ForeignKey(CurrencyCode, on_delete=models.CASCADE)
     cost_code=models.ForeignKey(Cost_Code, on_delete=models.CASCADE,default=1)
     effective_from=models.DateTimeField()
     def __str__(self):
@@ -346,21 +350,19 @@ class Productsummary(models.Model):
 
     def __str__(self):
         return self.title
+class CostCategory(models.Model):
+    cost_category = models.CharField(max_length=255)
+    def __str__(self):
+        return self.cost_category
 
 class Costtypes(models.Model):
-    COST_CATEGORY_CHOICES = [
-        ('Product', 'Product'),
-        ('Nonproduct', 'Nonproduct'),
-        ('Tax', 'Tax'),
-        ('Discount', 'Discount'),
-    ]
     Transaction_choices=[
         ('D','Debit'),
         ('C','Credit'),
     ]
     ID=models.CharField(max_length=255,primary_key=True)
     name=models.CharField(max_length=255)
-    cost_category=models.CharField(choices=COST_CATEGORY_CHOICES,max_length=255)#model
+    cost_category=models.ForeignKey(CostCategory, on_delete=models.CASCADE)
     is_order_level_cost=models.BooleanField()
     is_order_item_level_cost=models.BooleanField()
     transaction_type=models.CharField(choices=Transaction_choices,max_length=255)
@@ -368,17 +370,16 @@ class Costtypes(models.Model):
     def __str__(self):
         return self.name
 
+class OrderStatus(models.Model):
+    order_status = models.CharField(max_length=255)
+    def __str__(self):
+        return self.order_status
+
 class orders(models.Model):
-    STATUS_CHOICES = [
-        ('New', 'New'),
-        ('InProgress', 'InProgress'),
-        ('Completed', 'Completed'),
-    ]
     ID=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     orderedby=models.ForeignKey(User, on_delete=models.CASCADE)
     orderedon=models.DateTimeField(auto_now_add=True)
-    orderstatus=models.CharField(choices=STATUS_CHOICES,max_length=255)#model
-
+    orderstatus=models.ForeignKey(OrderStatus, on_delete=models.CASCADE)
     def __str__(self):
         return self.ID
 
@@ -395,7 +396,7 @@ class orderitemcost(models.Model):
     orderitem=models.ForeignKey(orderitems, on_delete=models.CASCADE)
     cost_type=models.ForeignKey(Costtypes, on_delete=models.CASCADE,limit_choices_to={'is_order_item_level_cost': True})
     amount=models.IntegerField(default=0)
-    currency_code=models.CharField(max_length=255)#model
+    currency_code=models.ForeignKey(CurrencyCode, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.orderitem}'
@@ -404,7 +405,7 @@ class ordercosts(models.Model):
     order=models.ForeignKey(orders, on_delete=models.CASCADE)
     cost_type = models.ForeignKey(Costtypes, on_delete=models.CASCADE,limit_choices_to={'is_order_item_level_cost': True})
     amount = models.IntegerField(default=0)
-    currency_code = models.CharField(max_length=255)#model
+    currency_code = models.ForeignKey(CurrencyCode, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.order}'

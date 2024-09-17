@@ -345,7 +345,7 @@ class WishallView(APIView):
             wishlist_data = WishallSerializer(wishlist, context={'request': request}).data
             product_info = {
                 'product_id': wishlist_data['wishlist_product']['id'],
-                'wishlist_product': f"{wishlist_data['wishlist_product']['parts_brand']['brand_manufacturer.name']} {wishlist_data['wishlist_product']['parts_category']['category_name']} {wishlist_data['wishlist_product']['subcategory_name']}",
+                'wishlist_product': f"{wishlist_data['wishlist_product']['parts_brand']['brand_name']} {wishlist_data['wishlist_product']['parts_category']['category_name']} {wishlist_data['wishlist_product']['subcategory_name']}",
                 'parts_no': wishlist_data['parts_no'],
                 'brand_logo': wishlist_data['brand_logo'],
                 'parts_type': wishlist_data['parts_type'],

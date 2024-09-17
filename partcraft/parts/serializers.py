@@ -301,6 +301,7 @@ class ProductoneSerializer(serializers.ModelSerializer):
                   'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart', 'product_fit']
     def get_brand_image(self,obj):
         return obj.parts_brand.brand_manufacturer.logo
+
     def arrangename(self, obj):
         return (f"{obj.parts_brand.brand_manufacturer.name} "
                 f"{obj.parts_category.category_name} "

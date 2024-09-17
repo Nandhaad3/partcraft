@@ -178,5 +178,10 @@ class ProductAttributeAdmin(admin.ModelAdmin):
 class ProductAttributeValueAdmin(admin.ModelAdmin):
     list_display = ['product_attribute_id', 'value', 'choice_value']
 
+@admin.register(OrderStatus)
+class OrderStatusAdmin(admin.ModelAdmin):
+    list_display = ['order_status']
 
-
+@admin.register(CurrencyCode)
+class CurrencyCodeAdmin(admin.ModelAdmin):
+    list_display = ['currency_code']
