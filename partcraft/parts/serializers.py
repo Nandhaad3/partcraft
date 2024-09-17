@@ -185,7 +185,7 @@ class ProductSerializer(serializers.ModelSerializer):
             for vehicle in vehicle_list:
                 for fit in parts_fits:
                     if (
-                            vehicle.get('vehicle_name') == fit.vehicle_name and
+                            vehicle.get('vehicle_make') == fit.vehicle_make and
                             vehicle.get('vehicle_model') == fit.vehicle_model and
                             vehicle.get('vehicle_year') == fit.vehicle_year and
                             vehicle.get('vehicle_variant') == fit.vehicle_variant
@@ -340,7 +340,7 @@ class ProductoneSerializer(serializers.ModelSerializer):
 
         for vehicle in obj.this_parts_fits.all():
             for v in vehicles:
-                if (vehicle.vehicle_name == v.get('vehicle_name') and
+                if (vehicle.vehicle_make.name == v.get('vehicle_make') and
                         vehicle.vehicle_model == v.get('vehicle_model') and
                         vehicle.vehicle_year == v.get('vehicle_year') and
                         vehicle.vehicle_variant == v.get('vehicle_variant')):
@@ -353,6 +353,7 @@ class WishallSerializer(serializers.ModelSerializer):
     parts_no = serializers.SerializerMethodField()
     brand_logo = serializers.SerializerMethodField()
     parts_type = serializers.SerializerMethodField(source='product.parts_type')
+    parts_category = serializers.SerializerMethodField()
     parts_price = serializers.SerializerMethodField()
     parts_offer = serializers.SerializerMethodField()
     final_price = serializers.SerializerMethodField()
@@ -364,9 +365,11 @@ class WishallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wishlist
         fields = [
-            'id', 'wishlist_name', 'parts_no', 'brand_logo', 'parts_type', 'parts_price', 'parts_offer',
+            'id', 'wishlist_name', 'parts_no', 'brand_logo', 'parts_category', 'parts_type', 'parts_price', 'parts_offer',
             'final_price', 'main_image', 'wishlist_product', 'addtocart', 'wishlist_delete', 'delete_all_wishlist']
         read_only_fields = ['wishlist_name']
+
+
 
     def arrangename(self, obj):
         return (f"{obj.parts_brand.brand_manufacturer.name} "
@@ -379,6 +382,9 @@ class WishallSerializer(serializers.ModelSerializer):
     def get_parts_name(self, obj):
         b = self.arrangename(obj)
         return b.replace('NoneL', '').strip()
+
+    def get_parts_category(self, obj):
+        return obj.wishlist_product.subcategory_name
 
     def get_wishlist_name(self, obj):
         return obj.wishlist_name.email
@@ -582,7 +588,6 @@ class Bestsellingserializer(serializers.ModelSerializer):
                 f"{product.parts_litre}L")
 
     def get_product_id(self,obj):
-        print(obj.product.product_code)
         return obj.product.id
 
 
@@ -755,19 +760,18 @@ class ApplicationCategorySerializer(serializers.ModelSerializer):
         fields = ['category_name', 'url']
 
 class ApplicationSerializer(serializers.ModelSerializer):
-    class ApplicationSerializer(serializers.ModelSerializer):
-        vehicle_make_name = serializers.SerializerMethodField()
-        vehicle_category_name = serializers.SerializerMethodField()
+    vehicle_make = serializers.SerializerMethodField()
+    vehicle_category = serializers.SerializerMethodField()
 
-        class Meta:
-            model = Vehicle
-            fields = ['vehicle_make', 'vehicle_category', 'vehicle_make_name', 'vehicle_category_name']
+    class Meta:
+        model = Vehicle
+        fields = '__all__'
 
-        def get_vehicle_make_name(self, obj):
-            return obj.vehicle_make.name
+    def get_vehicle_make(self, obj):
+        return obj.vehicle_make.name
 
-        def get_vehicle_category_name(self, obj):
-            return obj.vehicle_category.category_name
+    def get_vehicle_category(self, obj):
+        return obj.vehicle_category.category_name
 
 
 class SellerSerializer(serializers.ModelSerializer):

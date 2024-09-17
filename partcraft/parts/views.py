@@ -315,8 +315,9 @@ class WishlistCreateView(generics.ListCreateAPIView):
         if not product:
             return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # if Wishlist.objects.filter(wishlist_name=request.user, wishlist_product=product).exists():
-        #     return Response({"error": "Product already exists in the wishlist."}, status=status.HTTP_400_BAD_REQUEST)
+        existing_wishlist = Wishlist.objects.filter(wishlist_name=self.request.user, wishlist_product=product).exists()
+        if existing_wishlist:
+            return Response({"message": "Product is already in the wishlist."}, status=status.HTTP_400_BAD_REQUEST)
 
         data = {
             'wishlist_name': self.request.user,
@@ -341,6 +342,7 @@ class WishallView(APIView):
         move_to_cart_url = request.build_absolute_uri(reverse('move-to-cart'))
         delete_all_wishlist_url = request.build_absolute_uri(reverse('delete-all-wishlistitems'))
         product_info={}
+        wish=[]
         for wishlist in wishlists:
             wishlist_data = WishallSerializer(wishlist, context={'request': request}).data
             product_info = {
@@ -348,6 +350,7 @@ class WishallView(APIView):
                 'wishlist_product': f"{wishlist_data['wishlist_product']['parts_brand']['brand_name']} {wishlist_data['wishlist_product']['parts_category']['category_name']} {wishlist_data['wishlist_product']['subcategory_name']}",
                 'parts_no': wishlist_data['parts_no'],
                 'brand_logo': wishlist_data['brand_logo'],
+                'parts_category': wishlist_data['parts_category'],
                 'parts_type': wishlist_data['parts_type'],
                 'parts_price': wishlist_data['parts_price'],
                 'parts_offer': wishlist_data['parts_offer'],
@@ -357,14 +360,16 @@ class WishallView(APIView):
                 'addtocart': wishlist_data['addtocart'],
                 'Wishlistdel': wishlist_data['wishlist_delete'],
             }
-        categorized_data = dict(product_info)
+            categorized_data = dict(product_info)
+            wish.append(categorized_data)
+
         response = Response({
-            'product': categorized_data,
+            'product': wish,
             'move_to_cart': move_to_cart_url,
             'delete_all_wishlist': delete_all_wishlist_url,
              },
             status=status.HTTP_200_OK)
-        if bool(categorized_data) is not False:
+        if bool(wish) is not False:
             return response
         else:
             return Response({'Message': 'No Wishlist '}, status=status.HTTP_400_BAD_REQUEST)
@@ -522,8 +527,7 @@ class ViewCartView(BaseCartView):
         else:
             cart_items = self.get_cart_items_from_cookie(request)
             cart_data, total_price, savings = self.process_cart_data(cart_items)
-            print(cart_items)
-            print("cart data:", cart_data)
+
             checkout_url = request.build_absolute_uri(reverse('billing_addres'))
 
             if not cart_data:
@@ -686,7 +690,6 @@ class CartItemsCreateView(BaseCartView):
         # Get the quantity from the request, default to 1 if not provided
         quantity = int(request.data.get('quantity', 1))
 
-        # Check if the user is authenticated
         if request.user.is_authenticated:
             # Get or create a cart item for the user and product
             cart_item, created = Cart.objects.get_or_create(

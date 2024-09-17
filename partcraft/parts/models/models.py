@@ -545,5 +545,9 @@ class ProductAttributeValue(models.Model):
 #     Tabs = models.ArrayField(model_container=Tab)
 
 
-
-
+# updated cart
+class carts(models.Model):
+    cart_name=models.CharField(max_length=255)
+    order = models.ForeignKey(orders, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.cart_name}, {self.order}"
