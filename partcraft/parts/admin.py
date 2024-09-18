@@ -202,3 +202,4 @@ class cartsAdmin(admin.ModelAdmin):
 # class Product_btclinksAdmin(admin.ModelAdmin):
 #     list_display = ['product', 'btc_partner', 'url']
 
+admin.site.register(preferences)

@@ -751,7 +751,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['parts_name', 'parts_price', 'main_image', 'parts_no', 'parts_offer', 'product_full_detail', 'final_price']
+        fields = ['id', 'parts_name', 'parts_price', 'main_image', 'parts_no', 'parts_offer', 'product_full_detail', 'final_price']
 
     def get_parts_no(self, obj):
         return obj.parts_no
@@ -797,6 +797,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
     def get_delete(self, obj):
         return f"/api/cart/delete/{obj.ID}/"
 
+
+
 class ProductBTCSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_btc_links
@@ -806,3 +808,16 @@ class MerchantSerializer(serializers.ModelSerializer):
     class Meta:
         model = MerchandisingContent
         fields = '__all__'
+
+
+
+class PreferencesSerializer(serializers.ModelSerializer):
+    seller=serializers.SerializerMethodField()
+
+    class Meta:
+        model=preferences
+        fields = ['user','seller']
+    def get_seller(self, obj):
+        return obj.selected_seller
+
+

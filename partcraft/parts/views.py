@@ -1235,7 +1235,6 @@ class SelectSellerAddressAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         seller_id = request.data.get('seller_id')
-
         if not seller_id:
             return Response({'message': 'Seller ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1244,16 +1243,36 @@ class SelectSellerAddressAPIView(APIView):
         except Seller.DoesNotExist:
             return Response({'message': 'Seller not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        user = request.user
-        user_preferences, created = preferences.objects.update_or_create(
-            user=user, defaults={'selected_seller': seller}
-        )
+        # user = request.user
+        # user_preferences, created = preferences.objects.update_or_create(
+        #     user=user, defaults={'selected_seller': seller}
+        # )
 
         serializer = SellerSerializer(seller, context={'request': request})
         return Response({
             "message": "Seller selected successfully.",
             "selected_seller": serializer.data
         }, status=status.HTTP_200_OK)
+
+
+class PreferencesView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        prefer = preferences.objects.all()
+        print(prefer)
+        serializer = PreferencesSerializer(prefer, many=True)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        data = request.data
+        u=User.objects.get(email=request.user)
+        print(u.id)
+        serializer = PreferencesSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'data': 'Preferences has successfully created'}, status=status.HTTP_201_CREATED)
+        return Response({'data': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class CreateCartItem(APIView):
@@ -1496,23 +1515,38 @@ class CartItemDetailView(APIView):
 
         order_items = orderitems.objects.filter(order=active_order)
         serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
+        product = []
+        final={}
 
-        product = [
-            {
-                'parts_name': item['product']['parts_name'],
-                'parts_price': item['product']['parts_price'],
-                'main_image': item['product']['main_image'],
-                'parts_no': item['product']['parts_no'],
-                'parts_offer': item['product']['parts_offer'],
-                'product_full_detail' : item['product']['product_full_detail'],
-                'final_price': item['product']['final_price'],
-                'quantity': item['quantity'],
-                'detele': item['delete']
-            }
-            for item in serializer.data
-        ]
-
-        return Response(product, status=status.HTTP_200_OK)
+        for item in serializer.data:
+            data = {}
+            data['product_id'] = item['product']['id']
+            data['parts_name'] = item['product']['parts_name']
+            data['parts_price'] = item['product']['parts_price'] * item['quantity']
+            data['main_image'] = item['product']['main_image']
+            data['parts_no'] = item['product']['parts_no']
+            data['parts_offer'] = item['product']['parts_offer']
+            data['product_full_detail'] = item['product']['product_full_detail'],
+            data['final_price'] = item['product']['final_price'] * item['quantity']
+            data['quantity'] = item['quantity']
+            data['detele'] = item['delete']
+            product.append(data)
+        final['products'] = product
+        print(final)
+        total_price = []
+        actual_price=[]
+        for i in product:
+            t = i["final_price"] * i["quantity"]
+            total_price.append(int(t))
+            a = i['parts_price'] * i['quantity']
+            actual_price.append(int(a))
+        tot=sum(total_price)
+        act=sum(actual_price)
+        saving_price=act-tot
+        final['total_price']=tot
+        final['saving_price']=saving_price
+        response = Response({'data':final}, status=status.HTTP_200_OK)
+        return response
 
 class CartDeleteView(APIView):
     def delete(self, request, item_id, format=None):

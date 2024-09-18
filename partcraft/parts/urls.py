@@ -56,5 +56,6 @@ urlpatterns = [
     path('place/order/', PlaceOrder.as_view(), name='place=order'),
     path('b2c/', BtwocView.as_view(), name='b-2-c'),
     path('merchant/', MerchandisingContentView.as_view(), name='merchant'),
+    path('sellerprefer/',PreferencesView.as_view(),name='sellerprefer')
 ]
 

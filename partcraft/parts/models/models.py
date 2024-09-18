@@ -278,6 +278,8 @@ class Seller(models.Model):
     def __str__(self):
         return f'{self.name} {self.address}'
 
+
+
 class Product_cost(models.Model):
     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
     product_cost = models.IntegerField(default=0)
@@ -571,3 +573,7 @@ class preferences(models.Model):
     selected_seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
     def __str__(self):
         return f"{self.user}'s preferences"
+
+
+
+
