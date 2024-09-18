@@ -744,10 +744,20 @@ class CartSerializer(serializers.ModelSerializer):
     parts_name = serializers.SerializerMethodField()
     parts_price = serializers.SerializerMethodField()
     main_image = serializers.SerializerMethodField()
+    parts_no = serializers.SerializerMethodField()
+    parts_offer = serializers.SerializerMethodField()
+    product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
+    final_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['parts_name', 'parts_price', 'main_image']
+        fields = ['parts_name', 'parts_price', 'main_image', 'parts_no', 'parts_offer', 'product_full_detail', 'final_price']
+
+    def get_parts_no(self, obj):
+        return obj.parts_no
+
+    def get_parts_offer(self, obj):
+        return obj.parts_offer
 
     def get_brand_image(self, obj):
         return obj.parts_brand.brand_manufacturer.logo
@@ -768,6 +778,11 @@ class CartSerializer(serializers.ModelSerializer):
         return obj.parts_price
     def get_main_image(self, obj):
         return obj.main_image
+
+    def get_final_price(self, obj):
+        discount_amount = obj.parts_price * (obj.parts_offer / 100)
+        final_price = obj.parts_price - discount_amount
+        return final_price
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = CartSerializer(read_only=True)

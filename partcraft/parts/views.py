@@ -1450,11 +1450,16 @@ class CartItemDetailView(APIView):
 
         order_items = orderitems.objects.filter(order=active_order)
         serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
+
         product = [
             {
                 'parts_name': item['product']['parts_name'],
                 'parts_price': item['product']['parts_price'],
                 'main_image': item['product']['main_image'],
+                'parts_no': item['product']['parts_no'],
+                'parts_offer': item['product']['parts_offer'],
+                'product_full_detail' : item['product']['product_full_detail'],
+                'final_price': item['product']['final_price'],
                 'quantity': item['quantity'],
                 'detele': item['delete']
             }
@@ -1514,9 +1519,11 @@ class OrderSummaryAPIView(APIView):
                 'parts_name': product['parts_name'],
                 'parts_price': product['parts_price'],
                 'main_image': product['main_image'],
-                'quantity': item['quantity'],
+                'parts_no': product['parts_no'],
                 'parts_offer': product['parts_offer'],
-                'final_price': ['final_price'],
+                'product_full_detail': product['product_full_detail'],
+                'final_price': product['final_price'],
+                'quantity': item['quantity'],
             })
 
         billing_serializer = Billaddressserializer(billing_address)
