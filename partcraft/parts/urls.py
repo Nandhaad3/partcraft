@@ -52,6 +52,7 @@ urlpatterns = [
     path('create/cart/', CreateCartItem.as_view(), name='create-cart'),
     path('cart/', CartItemDetailView.as_view(), name='cart'),
     path('cart/delete/<int:item_id>/', CartDeleteView.as_view(), name='cart-delete'),
+    path('cart/delete/all/', EmptyCartView.as_view(), name='cart-delete-all'),
     path('place/order/', PlaceOrder.as_view(), name='place=order'),
     path('b2c/', BtwocView.as_view(), name='b-2-c'),
     path('merchant/', MerchandisingContentView.as_view(), name='merchant'),

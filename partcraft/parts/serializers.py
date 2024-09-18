@@ -110,7 +110,7 @@ class ProductSerializer(serializers.ModelSerializer):
     is_in_wishlist = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
     similar_products = serializers.SerializerMethodField()
-    addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
+    addtocart = serializers.HyperlinkedIdentityField(view_name='create-cart')
     buynow = serializers.SerializerMethodField()
 
 
@@ -291,7 +291,7 @@ class ProductoneSerializer(serializers.ModelSerializer):
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
     is_in_wishlist = serializers.SerializerMethodField()
-    addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
+    addtocart = serializers.HyperlinkedIdentityField(view_name='create-cart')
     product_fit = serializers.SerializerMethodField()
 
 
@@ -359,7 +359,7 @@ class WishallSerializer(serializers.ModelSerializer):
     final_price = serializers.SerializerMethodField()
     main_image = serializers.SerializerMethodField()
     wishlist_name = serializers.SerializerMethodField()
-    addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
+    addtocart = serializers.HyperlinkedIdentityField(view_name='create-cart')
     wishlist_delete = serializers.HyperlinkedIdentityField(view_name='wishdeleteoneitem')
     delete_all_wishlist = serializers.SerializerMethodField()
     class Meta:
@@ -497,7 +497,7 @@ class Bestsellingserializer(serializers.ModelSerializer):
     main_image = serializers.SerializerMethodField()
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
-    addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
+    addtocart = serializers.HyperlinkedIdentityField(view_name='create-cart')
     is_in_wishlist = serializers.SerializerMethodField()
 
     class Meta:
@@ -608,7 +608,7 @@ class TestProductSerializer(serializers.ModelSerializer):
     is_in_wishlist = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
     similar_products = serializers.SerializerMethodField()
-    addtocart = serializers.HyperlinkedIdentityField(view_name='cart-add')
+    addtocart = serializers.HyperlinkedIdentityField(view_name='create-cart')
     buynow = serializers.SerializerMethodField()
 
 
@@ -783,6 +783,7 @@ class CartSerializer(serializers.ModelSerializer):
         discount_amount = obj.parts_price * (obj.parts_offer / 100)
         final_price = obj.parts_price - discount_amount
         return final_price
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = CartSerializer(read_only=True)

@@ -1255,6 +1255,7 @@ class SelectSellerAddressAPIView(APIView):
             "selected_seller": serializer.data
         }, status=status.HTTP_200_OK)
 
+
 class CreateCartItem(APIView):
     def post(self, request, format=None):
         user = request.user
@@ -1314,8 +1315,9 @@ class CreateCartItem(APIView):
         inventory.items_left = inventory.instock_count
         inventory.save()
 
-        serializer = OrderItemSerializer(order_item)
+        serializer = OrderItemSerializer(order_item, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def put(self, request, format=None):
         user = request.user
         data = request.data
@@ -1366,7 +1368,7 @@ class CreateCartItem(APIView):
         inventory.items_left = inventory.instock_count
         inventory.save()
 
-        serializer = OrderItemSerializer(order_item)
+        serializer = OrderItemSerializer(order_item, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def apply_order_item_costs(self, order_item):
@@ -1430,6 +1432,50 @@ class CreateCartItem(APIView):
                     'currency_code': currency_code
                 }
             )
+
+
+class EmptyCartView(APIView):
+    def delete(self, request, format=None):
+        user = request.user
+        data = request.data
+
+        order_status_new, _ = OrderStatus.objects.get_or_create(order_status='New')
+
+        if user.is_authenticated:
+            active_order = orders.objects.filter(
+                orderedby=user,
+                orderstatus=order_status_new
+            ).first()
+        else:
+            session_key = request.session.session_key
+            if not session_key:
+                return Response({"error": "Session not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+            active_order = orders.objects.filter(
+                session_key=session_key,
+                orderstatus=order_status_new
+            ).first()
+
+        if not active_order:
+            return Response({"error": "No active order found."}, status=status.HTTP_404_NOT_FOUND)
+        order_items = orderitems.objects.filter(order=active_order)
+        if not order_items.exists():
+            return Response({"error": "No items found in the cart."}, status=status.HTTP_404_NOT_FOUND)
+
+        for order_item in order_items:
+            product = order_item.product
+            inventory = ProductInventory.objects.filter(product=product).first()
+
+            if inventory:
+                inventory.instock_count += order_item.quantity
+                inventory.items_left = inventory.instock_count
+                inventory.save()
+
+            order_item.delete()
+
+        ordercosts.objects.filter(order=active_order).delete()
+        active_order.delete()
+        return Response({"message": "All cart items deleted successfully."}, status=status.HTTP_200_OK)
 
 
 class CartItemDetailView(APIView):
@@ -1513,8 +1559,10 @@ class OrderSummaryAPIView(APIView):
         order_item_serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
 
         product_data = []
+
         for item in order_item_serializer.data:
             product = item['product']
+
             product_data.append({
                 'parts_name': product['parts_name'],
                 'parts_price': product['parts_price'],
@@ -1524,16 +1572,15 @@ class OrderSummaryAPIView(APIView):
                 'product_full_detail': product['product_full_detail'],
                 'final_price': product['final_price'],
                 'quantity': item['quantity'],
+                'total_price': item['quantity'] * product['final_price']
             })
+            orderitemcost.objects.all()
 
         billing_serializer = Billaddressserializer(billing_address)
         seller_serializer = SellerSerializer(seller_preferences.selected_seller)
 
-        response_data = {
-            'billing_address': billing_serializer.data,
-            'seller': seller_serializer.data,
-            'products': product_data
-        }
+        response_data = dict(billing_address=billing_serializer.data, seller=seller_serializer.data,
+                             products=product_data)
 
         return Response({'data':response_data}, status=status.HTTP_200_OK)
 

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, EmailMessage
+from django.template.loader import render_to_string
 import random
 from .models import *
 
@@ -8,7 +9,7 @@ def send_otp_via_email(email):
     try:
         otp = random.randint(100000, 999999)
         subject = 'Your account verification code'
-        message = f'Your OTP for email verification: {otp}'
+        html_content = render_to_string('myapp/email_templates/welcome_email.html', {'user': user})
         email_from = settings.EMAIL_HOST_USER
         recipient_list = [email]
         send_mail(subject, message, email_from, recipient_list)
