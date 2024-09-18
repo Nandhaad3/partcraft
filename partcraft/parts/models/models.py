@@ -173,7 +173,7 @@ class BillingAddress(models.Model):
     email = models.EmailField(max_length=255)
     billing_address = models.CharField(max_length=1000)
     # city = models.CharField(max_length=255, blank=True, null=True)
-    contact = models.CharField(max_length=13, blank=True, null=True)
+    # contact = models.CharField(max_length=13, blank=True, null=True)
 
     def __str__(self):
         return f'{self.billing_name} {self.billing_address}'
@@ -183,7 +183,7 @@ class ShippingAddress(models.Model):
     shipping_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
     shipping_address = models.CharField(max_length=1000)
-    contact = models.CharField(max_length=13)
+    # contact = models.CharField(max_length=13)
 
 
     def __str__(self):
@@ -283,7 +283,7 @@ class Product_cost(models.Model):
     product_cost = models.IntegerField(default=0)
     product_currency = models.ForeignKey(CurrencyCode, on_delete=models.CASCADE)
     cost_code=models.ForeignKey(Cost_Code, on_delete=models.CASCADE,default=1)
-    effective_from=models.DateTimeField()
+    # effective_from=models.DateTimeField()
     def __str__(self):
         return f'{self.product_id} {self.product_cost} {self.product_currency}'
 
@@ -291,10 +291,16 @@ class Product_btc_partners(models.Model):
     partner_name = models.CharField(max_length=255)
     partner_logo = models.URLField(max_length=511)
 
+    def __str__(self):
+        return f'{self.partner_name} {self.partner_logo}'
+
 class Product_btc_links(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     bzc_partner = models.ForeignKey(Product_btc_partners, on_delete=models.CASCADE)
     url = models.URLField(max_length=511)
+
+    def __str__(self):
+        return f'{self.product} {self.bzc_partner} {self.url}'
 
 class MerchandisingSlot(models.Model):
     id = models.AutoField(primary_key=True)
@@ -302,6 +308,9 @@ class MerchandisingSlot(models.Model):
     width = models.IntegerField(null=False)
     height = models.IntegerField(null=False)
     Aspect_ratio_threshold = models.IntegerField(default=10)
+
+    def __str__(self):
+        return f'{self.id} {self.width} {self.height} {self.Aspect_ratio_threshold}'
 
 class MerchandisingContent(models.Model):
     LINK_TYPE_CHOICES = [
@@ -314,6 +323,9 @@ class MerchandisingContent(models.Model):
     # image_storage = models.ForeignKey(Storage, on_delete=models.CASCADE, null=True, blank=True)
     click_link = models.CharField(max_length=255, null=True, blank=True)
     click_link_type = models.CharField(choices=LINK_TYPE_CHOICES,max_length=255, null=False)
+
+    def __str__(self):
+        return f'{self.slot} {self.image_url}'
 
 class Tags(models.Model):
     ID=models.CharField(max_length=255,primary_key=True)
@@ -331,6 +343,13 @@ class ProductTags(models.Model):
     def __str__(self):
         return self.ID
 
+class Productsummary(models.Model):
+    product_id=models.ForeignKey(Product, on_delete=models.CASCADE)
+    title=models.CharField(max_length=255)
+    content=models.TextField()
+    def __str__(self):
+        return self.title
+
 class ProductInventory(models.Model):
     product=models.ForeignKey(Product, on_delete=models.CASCADE)
     user_alert_threshold=models.IntegerField(default=0)
@@ -340,16 +359,9 @@ class ProductInventory(models.Model):
     reversed_count=models.IntegerField(default=0)
 
     def __str__(self):
-        return self.product
+        return str(self.product)
 
 
-class Productsummary(models.Model):
-    product_id=models.ForeignKey(Product, on_delete=models.CASCADE)
-    title=models.CharField(max_length=255)
-    content=models.TextField()
-
-    def __str__(self):
-        return self.title
 class CostCategory(models.Model):
     cost_category = models.CharField(max_length=255)
     def __str__(self):
@@ -366,6 +378,7 @@ class Costtypes(models.Model):
     is_order_level_cost=models.BooleanField()
     is_order_item_level_cost=models.BooleanField()
     transaction_type=models.CharField(choices=Transaction_choices,max_length=255)
+    percentage = models.IntegerField()
 
     def __str__(self):
         return self.name
@@ -377,20 +390,23 @@ class OrderStatus(models.Model):
 
 class orders(models.Model):
     ID=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    orderedby=models.ForeignKey(User, on_delete=models.CASCADE)
+    orderedby=models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     orderedon=models.DateTimeField(auto_now_add=True)
     orderstatus=models.ForeignKey(OrderStatus, on_delete=models.CASCADE)
+    session_key = models.CharField(max_length=40, null=True, blank=True)
+
     def __str__(self):
-        return self.ID
+        return f'Order {self.ID} by {self.orderedby}'
 
 class orderitems(models.Model):
     order=models.ForeignKey(orders, on_delete=models.CASCADE)
-    ID=models.IntegerField(primary_key=True)
+    ID=models.AutoField(primary_key=True)
     product=models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity=models.IntegerField(default=1)
 
     def __str__(self):
-        return self.ID
+        return str(self.ID)
+
 
 class orderitemcost(models.Model):
     orderitem=models.ForeignKey(orderitems, on_delete=models.CASCADE)
@@ -409,8 +425,6 @@ class ordercosts(models.Model):
 
     def __str__(self):
         return f'{self.order}'
-
-
 
 # class Attribute_Tab(models.Model):
 #     ID=models.CharField(max_length=255,primary_key=True)
@@ -551,3 +565,9 @@ class carts(models.Model):
     order = models.ForeignKey(orders, on_delete=models.CASCADE)
     def __str__(self):
         return f"{self.cart_name}, {self.order}"
+
+class preferences(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    selected_seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.user}'s preferences"

@@ -417,76 +417,6 @@ class WishallSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         return request.build_absolute_uri(reverse('delete-all-wishlistitems'))
 
-class CartSerializer(serializers.ModelSerializer):
-    user_name = serializers.SerializerMethodField()
-    parts_name = serializers.SerializerMethodField()
-    parts_offer = serializers.SerializerMethodField()
-    parts_price = serializers.SerializerMethodField()
-    discount_amount = serializers.SerializerMethodField()
-    final_price = serializers.SerializerMethodField()
-    main_image = serializers.SerializerMethodField()
-    code = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Cart
-        fields = ['user', 'user_name', 'product', 'quantity', 'parts_name', 'parts_price', 'parts_offer',
-                  'discount_amount', 'final_price', 'main_image', 'code']
-
-    def get_user_name(self, obj):
-        request = self.context.get('request')
-        if request.user.is_authenticated:
-            return obj.user.email
-        else:
-            return None
-
-    def arrangename(self, product):
-        return (f"{product.parts_brand.brand_manufacturer.name} "
-                f"{product.parts_category.category_name} "
-                f"{product.subcategory_name} "
-                f"{product.parts_voltage}V "
-                f"{product.parts_fits} "
-                f"{product.parts_litre}L")
-
-    def get_parts_name(self, obj):
-        product = obj.product
-        b = self.arrangename(product)
-        return b.replace('NoneL', '').strip()
-
-    def get_parts_offer(self, obj):
-        product = obj.product
-        return product.parts_offer
-
-    def get_parts_price(self, obj):
-        product = obj.product
-        return product.parts_price
-
-    def get_discount_amount(self, obj):
-        product = obj.product
-        discount_amount = product.parts_price * (product.parts_offer / 100)
-        return discount_amount
-
-    def get_code(self, obj):
-        return list(obj.code.values_list('carousel_code', flat=True))
-
-    def get_final_price(self, obj):
-        product = obj.product
-        discount_amount = product.parts_price * (product.parts_offer / 100)
-        final_amount = product.parts_price - discount_amount
-        return final_amount
-
-    def get_main_image(self, obj):
-        product = obj.product
-        return product.main_image
-
-    def create(self, validated_data):
-        request = self.context.get('request')
-        if request.user.is_authenticated:
-            validated_data['user'] = request.user
-        code_data = validated_data.pop('code', None)
-        cart = Cart.objects.create(**validated_data)
-        if code_data:
-            cart.code.set(code_data)
-        return cart
 
 
 class Carouselserilizers(serializers.ModelSerializer):
@@ -777,5 +707,86 @@ class ApplicationSerializer(serializers.ModelSerializer):
 class SellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
-        fields = ['name', 'seller_type', 'tin', 'address', 'email', 'mobile_no']
+        fields = ['id', 'name', 'seller_type', 'tin', 'address', 'email', 'mobile_no']
 
+class ProductInventorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductInventory
+        fields = '__all__'
+
+class OrderStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderStatus
+        fields = '__all__'
+
+class OrdersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = orders
+        fields = '__all__'
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = orderitems
+        fields = '__all__'
+
+class SellergroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SellerGroup
+        fields = '__all__'
+
+
+class ProductCostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_cost
+        fields = ['product_cost', 'product_currency', 'cost_code']
+
+class CartSerializer(serializers.ModelSerializer):
+    parts_name = serializers.SerializerMethodField()
+    parts_price = serializers.SerializerMethodField()
+    main_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ['parts_name', 'parts_price', 'main_image']
+
+    def get_brand_image(self, obj):
+        return obj.parts_brand.brand_manufacturer.logo
+
+    def arrangename(self, obj):
+        return (f"{obj.parts_brand.brand_manufacturer.name} "
+                f"{obj.parts_category.category_name} "
+                f"{obj.subcategory_name} "
+                f"{obj.parts_voltage}V "
+                f"{obj.parts_fits} "
+                f"{obj.parts_litre}L")
+
+    def get_parts_name(self, obj):
+        b = self.arrangename(obj)
+        return b.replace('NoneL', '').strip()
+
+    def get_parts_price(self, obj):
+        return obj.parts_price
+    def get_main_image(self, obj):
+        return obj.main_image
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = CartSerializer(read_only=True)
+    quantity = serializers.IntegerField()
+    delete = serializers.SerializerMethodField()
+
+    class Meta:
+        model = orderitems
+        fields = ['product', 'quantity', 'delete']
+
+    def get_delete(self, obj):
+        return f"/api/cart/delete/{obj.ID}/"
+
+class ProductBTCSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_btc_links
+        fields = '__all__'
+
+class MerchantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MerchandisingContent
+        fields = '__all__'

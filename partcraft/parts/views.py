@@ -15,6 +15,13 @@ from .serializers import *
 from collections import defaultdict
 from rest_framework.parsers import MultiPartParser, FormParser
 from account.emails import send_confirmation_email
+from django.contrib.auth import login
+from account.models import User
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from io import BytesIO
+from django.utils import timezone
+from django.core.mail import EmailMessage
 
 def adddict(serializer):
     last_data = []
@@ -195,6 +202,7 @@ def vehicle_view(request):
                 vehicle_data = VehicleoneSerializer(vehicle, many=True, context={'request': request}).data
 
                 response = Response({'vehicle': applicationserializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+
                 response.set_cookie('vehicle', json.dumps(vehicle_data))
                 print("cookies set response:")
                 for key, value in response.cookies.items():
@@ -588,6 +596,7 @@ class ViewCartView(BaseCartView):
             else:
                 return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(data='Add successfully', status=status.HTTP_201_CREATED)
+
         else:
             carouselserializer = Carouselpostserializer(data=request.data)
             if carouselserializer.is_valid():
@@ -867,92 +876,93 @@ class BillingAddressAPIView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class OrderSummaryAPIView(BaseCartView):
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        user = request.user
-        products_data = request.query_params.getlist('products')
-        order_items = []
-        grand_total = 0
-
-        def parse_url_parameter_data(products_data):
-            items = []
-            for product_data in products_data:
-                try:
-                    product_id, quantity = map(int, product_data.split(','))
-                    items.append({"product_id": product_id, "quantity": quantity})
-                except ValueError:
-                    continue
-            return items
-
-        if request.user.is_authenticated:
-            cart_items = Cart.objects.filter(user=user)
-            if cart_items.exists():
-                for item in cart_items:
-                    order_items.append({
-                        "product": item.product.id,
-                        "quantity": item.quantity,
-                        "code": list(item.code.values_list('id', flat=True))  # Convert to a list for serialization
-                    })
-        else:
-            order_item = self.get_cart_items_from_cookie(request)
-            order_data, _, _ = self.process_cart_data(order_item)
-            order_items.extend(order_data)
-
-        if products_data:
-            order_items.extend(parse_url_parameter_data(products_data))
-
-        if not order_items:
-            return Response({"detail": "No products."}, status=status.HTTP_400_BAD_REQUEST)
-
-        detailed_order_items = []
-
-        for item in order_items:
-            try:
-                product = Product.objects.get(id=item["product"])
-            except Product.DoesNotExist:
-                continue
-
-            product_serializer = TestProductSerializer(product, context={'request': request})
-            product_data = product_serializer.data
-            total = product_data['final_price'] * item["quantity"]
-            grand_total += total
-
-            detailed_order_items.append({
-                "product_id": product_data['id'],
-                "product_name": product_data['parts_name'],
-                "product_category": product_data['parts_category'],
-                "product_brand": product_data['parts_brand'],
-                "product_price": product_data['final_price'],
-                "product_image": product_data['main_image'],
-                "quantity": item["quantity"],
-                'code': item.get('code', []),
-                "total": total,
-            })
-
-        datas = {
-            "order_items": detailed_order_items,
-            "grand_total": grand_total
-        }
-
-        order_summary_data = {
-            "billing_address": datas["billing_address"],
-            "dealer_address": datas["dealer_address"],
-            "order_items": detailed_order_items,
-            "grand_total": grand_total
-        }
-
-        # Ensure everything is serializable
-        order_summary_json = json.dumps(order_summary_data)
-
-        # Create the response
-        response = Response({'data': datas}, status=status.HTTP_200_OK)
-
-        # Set the serialized order summary data in the cookies
-        response.set_cookie('order_summary', order_summary_json, max_age=3600, httponly=True)
-
-        return response
+# class OrderSummaryAPIView(BaseCartView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def get(self, request):
+#         user = request.user
+#         products_data = request.query_params.getlist('products')
+#         order_items = []
+#         grand_total = 0
+#
+#         def parse_url_parameter_data(products_data):
+#             items = []
+#             for product_data in products_data:
+#                 try:
+#                     product_id, quantity = map(int, product_data.split(','))
+#                     items.append({"product_id": product_id, "quantity": quantity})
+#                 except ValueError:
+#                     continue
+#             return items
+#
+#         if request.user.is_authenticated:
+#             cart_items = Cart.objects.filter(user=user)
+#             if cart_items.exists():
+#                 for item in cart_items:
+#                     order_items.append({
+#                         "product": item.product.id,
+#                         "quantity": item.quantity,
+#                         "code": list(item.code.values_list('id', flat=True))  # Convert to a list for serialization
+#                     })
+#         else:
+#             order_item = self.get_cart_items_from_cookie(request)
+#             order_data, _, _ = self.process_cart_data(order_item)
+#             order_items.extend(order_data)
+#
+#         if products_data:
+#             order_items.extend(parse_url_parameter_data(products_data))
+#
+#         if not order_items:
+#             return Response({"detail": "No products."}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         detailed_order_items = []
+#
+#         for item in order_items:
+#             try:
+#                 product = Product.objects.get(id=item["product"])
+#             except Product.DoesNotExist:
+#                 continue
+#
+#             product_serializer = TestProductSerializer(product, context={'request': request})
+#             product_data = product_serializer.data
+#             total = product_data['final_price'] * item["quantity"]
+#             grand_total += total
+#
+#             detailed_order_items.append({
+#                 "product_id": product_data['id'],
+#                 "product_name": product_data['parts_name'],
+#                 "product_category": product_data['parts_category'],
+#                 "product_brand": product_data['parts_brand'],
+#                 "product_price": product_data['final_price'],
+#                 "product_image": product_data['main_image'],
+#                 "quantity": item["quantity"],
+#                 'code': item.get('code', []),
+#                 "total": total,
+#             })
+#
+#         datas = {
+#             "order_items": detailed_order_items,
+#             "grand_total": grand_total
+#         }
+#
+#         order_summary_data = {
+#             "billing_address": datas["billing_address"],
+#             "dealer_address": datas["dealer_address"],
+#             "order_items": detailed_order_items,
+#             "grand_total": grand_total
+#         }
+#
+#         # Ensure everything is serializable
+#         order_summary_json = json.dumps(order_summary_data)
+#
+#         # Create the response
+#         response = Response({'data': datas}, status=status.HTTP_200_OK)
+#
+#         # Set the serialized order summary data in the cookies
+#         response.set_cookie('order_summary', order_summary_json, max_age=3600, httponly=True)
+#
+#         return response
 
 class OrderAPIView(BaseCartView):
     permission_classes = [IsAuthenticated]
@@ -1214,21 +1224,488 @@ class GetSellersByGroupNameAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response({'message': 'No sellers found in this group'}, status=status.HTTP_404_NOT_FOUND)
+    def get(self, request):
+        seller_group = SellerGroup.objects.all()
+        serializer = SellergroupSerializer(seller_group, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class SelectSellerAddressAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        def post(self, request, *args, **kwargs):
-            seller_id = request.data.get('seller_id')
-            if not seller_id:
-                return Response({'message': 'Seller ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    permission_classes = [IsAuthenticated]
 
-            try:
-                seller = Seller.objects.get(id=seller_id)
-            except Seller.DoesNotExist:
-                return Response({'message': 'Seller not found.'}, status=status.HTTP_404_NOT_FOUND)
-            request.session['selected_seller_id'] = seller_id
-            serializer = SellerSerializer(seller, context={'request': request})
-            return Response({
-                "message": "Seller selected successfully.",
-                "selected_seller": serializer.data
-            }, status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        seller_id = request.data.get('seller_id')
+
+        if not seller_id:
+            return Response({'message': 'Seller ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            seller = Seller.objects.get(id=seller_id)
+        except Seller.DoesNotExist:
+            return Response({'message': 'Seller not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        user_preferences, created = preferences.objects.update_or_create(
+            user=user, defaults={'selected_seller': seller}
+        )
+
+        serializer = SellerSerializer(seller, context={'request': request})
+        return Response({
+            "message": "Seller selected successfully.",
+            "selected_seller": serializer.data
+        }, status=status.HTTP_200_OK)
+
+class CreateCartItem(APIView):
+    def post(self, request, format=None):
+        user = request.user
+        data = request.data
+
+        order_status_new, created = OrderStatus.objects.get_or_create(order_status='New')
+
+        if user.is_authenticated:
+            active_order, created = orders.objects.get_or_create(
+                orderedby=user,
+                orderstatus=order_status_new
+            )
+        else:
+            session_key = request.session.session_key
+            if not session_key:
+                request.session.create()
+                session_key = request.session.session_key
+
+            active_order, created = orders.objects.get_or_create(
+                session_key=session_key,
+                orderstatus=order_status_new
+            )
+        product_id = data.get('product_id')
+
+        product = Product.objects.filter(id=product_id).first()
+        if not product:
+            return Response({"error": f"Product with id {product_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        inventory, _ = ProductInventory.objects.get_or_create(product=product)
+
+        if inventory.instock_count <= inventory.back_order_threshold:
+            return Response({"error": "Product out of stock."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if inventory.user_alert_threshold > 0 and data.get('quantity', 1) > inventory.reversed_count:
+            return Response({"error": f"Cannot add more than {inventory.maximum_add_by_user} items."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        order_item, created = orderitems.objects.get_or_create(
+            order=active_order,
+            product=product,
+            defaults={'quantity': 1}
+        )
+
+        if not created:
+            if order_item.quantity >= inventory.reversed_count:
+                return Response(
+                    {"error": f"You cannot add more than {inventory.reversed_count} items for this product."},
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            order_item.quantity += 1
+            order_item.save()
+
+        self.apply_order_item_costs(order_item)
+        self.apply_order_costs(active_order)
+
+        inventory.instock_count -= 1
+        inventory.items_left = inventory.instock_count
+        inventory.save()
+
+        serializer = OrderItemSerializer(order_item)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def put(self, request, format=None):
+        user = request.user
+        data = request.data
+
+        order_status_new, created = OrderStatus.objects.get_or_create(order_status='New')
+
+        if user.is_authenticated:
+            active_order = orders.objects.filter(
+                orderedby=user,
+                orderstatus=order_status_new
+            ).first()
+        else:
+            session_key = request.session.session_key
+            if not session_key:
+                return Response({"error": "Session not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+            active_order = orders.objects.filter(
+                session_key=session_key,
+                orderstatus=order_status_new
+            ).first()
+
+        if not active_order:
+            return Response({"error": "No active order found."}, status=status.HTTP_404_NOT_FOUND)
+
+        product_id = data.get('product_id')
+
+        product = Product.objects.filter(id=product_id).first()
+        if not product:
+            return Response({"error": f"Product with id {product_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        inventory, _ = ProductInventory.objects.get_or_create(product=product)
+
+        order_item = orderitems.objects.filter(order=active_order, product=product).first()
+        if not order_item:
+            return Response({"error": "Order item not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if order_item.quantity > 1:
+            order_item.quantity -= 1
+            order_item.save()
+            inventory.instock_count += 1
+        else:
+            order_item.delete()
+            inventory.instock_count += 1
+
+        self.apply_order_item_costs(order_item)
+        self.apply_order_costs(active_order)
+
+        inventory.items_left = inventory.instock_count
+        inventory.save()
+
+        serializer = OrderItemSerializer(order_item)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def apply_order_item_costs(self, order_item):
+        item_level_costs = Costtypes.objects.filter(is_order_item_level_cost=True)
+
+        product_cost = Product_cost.objects.filter(product_id=order_item.product).first()
+
+        if not product_cost:
+            raise ValueError("No product cost found for the given product.")
+
+        currency_code = product_cost.product_currency
+
+        for cost_type in item_level_costs:
+            if cost_type.transaction_type == 'Credit':
+                amount = -1 * (order_item.product.parts_price * cost_type.percentage / 100) * order_item.quantity
+            else:
+                amount = (order_item.product.parts_price * cost_type.percentage / 100) * order_item.quantity
+
+            if not isinstance(currency_code, CurrencyCode):
+                raise ValueError("currency_code must be an instance of CurrencyCode.")
+
+            orderitemcost.objects.update_or_create(
+                orderitem=order_item,
+                cost_type=cost_type,
+                defaults={
+                    'amount': amount,
+                    'currency_code': currency_code
+                }
+            )
+
+    def apply_order_costs(self, order):
+        item_level_costs = Costtypes.objects.filter(is_order_level_cost=True)
+
+        order_items = orderitems.objects.filter(order=order)
+
+        total_cost = sum(item.product.parts_price * item.quantity for item in order_items)
+
+        for cost_type in item_level_costs:
+            if cost_type.transaction_type == 'Credit':
+                amount = -1 * (total_cost * cost_type.percentage / 100)
+            else:
+                amount = (total_cost * cost_type.percentage / 100)
+            currency_code = None
+            for order_item in order_items:
+                product_cost = Product_cost.objects.filter(product_id=order_item.product).first()
+                if product_cost:
+                    currency_code = product_cost.product_currency
+                    break
+
+            if not currency_code:
+                raise ValueError("No currency code found for the products in the order.")
+
+            if not isinstance(currency_code, CurrencyCode):
+                raise ValueError("currency_code must be an instance of CurrencyCode.")
+
+            ordercosts.objects.update_or_create(
+                order=order,
+                cost_type=cost_type,
+                defaults={
+                    'amount': amount,
+                    'currency_code': currency_code
+                }
+            )
+
+
+class CartItemDetailView(APIView):
+    def get(self, request, format=None):
+        user = request.user
+        order_status_new, created = OrderStatus.objects.get_or_create(order_status='New')
+
+        if user.is_authenticated:
+            active_order = orders.objects.filter(orderedby=user, orderstatus=order_status_new).first()
+        else:
+            session_key = request.session.session_key
+            if not session_key:
+                return Response({"error": "Session not found."}, status=status.HTTP_400_BAD_REQUEST)
+            active_order = orders.objects.filter(session_key=session_key, orderstatus=order_status_new).first()
+
+        if not active_order:
+            return Response({"error": "No active order found."}, status=status.HTTP_404_NOT_FOUND)
+
+        order_items = orderitems.objects.filter(order=active_order)
+        serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
+        product = [
+            {
+                'parts_name': item['product']['parts_name'],
+                'parts_price': item['product']['parts_price'],
+                'main_image': item['product']['main_image'],
+                'quantity': item['quantity'],
+                'detele': item['delete']
+            }
+            for item in serializer.data
+        ]
+
+        return Response(product, status=status.HTTP_200_OK)
+
+class CartDeleteView(APIView):
+    def delete(self, request, item_id, format=None):
+        order_item = orderitems.objects.filter(ID=item_id).first()
+
+        if order_item is None:
+            return Response({"error": "Order item not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        product = order_item.product
+        product_inventory = ProductInventory.objects.filter(product=product).first()
+
+        if product_inventory is None:
+            return Response({"error": "Product inventory not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        product_inventory.instock_count += order_item.quantity
+        product_inventory.save()
+
+        orderitemcost.objects.filter(orderitem=order_item).delete()
+
+        order_item.delete()
+
+        return Response({"message": "cart item deleted successfully"},status=status.HTTP_200_OK)
+
+class OrderSummaryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        user = request.user
+        order_status_new, _ = OrderStatus.objects.get_or_create(order_status='New')
+
+        active_order = orders.objects.filter(orderedby=user, orderstatus=order_status_new).first()
+        if not active_order:
+            return Response({"error": "No active order found."}, status=status.HTTP_404_NOT_FOUND)
+
+        billing_address = BillingAddress.objects.filter(user=user).order_by('-id').first()
+        if not billing_address:
+            return Response({"error": "No billing address found."}, status=status.HTTP_404_NOT_FOUND)
+
+        seller_preferences = preferences.objects.filter(user=user).first()
+        if not seller_preferences or not seller_preferences.selected_seller:
+            return Response({"error": "No seller preferences found."}, status=status.HTTP_404_NOT_FOUND)
+
+        order_items = orderitems.objects.filter(order=active_order)
+        order_item_serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
+
+        product_data = []
+        for item in order_item_serializer.data:
+            product = item['product']
+            product_data.append({
+                'parts_name': product['parts_name'],
+                'parts_price': product['parts_price'],
+                'main_image': product['main_image'],
+                'quantity': item['quantity'],
+                'parts_offer': product['parts_offer'],
+                'final_price': ['final_price'],
+            })
+
+        billing_serializer = Billaddressserializer(billing_address)
+        seller_serializer = SellerSerializer(seller_preferences.selected_seller)
+
+        response_data = {
+            'billing_address': billing_serializer.data,
+            'seller': seller_serializer.data,
+            'products': product_data
+        }
+
+        return Response({'data':response_data}, status=status.HTTP_200_OK)
+
+
+class PlaceOrder(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        user = request.user
+
+        # Fetch the latest order for the user, or adjust as needed
+        order = orders.objects.filter(orderedby=user).latest('orderedon')  # Or use your criteria for selecting an order
+
+        if not order:
+            return Response({"error": "No orders found for the user."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Set order status to "InProgress"
+        order_status_placed, created = OrderStatus.objects.get_or_create(order_status="InProgress")
+        order.orderstatus = order_status_placed
+        order.save()
+
+        quotation_id = uuid.uuid4().hex.upper()
+
+        # You need to provide billing_address_id and shipping_address_id in the request data or handle defaults
+
+        total_cost = self.calculate_final_order_cost(order)
+
+        # pdf_buffer = self.generate_quotation_pdf(
+        #     user=user,
+        #     order=order,
+        #     total_cost=total_cost,
+        #     quotation_id=quotation_id
+        # )
+        #
+        # self.send_quotation_email(user.email, pdf_buffer, quotation_id)
+
+        return Response({
+            "message": "Order placed successfully.",
+            "quotation_id": quotation_id,
+            "total_cost": total_cost
+        }, status=status.HTTP_200_OK)
+
+    def calculate_order_item_cost(self, orderitem):
+        # Retrieve all cost entries for the given order item
+        item_costs = orderitemcost.objects.filter(orderitem=orderitem)
+
+        total_item_cost = 0
+        for cost in item_costs:
+            if (order_item.product.parts_price * cost_type.percentage / 100) == 'D':
+                total_item_cost += cost.amount
+            elif cost.cost_type.transaction_type == 'C':  # Credit
+                total_item_cost -= cost.amount
+
+        return total_item_cost
+
+    def calculate_order_item_cost(self, orderitem):
+        # Retrieve all cost entries for the given order item
+        item_costs = orderitemcost.objects.filter(orderitem=orderitem)
+
+        total_item_cost = 0
+        product_price = orderitem.product.parts_price  # Base price of the product
+
+        for cost in item_costs:
+            cost_type = cost.cost_type
+
+            if cost_type.percentage > 0:
+                # Apply percentage-based cost (like tax or discount on product price)
+                percentage_amount = (cost_type.percentage / 100) * product_price
+
+                # Determine if the percentage amount is a debit (D) or credit (C)
+                if cost_type.transaction_type == 'D':  # Debit
+                    total_item_cost += percentage_amount
+                elif cost_type.transaction_type == 'C':  # Credit
+                    total_item_cost -= percentage_amount
+            else:
+                # Apply fixed amount cost
+                if cost_type.transaction_type == 'D':  # Debit
+                    total_item_cost += cost.amount
+                elif cost_type.transaction_type == 'C':  # Credit
+                    total_item_cost -= cost.amount
+
+        return total_item_cost
+
+    def calculate_order_level_cost(self, order):
+        # Retrieve all cost entries for the given order
+        order_costs = ordercosts.objects.filter(order=order)
+
+        total_order_cost = 0
+        for cost in order_costs:
+            cost_type = cost.cost_type
+
+            if cost_type.percentage > 0:
+                percentage_amount = (cost_type.percentage / 100) * cost.amount
+                if cost_type.transaction_type == 'D':
+                    total_order_cost += percentage_amount
+                elif cost_type.transaction_type == 'C':
+                    total_order_cost -= percentage_amount
+            else:
+                # Apply fixed amount cost
+                if cost_type.transaction_type == 'D':
+                    total_order_cost += cost.amount
+                elif cost_type.transaction_type == 'C':  # Credit
+                    total_order_cost -= cost.amount
+
+        return total_order_cost
+
+    def apply_percentage_based_costs(self, order, base_amount):
+        # Retrieve all percentage-based costs (e.g., tax, discounts)
+        percentage_costs = ordercosts.objects.filter(order=order, cost_type__percentage__gt=0)
+
+        total_percentage_cost = 0
+        for cost in percentage_costs:
+            # Calculate percentage amount
+            percentage_amount = (cost.cost_type.percentage / 100) * base_amount
+            if cost.cost_type.transaction_type == 'D':  # Debit
+                total_percentage_cost += percentage_amount
+            elif cost.cost_type.transaction_type == 'C':  # Credit
+                total_percentage_cost -= percentage_amount
+
+        return total_percentage_cost
+
+    def calculate_final_order_cost(self, order):
+        total_item_cost = sum(self.calculate_order_item_cost(item) for item in order.orderitems_set.all())
+
+        total_order_cost = self.calculate_order_level_cost(order)
+
+        base_cost = total_item_cost + total_order_cost
+
+        percentage_cost = self.apply_percentage_based_costs(order, base_cost)
+
+        final_cost = base_cost + percentage_cost
+
+        return final_cost
+    # def generate_quotation_pdf(self, user, order, total_cost, quotation_id):
+    #     # Create a PDF buffer
+    #     buffer = BytesIO()
+    #
+    #     # Create a PDF with ReportLab
+    #     p = canvas.Canvas(buffer, pagesize=A4)
+    #     p.drawString(100, 800, f"Quotation ID: {quotation_id}")
+    #     p.drawString(100, 780, f"User: {user.email}")
+    #     p.drawString(100, 760, f"Order ID: {order.id}")
+    #     p.drawString(100, 740, f"Date: {timezone.now().strftime('%Y-%m-%d')}")
+    #
+    #     # Billing and shipping address
+    #
+    #     # Total cost
+    #     p.drawString(100, 640, f"Total Order Cost: ${total_cost:.2f}")
+    #
+    #     # Additional cost details (if you want to show item breakdown)
+    #
+    #     p.showPage()
+    #     p.save()
+    #
+    #     buffer.seek(0)
+    #     return buffer
+    #
+    # def send_quotation_email(self, email, pdf_buffer, quotation_id):
+    #     subject = f"Your Quotation (ID: {quotation_id})"
+    #     body = "Please find attached the quotation for your recent order."
+    #
+    #     email_message = EmailMessage(
+    #         subject=subject,
+    #         body=body,
+    #         to=[email]
+    #     )
+    #     email_message.attach(f"quotation_{quotation_id}.pdf", pdf_buffer.getvalue(), "application/pdf")
+    #     email_message.send()
+
+
+
+class BtwocView(APIView):
+    def get(self, request):
+        b_2_c = Product_btc_links.objects.all()
+        serializer = ProductBTCSerializer(b_2_c, many=True, context={'request':request})
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+
+class MerchandisingContentView(APIView):
+    def get(self, request):
+        merchant = MerchandisingContent.objects.all()
+        serializer = MerchantSerializer(merchant, many=True, context={'request':request})
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)

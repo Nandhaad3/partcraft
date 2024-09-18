@@ -30,7 +30,7 @@ urlpatterns = [
     path('carouseloneview/<int:pk>',Carouseloneview.as_view(),name='carouseloneview'),
     path('buynow/', ShippingAdressAPIView.as_view(), name='buy_now'),
     path('billing/address/', BillingAddressAPIView.as_view(), name='billing-address'),
-    path('order_summary/', OrderSummaryAPIView.as_view(), name='order_summary'),
+    path('order/summary/', OrderSummaryAPIView.as_view(), name='order_summary'),
     path('place_order/', OrderAPIView.as_view(), name='place_order'),
     path('couponcodeapply/',ViewCartView.as_view(),name='couponcodeapply'),
     path('best_selling/', BestSellingView.as_view(), name='best_selling'),
@@ -49,5 +49,11 @@ urlpatterns = [
     path('seller/', SellerView.as_view(), name='seller'),
     path('sellers/group/', GetSellersByGroupNameAPIView.as_view(), name='sellers-by-group'),
     path('select/seller/', SelectSellerAddressAPIView.as_view(), name='select-seller'),
+    path('create/cart/', CreateCartItem.as_view(), name='create-cart'),
+    path('cart/', CartItemDetailView.as_view(), name='cart'),
+    path('cart/delete/<int:item_id>/', CartDeleteView.as_view(), name='cart-delete'),
+    path('place/order/', PlaceOrder.as_view(), name='place=order'),
+    path('b2c/', BtwocView.as_view(), name='b-2-c'),
+    path('merchant/', MerchandisingContentView.as_view(), name='merchant'),
 ]
 

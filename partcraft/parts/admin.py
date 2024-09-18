@@ -135,7 +135,7 @@ class ProductsummaryAdmin(admin.ModelAdmin):
 
 @admin.register(Costtypes)
 class CosttypesAdmin(admin.ModelAdmin):
-    list_display = ['ID', 'name', 'cost_category']
+    list_display = ['ID', 'name', 'cost_category', 'is_order_level_cost', 'is_order_item_level_cost', 'transaction_type', 'percentage' ]
 
 @admin.register(orders)
 class ordersAdmin(admin.ModelAdmin):
@@ -193,3 +193,12 @@ class CostCategoryAdmin(admin.ModelAdmin):
 @admin.register(carts)
 class cartsAdmin(admin.ModelAdmin):
     list_display = ['cart_name', 'order']
+
+# @admin.register(Product_btc_partners)
+# class Product_btcpartnersAdmin(admin.ModelAdmin):
+#     list_display = ['partner_name', 'partner_logo']
+
+# @admin.register(Product_btc_links)
+# class Product_btclinksAdmin(admin.ModelAdmin):
+#     list_display = ['product', 'btc_partner', 'url']
+
