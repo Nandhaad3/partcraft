@@ -1047,51 +1047,6 @@ class BestSellingView(generics.ListAPIView):
         # return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class MyOrderView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, order_id=None):
-        user = request.user
-
-        def get_order_details(order):
-            product = order.product
-            product_data = TestProductSerializer(product, context={'request': request}).data
-            order_details = {
-                'order_id': order.order_id,
-                'order_date': order.order_date,
-                "product_name": product_data['parts_name'],
-                "part_no": product_data['parts_no'],
-                "product_price": product_data['final_price'],
-                "product_image": product_data['main_image'],
-                'quantity': order.quantity,
-            }
-            return order_details
-
-        if order_id:
-            order = get_object_or_404(Order, user=user, order_id=order_id)
-            order_details = get_order_details(order)
-            return Response(order_details, status=status.HTTP_404_NOT_FOUND)
-        orders = Order.objects.filter(user=user)
-        if not orders:
-            return Response({"detail": "No orders found."}, status=status.HTTP_404_NOT_FOUND)
-        all_order_details = [get_order_details(order) for order in orders]
-        return Response(all_order_details, status=status.HTTP_200_OK)
-
-    def delete(self, request, order_id=None):
-        if not order_id:
-            return Response({"detail": "Order ID required"}, status=status.HTTP_400_BAD_REQUEST)
-        user = request.user
-        order = get_object_or_404(Order, user=user, order_id=order_id)
-        product_order_count = get_object_or_404(ProductOrderCount, product=order.product)
-        product_order_count.order_count -= order.quantity
-        if product_order_count.order_count <= 0:
-            product_order_count.order_count = 0
-        product_order_count.save()
-
-        order.delete()
-        return Response({"detail": "Order deleted."}, status=status.HTTP_204_NO_CONTENT)
-
-
 
 class ToptenView(generics.ListAPIView):
     queryset = Category.objects.all()
@@ -1784,6 +1739,54 @@ class PlaceOrder(APIView):
     #     email_message.attach(f"quotation_{quotation_id}.pdf", pdf_buffer.getvalue(), "application/pdf")
     #     email_message.send()
 
+
+class MyOrdersView(APIView):
+    def get(self, request, user_id=None, format=None):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            order_status_inprogress = OrderStatus.objects.get(order_status='InProgress')
+        except OrderStatus.DoesNotExist:
+            return Response({"error": "Order status 'InProgress' not found."}, status=status.HTTP_404_NOT_FOUND)
+        active_order = orders.objects.filter(orderedby=user, orderstatus=order_status_inprogress).first()
+
+        if not active_order:
+            return Response({"error": "No active 'InProgress' order found."}, status=status.HTTP_404_NOT_FOUND)
+
+        order_items = orderitems.objects.filter(order=active_order)
+        serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
+
+        product = []
+        final = {}
+        total_parts_price = 0
+
+        order_data = {
+            'order_id': active_order.id,
+            'order_date': active_order.order_date,
+            'order_status': active_order.orderstatus.order_status,
+        }
+
+        for item in serializer.data:
+            data = {}
+            data['product_id'] = item['product']['id']
+            data['parts_name'] = item['product']['parts_name']
+            data['parts_price'] = item['product']['parts_price'] * item[
+                'quantity']
+            data['quantity'] = item['quantity']
+
+            data['order'] = order_data
+
+            product.append(data)
+            total_parts_price += data['parts_price']
+
+        final['products'] = product
+        final['total_parts_price'] = total_parts_price
+
+        response = Response({'data': final}, status=status.HTTP_200_OK)
+        return response
 
 
 class BtwocView(APIView):
