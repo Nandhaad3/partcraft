@@ -1288,45 +1288,53 @@ class CreateCartItem(APIView):
                 session_key=session_key,
                 orderstatus=order_status_new
             )
-        product_id = data.get('product_id')
 
-        product = Product.objects.filter(id=product_id).first()
-        if not product:
-            return Response({"error": f"Product with id {product_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+        products_data = data.get('products')
+        if not products_data:
+            product_id = data.get('product_id')
+            if not product_id:
+                return Response({"error": "No product ID provided."}, status=status.HTTP_400_BAD_REQUEST)
+            products_data = [{'product_id': product_id}]
 
-        inventory, _ = ProductInventory.objects.get_or_create(product=product)
+        response_data = []
+        for product_data in products_data:
+            product_id = product_data.get('product_id')
 
-        if inventory.instock_count <= inventory.back_order_threshold:
-            return Response({"error": "Product out of stock."}, status=status.HTTP_400_BAD_REQUEST)
+            product = Product.objects.filter(id=product_id).first()
+            if not product:
+                return Response({"error": f"Product with id {product_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        if inventory.user_alert_threshold > 0 and data.get('quantity', 1) > inventory.reversed_count:
-            return Response({"error": f"Cannot add more than {inventory.maximum_add_by_user} items."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            inventory, _ = ProductInventory.objects.get_or_create(product=product)
 
-        order_item, created = orderitems.objects.get_or_create(
-            order=active_order,
-            product=product,
-            defaults={'quantity': 1}
-        )
+            if inventory.instock_count <= inventory.back_order_threshold:
+                return Response({"error": f"Product {product.name} is out of stock."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not created:
-            if order_item.quantity >= inventory.reversed_count:
-                return Response(
-                    {"error": f"You cannot add more than {inventory.reversed_count} items for this product."},
-                    status=status.HTTP_400_BAD_REQUEST)
+            order_item, created = orderitems.objects.get_or_create(
+                order=active_order,
+                product=product,
+                defaults={'quantity': 1}
+            )
 
-            order_item.quantity += 1
-            order_item.save()
+            if not created:
+                if order_item.quantity + 1 > inventory.reversed_count:
+                    return Response(
+                        {"error": f"You cannot add more than {inventory.reversed_count} items for {product.name}."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                order_item.quantity += 1
+                order_item.save()
 
-        self.apply_order_item_costs(order_item)
-        self.apply_order_costs(active_order)
+            inventory.instock_count -= 1
+            inventory.items_left = inventory.instock_count
+            inventory.save()
 
-        inventory.instock_count -= 1
-        inventory.items_left = inventory.instock_count
-        inventory.save()
+            self.apply_order_item_costs(order_item)
+            self.apply_order_costs(active_order)
 
-        serializer = OrderItemSerializer(order_item, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer = OrderItemSerializer(order_item, context={'request': request})
+            response_data.append(serializer.data)
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
     def put(self, request, format=None):
         user = request.user

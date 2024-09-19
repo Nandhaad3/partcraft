@@ -304,7 +304,7 @@ class ProductoneSerializer(serializers.ModelSerializer):
                   'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart', 'product_fit']
 
     def get_addtocart(self, obj):
-        return f"/api/create/cart/{obj.id}"
+        return f"/api/create/cart/"
     def get_brand_image(self,obj):
         return obj.parts_brand.brand_manufacturer.logo
 
@@ -376,7 +376,7 @@ class WishallSerializer(serializers.ModelSerializer):
         read_only_fields = ['wishlist_name']
 
     def get_addtocart(self, obj):
-        return f"/api/create/cart/{obj.id}"
+        return f"/api/create/cart/"
 
     def arrangename(self, obj):
         return (f"{obj.parts_brand.brand_manufacturer.name} "
@@ -513,7 +513,7 @@ class Bestsellingserializer(serializers.ModelSerializer):
                   'final_price', 'main_image', 'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart']
 
     def get_addtocart(self, obj):
-        return f"/api/create/cart/{obj.product_id}"
+        return f"/api/create/cart/"
 
     def get_parts_type(self, obj):
         return obj.product.parts_type
