@@ -1204,16 +1204,14 @@ class SelectSellerAddressAPIView(APIView):
         except Seller.DoesNotExist:
             return Response({'message': 'Seller not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # user = request.user
-        # user_preferences, created = preferences.objects.update_or_create(
-        #     user=user, defaults={'selected_seller': seller}
-        # )
 
         serializer = SellerSerializer(seller, context={'request': request})
-        return Response({
+        response =  Response({
             "message": "Seller selected successfully.",
             "selected_seller": serializer.data
         }, status=status.HTTP_200_OK)
+        response.set_cookie('seller_id', seller.id, max_age=3600)
+        return response
 
 
 class PreferencesView(APIView):
@@ -1578,9 +1576,14 @@ class OrderSummaryAPIView(APIView):
         if not billing_address:
             return Response({"error": "No billing address found."}, status=status.HTTP_404_NOT_FOUND)
 
-        seller_preferences = preferences.objects.filter(user=user).first()
-        if not seller_preferences or not seller_preferences.selected_seller:
+        seller_id = request.COOKIES.get('seller_id')
+        if not seller_id:
             return Response({"error": "No seller preferences found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            seller_preferences = Seller.objects.get(id=seller_id)
+        except Seller.DoesNotExist:
+            return Response({"error": "Seller not found."}, status=status.HTTP_404_NOT_FOUND)
 
         order_items = orderitems.objects.filter(order=active_order)
         order_item_serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
@@ -1601,16 +1604,13 @@ class OrderSummaryAPIView(APIView):
                 'quantity': item['quantity'],
                 'total_price': item['quantity'] * product['final_price']
             })
-            orderitemcost.objects.all()
 
         billing_serializer = Billaddressserializer(billing_address)
-        seller_serializer = SellerSerializer(seller_preferences.selected_seller)
-
+        seller_serializer = SellerSerializer(seller_preferences)
         response_data = dict(billing_address=billing_serializer.data, seller=seller_serializer.data,
                              products=product_data)
 
-        return Response({'data':response_data}, status=status.HTTP_200_OK)
-
+        return Response({'data': response_data}, status=status.HTTP_200_OK)
 
 class PlaceOrder(APIView):
     permission_classes = [IsAuthenticated]
