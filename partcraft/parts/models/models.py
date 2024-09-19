@@ -72,7 +72,8 @@ class Brand(models.Model):
 class Category(models.Model):
     category_name = models.CharField(max_length=50)
     category_image = models.URLField(max_length=200,blank=True)
-
+    code=models.CharField(max_length=50,blank=True)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='children', on_delete=models.CASCADE)
     def __str__(self):
         return self.category_name
 
@@ -188,6 +189,14 @@ class ShippingAddress(models.Model):
 
     def __str__(self):
         return f'{self.shipping_name} {self.shipping_address}'
+
+class Usercoupon(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.ManyToManyField(Carousel)
+    product=models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.user}'
 
 
 class Profile(models.Model):

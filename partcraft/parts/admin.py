@@ -223,3 +223,7 @@ class SectionAdmin(admin.ModelAdmin):
 @admin.register(Categorys)
 class CategorysAdmin(admin.ModelAdmin):
     list_display = ['name', 'parent','code']
+
+@admin.register(Usercoupon)
+class UsercouponAdmin(admin.ModelAdmin):
+    list_display = ['user', 'product']

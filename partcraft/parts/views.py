@@ -120,20 +120,38 @@ class categoryonedetail(generics.ListAPIView):
 
     def get_queryset(self):
         category_id = self.kwargs.get('pk')
-        cat = Category.objects.get(id=category_id)
-        quaryset = Product.objects.all().filter(parts_category_id=cat.id)
-        return quaryset
+        category_str = self.kwargs.get('code')
+        if category_id:
+            cat = Category.objects.get(id=category_id)
+            quaryset = Product.objects.all().filter(parts_category_id=cat.id)
+            return quaryset
+        if category_str:
+            cat = Category.objects.get(code=category_str)
+            quaryset = Product.objects.all().filter(parts_category_id=cat.id)
+            return quaryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         category_id = self.kwargs.get('pk')
-        cat = Category.objects.get(id=category_id)
-        if not queryset.exists():
-            return Response({'details': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = self.get_serializer(queryset, many=True)
-        category_serializer = CategorySerializer(cat, context={'request': request})
-        lastdata = adddict(serializer)
-        return Response({'data': category_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+        category_str= self.kwargs.get('code')
+        if category_id:
+            cat = Category.objects.get(id=category_id)
+            if not queryset.exists():
+                return Response({'details': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            serializer = self.get_serializer(queryset, many=True)
+            category_serializer = CategorySerializer(cat, context={'request': request})
+            lastdata = adddict(serializer)
+            return Response({'data': category_serializer.data, 'results': lastdata}, status=status.HTTP_200_OK)
+        if category_str:
+            print(category_str)
+            cat = Category.objects.get(code=category_str)
+            if not queryset.exists():
+                return Response({'details': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            serializer = self.get_serializer(queryset, many=True)
+            category_serializer = CategorySerializer(cat, context={'request': request})
+            lastdata = adddict(serializer)
+            return Response({'data': category_serializer.data, 'results': lastdata}, status=status.HTTP_200_OK)
+
 
 
 class brandlistview(generics.ListAPIView):
@@ -262,6 +280,7 @@ class MatchVehicle(APIView):
                 return Response({'details': 'Invalid of model'}, status=status.HTTP_400_BAD_REQUEST)
 
         vehicles = Vehicle.objects.filter(**filters)
+
         if not vehicles.exists():
             return Response({'details': 'Vehicle Not Found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = ApplicationSerializer(vehicles, many=True, context={'request': request})
@@ -1227,22 +1246,25 @@ class PreferencesView(APIView):
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request):
-        seller_id = request.data.get('seller_id',[])
+        seller_id = request.data.get('seller_id', [])
         print(seller_id)
         user = request.user
         if seller_id:
-            u=User.objects.get(id=user.id)
-            b=[]
+            u = User.objects.get(id=user.id)
+            b = []
             for i in seller_id:
                 try:
-                    s=Seller.objects.get(id=i)
+                    s = Seller.objects.get(id=i)
                     b.append(s)
                 except:
                     print('not found')
-            o=SellerPreferces.objects.get(user=u.id)
+
+            l = SellerPreferces.objects.filter(user=u)
+            if bool(l) is False:
+                SellerPreferces.objects.create(user=u)
+            o = SellerPreferces.objects.get(user=u)
             for i in b:
                 o.seller.add(i.id)
-            # p=SellerPreferces(user_id=seller_id, data=data)
             return Response({'message': 'Seller selected successfully.'}, status=status.HTTP_200_OK)
         return Response({'message': 'Seller_id not found.'}, status=status.HTTP_404_NOT_FOUND)
     def delete(self, request):
@@ -1291,6 +1313,7 @@ class CreateCartItem(APIView):
 
         products_data = request.data.get('product_id', [])
         products_data = {'product_id': products_data}
+        print(products_data)
 
         response_data = []
         for product_datas in products_data['product_id']:
@@ -1492,7 +1515,7 @@ class EmptyCartView(APIView):
         active_order.delete()
         return Response({"message": "All cart items deleted successfully."}, status=status.HTTP_200_OK)
 
-
+#New Cart
 class CartItemDetailView(APIView):
     def post(self, request):
         if request.user.is_authenticated:
@@ -1511,7 +1534,14 @@ class CartItemDetailView(APIView):
                     if o:
                         for j in o:
                             if i == j.product:
-                                j.code.add(c)
+                                print(j.product.id)
+                                # j.code.add(c)
+                                u = User.objects.get(id=user.id)
+                                l = Usercoupon.objects.filter(user=u,product=j.product.id)
+                                if bool(l) is False:
+                                    Usercoupon.objects.create(user=u,product=j.product)
+                                o = Usercoupon.objects.get(user=u,product=j.product.id)
+                                o.code.add(c)
                                 return Response(data='Add successfully', status=status.HTTP_201_CREATED)
                     else:
                         return Response(data='Cart not found', status=status.HTTP_404_NOT_FOUND)
@@ -1538,7 +1568,6 @@ class CartItemDetailView(APIView):
         serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
         product = []
         final={}
-
         for item in serializer.data:
             data = {}
             data['product_id'] = item['product']['id']
@@ -1549,12 +1578,10 @@ class CartItemDetailView(APIView):
             data['parts_offer'] = item['product']['parts_offer']
             data['product_full_detail'] = item['product']['product_full_detail'],
             data['final_price'] = item['product']['final_price'] * item['quantity']
-            data['code'] = ['code']
             data['quantity'] = item['quantity']
             data['detele'] = item['delete']
             product.append(data)
         final['products'] = product
-        print(final)
         total_price = []
         actual_price=[]
         for i in product:
@@ -1618,28 +1645,42 @@ class OrderSummaryAPIView(APIView):
 
         order_items = orderitems.objects.filter(order=active_order)
         order_item_serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
+        # f=[]
+        # product_data=[]
+        # for  i in order_items:
+        #     f.append
 
-        product_data = []
-
-        for item in order_item_serializer.data:
-            product = item['product']
-
+        # print(product_data)
+        #ordercosts
+        u = orders.objects.get(orderedby=request.user)
+        oc = ordercosts.objects.filter(order=u.ID)
+        b = []
+        for i in oc:
+            if not i.cost_type.name == 'Discount Cost':
+                b.append(i.amount)
+        tax_final_price = sum(b)
+        for item in product_data:
             product_data.append({
-                'parts_name': product['parts_name'],
-                'parts_price': product['parts_price'],
-                'main_image': product['main_image'],
-                'parts_no': product['parts_no'],
-                'parts_offer': product['parts_offer'],
-                'product_full_detail': product['product_full_detail'],
-                'final_price': product['final_price'],
+                'parts_name': item['parts_name'],
+                'parts_price': item['parts_price'],
+                'main_image': item['main_image'],
+                'parts_no': item['parts_no'],
+                'parts_offer': item['parts_offer'],
+                'product_full_detail': item['product_full_detail'],
+                'final_price': item['final_price'],
                 'quantity': item['quantity'],
-                'total_price': item['quantity'] * product['final_price']
+                'total_price': item['quantity'] * item['final_price']
             })
+        t = []
+        for i in product_data:
+            t.append(i.get('total_price'))
+        total_price = sum(t)
+        ordercost_price = total_price + tax_final_price
 
         billing_serializer = Billaddressserializer(billing_address)
         seller_serializer = SellerSerializer(seller_preferences)
         response_data = dict(billing_address=billing_serializer.data, seller=seller_serializer.data,
-                             products=product_data)
+                             products=product_data,price=total_price,tax=tax_final_price,final_price=ordercost_price)
 
         return Response({'data': response_data}, status=status.HTTP_200_OK)
 
@@ -2036,12 +2077,12 @@ class CategoryTreeView(APIView):
 
     def savecategorymongodb(self):
         # Step 1: Save root categories (categories with no parent)
-        root_categories = Categorys.objects.filter(parent__isnull=True)
+        root_categories = Category.objects.filter(parent__isnull=True)
         for category in root_categories:
             self.save_category_and_children(category)
 
         # Step 2: Add child categories (categories with a parent)
-        child_categories = Categorys.objects.filter(parent__isnull=False)
+        child_categories = Category.objects.filter(parent__isnull=False)
         for category in child_categories:
             self.add_category_to_parent(category)
 
@@ -2049,7 +2090,7 @@ class CategoryTreeView(APIView):
         """
         Recursively build and save a category tree, starting from a root category.
         """
-        category_name = category.name
+        category_name = category.category_name
         category_code = category.code
 
         # Fetch or create the root category in MongoDB
@@ -2070,7 +2111,7 @@ class CategoryTreeView(APIView):
         """
         # Create the current category node
         category_node = mongodb.Categorys(
-            name=category.name,
+            name=category.category_name,
             code=category.code if category.code else "Refer Code",
             children=[]
         )
@@ -2094,19 +2135,19 @@ class CategoryTreeView(APIView):
 
         # Find the parent category in MongoDB (inside Root's children)
         parent_category = None
-        root_category = mongodb.Root.objects(children__name=parent.name).first()
+        root_category = mongodb.Root.objects(children__name=parent.category_name).first()
 
         if root_category:
             # Find the parent category inside the root's children
             for child in root_category.children:
-                if child.name == parent.name:
+                if child.name == parent.category_name:
                     parent_category = child
                     break
 
         if parent_category:
             # Create a new node for the current category
             category_node = mongodb.Categorys(
-                name=category.name,
+                name=category.category_name,
                 code=category.code if category.code else "Refer Code",
                 children=[]
             )

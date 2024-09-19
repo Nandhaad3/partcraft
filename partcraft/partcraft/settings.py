@@ -144,21 +144,21 @@ DATABASES = {
         'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
         'PORT': '6543',
     },
-    # 'nonrel': {
-    #     'ENGINE': 'djongo',
-    #     'NAME': 'partscraft',
-    #     'ENFORCE_SCHEMA': False,
-    #     'CLIENT': {
-    #         'host': 'mongodb+srv://admin:kWwviQLhdkbL5MQE@admindash.zvg2l7k.mongodb.net/?retryWrites=true&w=majority',
-    #     },
-    # }
+    'nonrel': {
+        'ENGINE': 'djongo',
+        'NAME': 'partscraft',
+        'ENFORCE_SCHEMA': False,
+        'CLIENT': {
+            'host': 'mongodb+srv://admin:kWwviQLhdkbL5MQE@admindash.zvg2l7k.mongodb.net/?retryWrites=true&w=majority',
+        },
+    }
 }
 
 # DATABASE_ROUTERS = ['parts.utils.db_routers.NonRelRouter']
-# MONGOENGINE = {
-#     'db': 'partscraft',
-#     'host': 'mongodb+srv://admin:kWwviQLhdkbL5MQE@admindash.zvg2l7k.mongodb.net/?retryWrites=true&w=majority',
-# }
+MONGOENGINE = {
+    'db': 'partscraft',
+    'host': 'mongodb+srv://admin:kWwviQLhdkbL5MQE@admindash.zvg2l7k.mongodb.net/?retryWrites=true&w=majority',
+}
 
 # DATABASES = {
 #     'default': {
@@ -273,14 +273,14 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'dhanushpathiprakash0511@gmail.com'
 EMAIL_HOST_PASSWORD = 'opghzxooktakptya'
-#
-# import mongoengine
-#
-# mongoengine.connect(
-#     db=MONGOENGINE['db'],
-#     host=MONGOENGINE['host'],
-#     alias='nonrel',
-# )
+
+import mongoengine
+
+mongoengine.connect(
+    db=MONGOENGINE['db'],
+    host=MONGOENGINE['host'],
+    alias='nonrel',
+)
 
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379

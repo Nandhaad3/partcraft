@@ -819,8 +819,6 @@ class MerchantSerializer(serializers.ModelSerializer):
         model = MerchandisingContent
         fields = '__all__'
 
-
-
 class PreferencesSerializer(serializers.ModelSerializer):
     # You can use the related field directly instead of SerializerMethodField
     seller_id = serializers.SerializerMethodField()
@@ -828,7 +826,6 @@ class PreferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SellerPreferces
         fields = ['user', 'seller_id']
-
 
     def get_seller_id(self, obj):
         return obj.seller

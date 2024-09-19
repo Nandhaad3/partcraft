@@ -7,6 +7,8 @@ urlpatterns = [
     path('getoneproduct/<int:pk>/',partsonedetail.as_view(),name='getoneproduct'),
     path('allcategory/',categorylistview.as_view(),name='allcatetgories'),
     path('onecategorydetails/<int:pk>/',categoryonedetail.as_view(),name='onecategorydetails'),
+    path('onecategorydetail/<int:pk>/', categoryonedetail.as_view(), name='onecategorydetails'),
+    path('onecategorydetailsfromcode/<str:code>/', categoryonedetail.as_view(), name='onecategorydetails'),
     path('allbrand/',brandlistview.as_view(),name='allbrands'),
     path('brandonedetails/<int:pk>/',brandonedetail.as_view(),name='brandonedetails'),
     path('allvehicles/',vehiclelistview.as_view(),name='allvehicles'),
@@ -31,7 +33,8 @@ urlpatterns = [
     path('buynow/', ShippingAdressAPIView.as_view(), name='buy_now'),
     path('billing/address/', BillingAddressAPIView.as_view(), name='billing-address'),
     path('order/summary/', OrderSummaryAPIView.as_view(), name='order_summary'),
-    path('place_order/', OrderAPIView.as_view(), name='place_order'),
+    # path('place_order/', OrderAPIView.as_view(), name='place_order'),
+    path('place/order/', PlaceOrder.as_view(), name='place=order'),
     path('couponcodeapply/',ViewCartView.as_view(),name='couponcodeapply'),
     path('best_selling/', BestSellingView.as_view(), name='best_selling'),
     path('order/history/', MyOrdersView.as_view(), name='my_order'),
@@ -58,5 +61,6 @@ urlpatterns = [
     path('sellerprefer/',PreferencesView.as_view(),name='sellerprefer'),
     path('productattribute/',ProductattributeView.as_view(), name='productattribute'),
     path('categorytree/',CategoryTreeView.as_view(), name='categorytree'),
+
 ]
 
