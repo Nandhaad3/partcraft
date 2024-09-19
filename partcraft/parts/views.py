@@ -1289,20 +1289,17 @@ class CreateCartItem(APIView):
                 orderstatus=order_status_new
             )
 
-        products_data = data.get('products')
-        if not products_data:
-            product_id = data.get('product_id')
-            if not product_id:
-                return Response({"error": "No product ID provided."}, status=status.HTTP_400_BAD_REQUEST)
-            products_data = [{'product_id': product_id}]
+        products_data = request.data.get('product_id', [])
+        products_data = {'product_id': products_data}
 
         response_data = []
-        for product_data in products_data:
-            product_id = product_data.get('product_id')
+        for product_datas in products_data['product_id']:
+            # print(type(product_datas))
+            # product_id = product_datas.get('product_id')
 
-            product = Product.objects.filter(id=product_id).first()
+            product = Product.objects.filter(id=product_datas).first()
             if not product:
-                return Response({"error": f"Product with id {product_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": f"Product with id {product_datas} not found."}, status=status.HTTP_404_NOT_FOUND)
 
             inventory, _ = ProductInventory.objects.get_or_create(product=product)
 
@@ -1497,6 +1494,31 @@ class EmptyCartView(APIView):
 
 
 class CartItemDetailView(APIView):
+    def post(self, request):
+        if request.user.is_authenticated:
+            carouselserializer = Carouselpostserializer(data=request.data)
+            user = request.user
+            if carouselserializer.is_valid():
+                c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
+                b = Brand.objects.get(brand_manufacturer=c.carousel_brand.brand_manufacturer)
+                ct = Category.objects.get(category_name=c.carousel_category)
+                p = Product.objects.filter(parts_brand=b, parts_category=ct)
+                pro = None
+                print(p)
+                for i in p:
+                    crt = orders.objects.get(orderedby=user)
+                    o = orderitems.objects.all().filter(order_id=crt.ID)
+                    if o:
+                        for j in o:
+                            if i == j.product:
+                                j.code.add(c)
+                                return Response(data='Add successfully', status=status.HTTP_201_CREATED)
+                    else:
+                        return Response(data='Cart not found', status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data='Add successfully', status=status.HTTP_201_CREATED)
+
     def get(self, request, format=None):
         user = request.user
         order_status_new, created = OrderStatus.objects.get_or_create(order_status='New')
@@ -1527,6 +1549,7 @@ class CartItemDetailView(APIView):
             data['parts_offer'] = item['product']['parts_offer']
             data['product_full_detail'] = item['product']['product_full_detail'],
             data['final_price'] = item['product']['final_price'] * item['quantity']
+            data['code'] = ['code']
             data['quantity'] = item['quantity']
             data['detele'] = item['delete']
             product.append(data)
