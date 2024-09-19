@@ -13,15 +13,17 @@ from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from .serializers import *
 from collections import defaultdict
+from pymongo import MongoClient
 from rest_framework.parsers import MultiPartParser, FormParser
 from account.emails import send_confirmation_email
 from django.contrib.auth import login
 from account.models import User
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
+# from reportlab.pdfgen import canvas
+# from reportlab.lib.pagesizes import A4
 from io import BytesIO
 from django.utils import timezone
 from django.core.mail import EmailMessage
+from .models import mongo_models as mongodb
 
 def adddict(serializer):
     last_data = []
@@ -1048,6 +1050,10 @@ class BestSellingView(generics.ListAPIView):
 
 
 
+
+
+
+
 class ToptenView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = Toptenserializer
@@ -1212,22 +1218,54 @@ class SelectSellerAddressAPIView(APIView):
 
 class PreferencesView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        prefer = preferences.objects.all()
+        # Get all preferences
+        prefer = SellerPreferces.objects.all()
         print(prefer)
+        # Serialize preferences
         serializer = PreferencesSerializer(prefer, many=True)
+        # Return serialized data
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request):
-        data = request.data
-        u=User.objects.get(email=request.user)
-        print(u.id)
-        serializer = PreferencesSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'data': 'Preferences has successfully created'}, status=status.HTTP_201_CREATED)
-        return Response({'data': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
+        seller_id = request.data.get('seller_id',[])
+        print(seller_id)
+        user = request.user
+        if seller_id:
+            u=User.objects.get(id=user.id)
+            b=[]
+            for i in seller_id:
+                try:
+                    s=Seller.objects.get(id=i)
+                    b.append(s)
+                except:
+                    print('not found')
+            o=SellerPreferces.objects.get(user=u.id)
+            for i in b:
+                o.seller.add(i.id)
+            # p=SellerPreferces(user_id=seller_id, data=data)
+            return Response({'message': 'Seller selected successfully.'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Seller_id not found.'}, status=status.HTTP_404_NOT_FOUND)
+    def delete(self, request):
+        seller_id = request.data.get('seller_id', [])
+        print(seller_id)
+        user = request.user
+        if seller_id:
+            u = User.objects.get(id=user.id)
+            b = []
+            for i in seller_id:
+                try:
+                    s = Seller.objects.get(id=i)
+                    b.append(s)
+                except:
+                    print('not found')
+            o = SellerPreferces.objects.get(user=u.id)
+            for i in b:
+                o.seller.remove(i.id)
+            # p=SellerPreferces(user_id=seller_id, data=data)
+            return Response({'message': 'Seller Deleted successfully.'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Seller_id not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class CreateCartItem(APIView):
@@ -1800,3 +1838,289 @@ class MerchandisingContentView(APIView):
         merchant = MerchandisingContent.objects.all()
         serializer = MerchantSerializer(merchant, many=True, context={'request':request})
         return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+
+
+#attribute API
+
+# class ProductattributeView(APIView):
+#
+#     def get(self, request):
+#         # Fetch data from ProductAttribute (Django ORM)
+#         pro = ProductAttribute.objects.all()
+#
+#         for i in pro:
+#             product_code = i.productcode.product_code
+#             attribute_code = i.attributecode.attributecode
+#             tab_code = i.tabcode.tabcode
+#             section_code = i.sectioncode.sectioncode
+#
+#             # Fetch the product from MongoDB by product code
+#             product = mongodb.Product.objects(Productcode=product_code).first()
+#
+#             if not product:
+#                 # If product does not exist, create a new one
+#                 attribute = mongodb.Attribute(Attributecode=attribute_code)
+#                 section = mongodb.Section(Sectioncode=section_code, Attributes=[attribute])
+#                 tab = mongodb.Tab(Tabcode=tab_code, Sections=[section])
+#                 product = mongodb.Product(Productcode=product_code, Tabs=[tab])
+#             else:
+#                 # If product exists, check for tab
+#                 tab = next((t for t in product.Tabs if t.Tabcode == tab_code), None)
+#
+#                 if not tab:
+#                     # If tab does not exist, create and add a new tab
+#                     attribute = mongodb.Attribute(Attributecode=attribute_code)
+#                     section = mongodb.Section(Sectioncode=section_code, Attributes=[attribute])
+#                     tab = mongodb.Tab(Tabcode=tab_code, Sections=[section])
+#                     product.Tabs.append(tab)
+#                 else:
+#                     # If tab exists, check for section
+#                     section = next((s for s in tab.Sections if s.Sectioncode == section_code), None)
+#
+#                     if not section:
+#                         # If section does not exist, create and add a new section
+#                         attribute = mongodb.Attribute(Attributecode=attribute_code)
+#                         section = mongodb.Section(Sectioncode=section_code, Attributes=[attribute])
+#                         tab.Sections.append(section)
+#                     else:
+#                         # If section exists, check for attribute
+#                         attribute = next((a for a in section.Attributes if a.Attributecode == attribute_code), None)
+#
+#                         if not attribute:
+#                             # If attribute does not exist, add it to the section
+#                             attribute = mongodb.Attribute(Attributecode=attribute_code)
+#                             section.Attributes.append(attribute)
+#
+#             # Save the updated product to MongoDB
+#             product.save()
+#         data=mongodb.Product.objects.all()
+#         print(data)
+#         return Response(data={"message": "Products and attributes successfully updated in MongoDB"}, status=200)
+#
+
+
+
+class ProductattributeView(APIView):
+    def saveproductmongodb(self):
+        pro = ProductAttribute.objects.all()
+        for i in pro:
+            product_code = i.productcode.product_code
+            attribute_code = i.attributecode.attributecode
+            tab_code = i.tabcode.tabcode
+            section_code = i.sectioncode.sectioncode
+
+            # Fetch the product from MongoDB by product code
+            product = mongodb.Product.objects(Productcode=product_code).first()
+
+            if not product:
+                # If product does not exist, create a new one
+                attribute = mongodb.Attribute(Attributecode=attribute_code)
+                section = mongodb.Section(Sectioncode=section_code, Attributes=[attribute])
+                tab = mongodb.Tab(Tabcode=tab_code, Sections=[section])
+                product = mongodb.Product(Productcode=product_code, Tabs=[tab])
+            else:
+                # If product exists, check for tab
+                tab = next((t for t in product.Tabs if t.Tabcode == tab_code), None)
+
+                if not tab:
+                    # If tab does not exist, create and add a new tab
+                    attribute = mongodb.Attribute(Attributecode=attribute_code)
+                    section = mongodb.Section(Sectioncode=section_code, Attributes=[attribute])
+                    tab = mongodb.Tab(Tabcode=tab_code, Sections=[section])
+                    product.Tabs.append(tab)
+                else:
+                    # If tab exists, check for section
+                    section = next((s for s in tab.Sections if s.Sectioncode == section_code), None)
+
+                    if not section:
+                        # If section does not exist, create and add a new section
+                        attribute = mongodb.Attribute(Attributecode=attribute_code)
+                        section = mongodb.Section(Sectioncode=section_code, Attributes=[attribute])
+                        tab.Sections.append(section)
+                    else:
+                        # If section exists, check for attribute
+                        attribute = next((a for a in section.Attributes if a.Attributecode == attribute_code), None)
+
+                        if not attribute:
+                            # If attribute does not exist, add it to the section
+                            attribute = mongodb.Attribute(Attributecode=attribute_code)
+                            section.Attributes.append(attribute)
+
+            # Save the updated product to MongoDB
+            product.save()
+
+    def get(self, request):
+        self.saveproductmongodb()
+        # Fetch data from MongoDB
+        products = mongodb.Product.objects()
+
+        # List to store the serialized products
+        product_list = []
+
+        # Loop through the MongoDB objects and serialize them
+        for product in products:
+            product_data = {
+                "Productcode": product.Productcode,
+                "Tabs": []
+            }
+
+            # Loop through tabs
+            for tab in product.Tabs:
+                tab_data = {
+                    "Tabcode": tab.Tabcode,
+                    "Sections": []
+                }
+
+                # Loop through sections
+                for section in tab.Sections:
+                    section_data = {
+                        "Sectioncode": section.Sectioncode,
+                        "Attributes": []
+                    }
+
+                    # Loop through attributes
+                    for attribute in section.Attributes:
+                        attribute_data = {
+                            "Attributecode": attribute.Attributecode
+                        }
+                        section_data["Attributes"].append(attribute_data)
+
+                    tab_data["Sections"].append(section_data)
+
+                product_data["Tabs"].append(tab_data)
+
+            product_list.append(product_data)
+
+        # Return the serialized MongoDB data as an API response
+        return Response(data={"products": product_list}, status=200)
+
+
+
+
+
+
+
+
+class CategoryTreeView(APIView):
+
+    def savecategorymongodb(self):
+        # Step 1: Save root categories (categories with no parent)
+        root_categories = Categorys.objects.filter(parent__isnull=True)
+        for category in root_categories:
+            self.save_category_and_children(category)
+
+        # Step 2: Add child categories (categories with a parent)
+        child_categories = Categorys.objects.filter(parent__isnull=False)
+        for category in child_categories:
+            self.add_category_to_parent(category)
+
+    def save_category_and_children(self, category):
+        """
+        Recursively build and save a category tree, starting from a root category.
+        """
+        category_name = category.name
+        category_code = category.code
+
+        # Fetch or create the root category in MongoDB
+        root_category = mongodb.Root.objects(name=category_name).first()
+        if not root_category:
+            root_category = mongodb.Root(name=category_name, children=[])
+
+        # Build and append the category tree
+        root_category_node = self.build_category_tree(category)
+        if not any(child.code == category_code for child in root_category.children):
+            root_category.children.append(root_category_node)
+
+        root_category.save()
+
+    def build_category_tree(self, category):
+        """
+        Recursively build a category tree by processing parent and children relationships.
+        """
+        # Create the current category node
+        category_node = mongodb.Categorys(
+            name=category.name,
+            code=category.code if category.code else "Refer Code",
+            children=[]
+        )
+
+        # Fetch the children of the current category from the PostgreSQL model
+        child_categories = category.children.all()
+
+        # Recursively build the tree for each child
+        for child in child_categories:
+            child_node = self.build_category_tree(child)
+            if not any(sub_child.code == child.code for sub_child in category_node.children):
+                category_node.children.append(child_node)
+
+        return category_node
+
+    def add_category_to_parent(self, category):
+        """
+        Find the parent of the current category and add it as a child.
+        """
+        parent = category.parent
+
+        # Find the parent category in MongoDB (inside Root's children)
+        parent_category = None
+        root_category = mongodb.Root.objects(children__name=parent.name).first()
+
+        if root_category:
+            # Find the parent category inside the root's children
+            for child in root_category.children:
+                if child.name == parent.name:
+                    parent_category = child
+                    break
+
+        if parent_category:
+            # Create a new node for the current category
+            category_node = mongodb.Categorys(
+                name=category.name,
+                code=category.code if category.code else "Refer Code",
+                children=[]
+            )
+
+            # Add the current category as a child to the parent category if not already present
+            if not any(sub_child.code == category.code for sub_child in parent_category.children):
+                parent_category.children.append(category_node)
+                root_category.save()
+
+    def get(self, request):
+        self.savecategorymongodb()
+
+        # Fetch data from MongoDB
+        categories = mongodb.Root.objects()
+        # List to store the serialized categories
+        category_list = []
+
+        # Loop through the MongoDB objects and serialize them in the required format
+        for root in categories:
+            # root_data = {
+            #     "name": root.name,
+            #     "children": []
+            # }
+
+            # Loop through root children
+            for child in root.children:
+                child_data = self.serialize_category(child)
+                # root_data["children"].append(child_data)
+                category_list.append(child_data)
+
+        # Return the serialized MongoDB data as an API response
+        return Response(data={"name": "ROOT", "children": category_list}, status=200)
+
+    def serialize_category(self, category):
+        """
+        Serialize a category object into the required JSON format.
+        """
+        category_data = {
+            "name": category.name,
+            "code": category.code if category.code else "Refer Code",
+            "children": []
+        }
+
+        for sub_child in category.children:
+            sub_child_data = self.serialize_category(sub_child)
+            category_data["children"].append(sub_child_data)
+
+        return category_data

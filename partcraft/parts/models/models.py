@@ -117,7 +117,7 @@ class Product(models.Model):
     main_image = models.URLField(max_length=200)
 
     def __str__(self):
-        return self.product_code
+        return f'{self.parts_brand} {self.parts_category} {str(self.subcategory_name)}'
 
 
 class RelatedProduct(models.Model):
@@ -485,11 +485,13 @@ class Attribute(models.Model):
     attributecode=models.CharField(max_length=255)
     name=models.CharField(max_length=255)
     datatype=models.CharField(choices=DATATYPE_CHOICES,max_length=255)
-    min_value=models.IntegerField(blank=True)
-    max_value=models.IntegerField(blank=True)
-    dataformat=models.DateField(blank=True)
-    timeformat=models.TimeField(blank=True)
-
+    min_value = models.IntegerField(blank=True, null=True)
+    max_value = models.IntegerField(blank=True, null=True)
+    dataformat = models.DateField(blank=True, null=True)
+    timeformat = models.TimeField(blank=True, null=True)
+    # choice_group = models.ForeignKey('Choice_group')
+    def __str__(self):
+        return self.name
     def clean(self):
         # Date and time format lists
         date_formats = [
@@ -518,24 +520,49 @@ class Attribute(models.Model):
                 continue
         raise ValidationError(f"Invalid {field_type} format: {value}. Please use a valid format.")
 
+
+class Tab(models.Model):
+    tabcode=models.CharField(max_length=20)
+    tabname=models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.tabname
+
+class Section(models.Model):
+    sectioncode=models.CharField(max_length=20)
+    sectionname=models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.sectionname
+
 class ProductAttribute(models.Model):
     product_attribute_id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     productcode = models.ForeignKey(Product, on_delete=models.CASCADE)
     attributecode = models.ForeignKey(Attribute, on_delete=models.CASCADE)
-    tabcode = models.CharField(max_length=10)
-    sectioncode = models.CharField(max_length=10, null=True, blank=True)
+    tabcode = models.ForeignKey(Tab, on_delete=models.CASCADE)
+    sectioncode = models.ForeignKey(Section, on_delete=models.CASCADE)
 
 
     def __str__(self):
-        return self.productcode
+        return f'{self.productcode.parts_brand} {self.productcode.parts_category} {str(self.productcode.subcategory_name)} - {self.attributecode.name}'
 
 class ProductAttributeValue(models.Model):
     product_attribute_id=models.ForeignKey(ProductAttribute, on_delete=models.CASCADE)
     value=models.CharField(max_length=255)
-    choice_value=models.ForeignKey(Choice, on_delete=models.CASCADE)
+    choice_value=models.ForeignKey(Choice, on_delete=models.CASCADE,blank=True,null=True)
 
     def __str__(self):
         return self.value
+
+class Categorys(models.Model):
+    name = models.CharField(max_length=255)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='children', on_delete=models.CASCADE)
+    code = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 
 
 #####JSON
@@ -568,12 +595,13 @@ class carts(models.Model):
     def __str__(self):
         return f"{self.cart_name}, {self.order}"
 
-class preferences(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    selected_seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
-    def __str__(self):
-        return f"{self.user}'s preferences"
+class SellerPreferces(models.Model):
+    id=models.AutoField(primary_key=True)
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
+    seller=models.ManyToManyField(Seller)
 
+    def __str__(self):
+        return f"{self.user}"
 
 
 

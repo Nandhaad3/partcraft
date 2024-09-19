@@ -1,37 +1,97 @@
-{
-  "Name": "ROOT",
-  "Children": [
-    {
-      "Name": "Compressor Parts",
-      "Children": [
-    {
-      "code": "Refer Code",
-      "Name": "Screw Compressor Parts",
-      "Children": [
-    {
-      "code": "Refer Code",
-      "Name": "Filter"
-    },
-    {
-      "code": "Refer Code",
-      "Name": "Electrial"
-    },
-    {
-      "Name": "Unload Value"
-    }
-  ]
-
-    },
-    {
-      "Name": "Piston Compressor Parts",
-      "order": "2"
-    },
-    {
-      "Name": "Additional",
-      "order": "3"
-    }
-
-  ]
-    }
-  ]
+ "name": "ROOT",
+    "children": [
+        {
+            "name": "Screw Compressor Parts",
+            "code": "SCR001",
+            "children": [
+                {
+                    "name": "Filter",
+                    "code": "FL001",
+                    "children": [
+                        {
+                            "name": "Air Filters",
+                            "code": "AIRE001",
+                            "children": []
+                        },
+                        {
+                            "name": "Oil filters",
+                            "code": "OFR001",
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Electrial",
+                    "code": "EC001",
+                    "children": [
+                        {
+                            "name": "Control parts",
+                            "code": "CONP001",
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Unload valve",
+                    "code": "UNV001",
+                    "children": []
+                },
+                {
+                    "name": "Control panel",
+                    "code": "SCP_CP",
+                    "children": []
+                }
+            ]
+        },
+        {
+            "name": "Piston/Reciprocating Compressors",
+            "code": "PIS001",
+            "children": [
+                {
+                    "name": "Pumps and electrical motors",
+                    "code": "PUM001",
+                    "children": [
+                        {
+                            "name": "Pumps",
+                            "code": "PUMP001",
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Pump and motor parts",
+                    "code": "PUMMT001",
+                    "children": [
+                        {
+                            "name": "Pistons",
+                            "code": "PISTO001",
+                            "children": []
+                        },
+                        {
+                            "name": "Cylinders",
+                            "code": "CYL001",
+                            "children": [
+                                {
+                                    "name": "Cylinders",
+                                    "code": "CYLS001",
+                                    "children": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Belt system",
+                    "code": "BET0001",
+                    "children": [
+                        {
+                            "name": "Belts",
+                            "code": "BE1011",
+                            "children": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }

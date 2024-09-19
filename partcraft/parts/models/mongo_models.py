@@ -1,8 +1,75 @@
-# from djongo import models as mongo_models
-# from .models import *
-# from mongoengine import Document, fields
-# import uuid
-#
+from .models import *
+from mongoengine import Document, fields,EmbeddedDocumentField,EmbeddedDocument
+import uuid
+import mongoengine as me
+class product_attribute(Document):
+    product_code = fields.StringField(required=True)
+    tab_code = fields.StringField(required=True)
+    section_code = fields.StringField()
+    attribute_code = fields.StringField(required=True)
+
+    meta = {
+        'collection': 'product_attributes',
+        'db_alias': 'nonrel'
+    }
+    def __str__(self):
+        return self.product_code
+
+class product_document(Document):
+    TYPE_CHOICE = ('Internal', 'External')
+    product_code = fields.StringField(required=True)
+    document_id = fields.StringField(required=True)
+    document_name = fields.StringField(required=True)
+    document_url = fields.StringField(required=True)
+    document_type = fields.StringField(choices=TYPE_CHOICE, required=True)
+
+    meta = {
+        'collection': 'product_documents',
+        'db_alias': 'nonrel'
+    }
+    def __str__(self):
+        return self.product_code
+
+#json
+
+class Attribute(me.EmbeddedDocument):
+    Attributecode = me.StringField(max_length=10)
+
+class Section(me.EmbeddedDocument):
+    Sectioncode = me.StringField(max_length=10, null=True, blank=True)
+    Attributes = me.ListField(me.EmbeddedDocumentField(Attribute))
+
+class Tab(me.EmbeddedDocument):
+    Tabcode = me.StringField(max_length=10)
+    Sections = me.ListField(me.EmbeddedDocumentField(Section))
+
+# Main Document Class
+class Product(Document):
+    Productcode = me.StringField(max_length=10)
+    Tabs = me.ListField(me.EmbeddedDocumentField(Tab))
+
+    meta = {
+        'collection': 'product',
+        'db_alias': 'nonrel'
+    }
+
+
+
+class Categorys(EmbeddedDocument):
+    name = fields.StringField(required=True)
+    code = fields.StringField(null=True)
+    children = fields.EmbeddedDocumentListField('Categorys')
+
+class Root(Document):
+    name = fields.StringField(required=True)
+    children = fields.EmbeddedDocumentListField(Categorys)
+
+    meta = {'collection': 'categories','db_alias': 'nonrel'}
+
+    def __str__(self):
+        return self.name
+
+
 # class product_attribute(Document):
 #     product_code = fields.StringField(required=True)
 #     tab_code = fields.StringField(required=True)

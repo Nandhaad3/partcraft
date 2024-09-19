@@ -1,6 +1,11 @@
 from django.contrib import admin
 from .models.models import *
 
+admin.site.site_header = "PARTSCRAFT Admin"
+admin.site.site_title = "PARTSCRAFT Admin Portal"
+admin.site.index_title = "Welcome to PARTSCRAFT ADMIN Portal"
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['id', 'parts_brand','parts_category','subcategory_name','parts_price', 'parts_status','parts_offer','main_image']
@@ -92,7 +97,7 @@ class SellerGroupAdmin(admin.ModelAdmin):
 
 @admin.register(Seller)
 class SellerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'seller_type']
+    list_display = ['id','name', 'seller_type']
 
 
 @admin.register(Product_cost)
@@ -202,4 +207,19 @@ class cartsAdmin(admin.ModelAdmin):
 # class Product_btclinksAdmin(admin.ModelAdmin):
 #     list_display = ['product', 'btc_partner', 'url']
 
-admin.site.register(preferences)
+admin.site.register(SellerPreferces)
+
+
+@admin.register(Tab)
+class TabAdmin(admin.ModelAdmin):
+    list_display = ['tabcode','tabname']
+
+
+@admin.register(Section)
+class SectionAdmin(admin.ModelAdmin):
+    list_display = ['sectioncode','sectionname']
+
+
+@admin.register(Categorys)
+class CategorysAdmin(admin.ModelAdmin):
+    list_display = ['name', 'parent','code']
