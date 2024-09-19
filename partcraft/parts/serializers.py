@@ -110,7 +110,7 @@ class ProductSerializer(serializers.ModelSerializer):
     is_in_wishlist = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
     similar_products = serializers.SerializerMethodField()
-    addtocart = serializers.HyperlinkedIdentityField(view_name='create-cart')
+    addtocart = serializers.SerializerMethodField()
     buynow = serializers.SerializerMethodField()
 
 
@@ -122,6 +122,9 @@ class ProductSerializer(serializers.ModelSerializer):
                   'parts_status', 'parts_condition', 'parts_warranty', 'parts_specification',
                   'main_image', 'images', 'parts_brand', 'parts_category', 'this_parts_fits', 'product_fit', 'wishlist',
                   'is_in_wishlist', 'related_products', 'similar_products', 'addtocart', 'buynow']
+
+    def get_addtocart(self, obj):
+        return f"/api/create/cart{obj.id}"
     def get_brand_image(self,obj):
         return obj.parts_brand.brand_manufacturer.logo
     def arrangename(self, obj):
@@ -291,7 +294,7 @@ class ProductoneSerializer(serializers.ModelSerializer):
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
     is_in_wishlist = serializers.SerializerMethodField()
-    addtocart = serializers.HyperlinkedIdentityField(view_name='create-cart')
+    addtocart = serializers.SerializerMethodField()
     product_fit = serializers.SerializerMethodField()
 
 
@@ -299,6 +302,9 @@ class ProductoneSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'parts_type','brand_image' ,'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image',
                   'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart', 'product_fit']
+
+    def get_addtocart(self, obj):
+        return f"/api/create/cart/{obj.id}"
     def get_brand_image(self,obj):
         return obj.parts_brand.brand_manufacturer.logo
 
@@ -359,7 +365,7 @@ class WishallSerializer(serializers.ModelSerializer):
     final_price = serializers.SerializerMethodField()
     main_image = serializers.SerializerMethodField()
     wishlist_name = serializers.SerializerMethodField()
-    addtocart = serializers.HyperlinkedIdentityField(view_name='create-cart')
+    addtocart = serializers.SerializerMethodField()
     wishlist_delete = serializers.HyperlinkedIdentityField(view_name='wishdeleteoneitem')
     delete_all_wishlist = serializers.SerializerMethodField()
     class Meta:
@@ -369,7 +375,8 @@ class WishallSerializer(serializers.ModelSerializer):
             'final_price', 'main_image', 'wishlist_product', 'addtocart', 'wishlist_delete', 'delete_all_wishlist']
         read_only_fields = ['wishlist_name']
 
-
+    def get_addtocart(self, obj):
+        return f"/api/create/cart/{obj.id}"
 
     def arrangename(self, obj):
         return (f"{obj.parts_brand.brand_manufacturer.name} "
@@ -497,13 +504,16 @@ class Bestsellingserializer(serializers.ModelSerializer):
     main_image = serializers.SerializerMethodField()
     product_full_detail = serializers.HyperlinkedIdentityField(view_name='getoneproduct')
     wishlist = serializers.HyperlinkedIdentityField(view_name='wishlistcreate')
-    addtocart = serializers.HyperlinkedIdentityField(view_name='create-cart')
+    addtocart = serializers.SerializerMethodField()
     is_in_wishlist = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductOrderCount
         fields = ['product_id', 'parts_type', 'parts_name', 'brand_logo', 'parts_no', 'parts_price', 'parts_offer',
                   'final_price', 'main_image', 'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart']
+
+    def get_addtocart(self, obj):
+        return f"/api/create/cart/{obj.product_id}"
 
     def get_parts_type(self, obj):
         return obj.product.parts_type
