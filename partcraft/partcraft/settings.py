@@ -268,11 +268,11 @@ SIMPLE_JWT = {
 PASSWORD_RESET_TIMEOUT = 1800
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.office365.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'dhanushpathiprakash0511@gmail.com'
-EMAIL_HOST_PASSWORD = 'opghzxooktakptya'
+EMAIL_HOST_USER = 'dhanushpathiprakash@ad3infotech.com'
+EMAIL_HOST_PASSWORD = 'Sixty^(69'
 
 import mongoengine
 

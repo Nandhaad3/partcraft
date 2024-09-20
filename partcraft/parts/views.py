@@ -1645,44 +1645,56 @@ class OrderSummaryAPIView(APIView):
 
         order_items = orderitems.objects.filter(order=active_order)
         order_item_serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
-        # f=[]
-        # product_data=[]
-        # for  i in order_items:
-        #     f.append
 
-        # print(product_data)
-        #ordercosts
-        u = orders.objects.get(orderedby=request.user)
-        oc = ordercosts.objects.filter(order=u.ID)
-        b = []
-        for i in oc:
-            if not i.cost_type.name == 'Discount Cost':
-                b.append(i.amount)
-        tax_final_price = sum(b)
-        for item in product_data:
+
+        order_costs = ordercosts.objects.filter(order=active_order)
+
+        # Separate costs by category, skipping 'Discount Cost'
+        shipping_cost = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'Shipping Cost'])
+        packaging_cost = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'Packaging Cost'])
+        central_tax = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'Central Tax'])
+        state_tax = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'State Tax'])
+
+
+
+        miscellaneous = shipping_cost + packaging_cost + central_tax + state_tax
+
+        product_data = []
+        for item in order_item_serializer.data:
+            product = item.get('product', {})
             product_data.append({
-                'parts_name': item['parts_name'],
-                'parts_price': item['parts_price'],
-                'main_image': item['main_image'],
-                'parts_no': item['parts_no'],
-                'parts_offer': item['parts_offer'],
-                'product_full_detail': item['product_full_detail'],
-                'final_price': item['final_price'],
-                'quantity': item['quantity'],
-                'total_price': item['quantity'] * item['final_price']
+                'parts_name': product.get('parts_name', 'N/A'),  # Access 'parts_name' within the 'product' key
+                'parts_price': product.get('parts_price', 0),
+                'main_image': product.get('main_image', ''),
+                'parts_no': product.get('parts_no', 'N/A'),
+                'parts_offer': product.get('parts_offer', 'N/A'),
+                'product_full_detail': product.get('product_full_detail', 'N/A'),
+                'final_price': product.get('final_price', 0),
+                'quantity': item.get('quantity', 1),
+                'total_price': item.get('quantity', 1) * product.get('final_price', 0)
             })
-        t = []
-        for i in product_data:
-            t.append(i.get('total_price'))
-        total_price = sum(t)
-        ordercost_price = total_price + tax_final_price
+
+        total_price = sum([item['total_price'] for item in product_data])
+
+        ordercost_price = total_price + miscellaneous
 
         billing_serializer = Billaddressserializer(billing_address)
         seller_serializer = SellerSerializer(seller_preferences)
-        response_data = dict(billing_address=billing_serializer.data, seller=seller_serializer.data,
-                             products=product_data,price=total_price,tax=tax_final_price,final_price=ordercost_price)
+
+        response_data = {
+            'billing_address': billing_serializer.data,
+            'seller': seller_serializer.data,
+            'products': product_data,
+            'total_price': total_price,
+            'shipping_cost': shipping_cost,
+            'packaging_cost': packaging_cost,
+            'central_tax': central_tax,
+            'state_tax': state_tax,
+            'final_price': ordercost_price
+        }
 
         return Response({'data': response_data}, status=status.HTTP_200_OK)
+
 
 class PlaceOrder(APIView):
     permission_classes = [IsAuthenticated]
