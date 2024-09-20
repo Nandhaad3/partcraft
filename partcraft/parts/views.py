@@ -1839,17 +1839,17 @@ class PlaceOrder(APIView):
         #     total_cost=total_cost,
         #     quotation_id=quotation_id
         # )
-        email = EmailMessage(
-            subject= f'Order Received - {quotation_id}',
-            message = (f'Dear Sir/Madam,\n'
-                   f'You have received an order {quotation_id}.\n'
-                   f'please find the quotation attachment'),
-            email_from = settings.EMAIL_HOST_USER,
-            recipient_list =
-        )
-        print(email)
-        email.send()
-        print("successfully sent email")
+        # email = EmailMessage(
+        #     subject= f'Order Received - {quotation_id}',
+        #     message = (f'Dear Sir/Madam,\n'
+        #            f'You have received an order {quotation_id}.\n'
+        #            f'please find the quotation attachment'),
+        #     email_from = settings.EMAIL_HOST_USER,
+        #     recipient_list =
+        # )
+        # print(email)
+        # email.send()
+        # print("successfully sent email")
         return Response({
             "message": "Order placed successfully.",
             "quotation_no": quotation_id,
