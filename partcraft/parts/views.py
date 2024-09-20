@@ -24,6 +24,10 @@ from io import BytesIO
 from django.utils import timezone
 from django.core.mail import EmailMessage
 from .models import mongo_models as mongodb
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from django.core.mail import EmailMessage
+from io import BytesIO
 
 def adddict(serializer):
     last_data = []
@@ -1828,24 +1832,30 @@ class PlaceOrder(APIView):
 
         quotation_id = uuid.uuid4().hex.upper()
 
-        # You need to provide billing_address_id and shipping_address_id in the request data or handle defaults
-
-        total_cost = self.calculate_final_order_cost(order)
-
+        url = ("https://asset.cloudinary.com/dfwjcn8kh/91841c30f2fe77d943b7d6983f4210d5")
         # pdf_buffer = self.generate_quotation_pdf(
         #     user=user,
         #     order=order,
         #     total_cost=total_cost,
         #     quotation_id=quotation_id
         # )
-        #
-        # self.send_quotation_email(user.email, pdf_buffer, quotation_id)
-
+        email = EmailMessage(
+            subject= f'Order Received - {quotation_id}',
+            message = (f'Dear Sir/Madam,\n'
+                   f'You have received an order {quotation_id}.\n'
+                   f'please find the quotation attachment'),
+            email_from = settings.EMAIL_HOST_USER,
+            recipient_list =
+        )
+        print(email)
+        email.send()
+        print("successfully sent email")
         return Response({
             "message": "Order placed successfully.",
-            "quotation_id": quotation_id,
-            "total_cost": total_cost
+            "quotation_no": quotation_id,
+            "quotation_url": url
         }, status=status.HTTP_200_OK)
+
 
     def calculate_order_item_cost(self, orderitem):
         # Retrieve all cost entries for the given order item
@@ -1976,52 +1986,51 @@ class PlaceOrder(APIView):
 
 
 class MyOrdersView(APIView):
-    def get(self, request, user_id=None, format=None):
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+    def get(self, request, format=None):
+        user = request.user
+        # Fetch all orders for the user
+        all_orders = orders.objects.filter(orderedby=user)
 
-        try:
-            order_status_inprogress = OrderStatus.objects.get(order_status='InProgress')
-        except OrderStatus.DoesNotExist:
-            return Response({"error": "Order status 'InProgress' not found."}, status=status.HTTP_404_NOT_FOUND)
-        active_order = orders.objects.filter(orderedby=user, orderstatus=order_status_inprogress).first()
+        if not all_orders.exists():
+            return Response({"error": "No orders found for this user."}, status=status.HTTP_404_NOT_FOUND)
 
-        if not active_order:
-            return Response({"error": "No active 'InProgress' order found."}, status=status.HTTP_404_NOT_FOUND)
-
-        order_items = orderitems.objects.filter(order=active_order)
-        serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
-
-        product = []
-        final = {}
+        order_data_list = []
         total_parts_price = 0
 
-        order_data = {
-            'order_id': active_order.id,
-            'order_date': active_order.order_date,
-            'order_status': active_order.orderstatus.order_status,
+        # Iterate through all orders
+        for order in all_orders:
+            order_items = orderitems.objects.filter(order=order)
+            serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
+
+            order_data = {
+                'order_id': order.ID,
+                'order_date': order.orderedon,
+                'order_status': order.orderstatus.order_status,
+                'products': []
+            }
+
+            order_total_price = 0
+
+            for item in serializer.data:
+                product_data = {
+                    'product_id': item['product']['id'],
+                    'parts_name': item['product']['parts_name'],
+                    'parts_price': item['product']['parts_price'] * item['quantity'],
+                    'quantity': item['quantity']
+                }
+
+                order_total_price += product_data['parts_price']
+                order_data['products'].append(product_data)
+
+            order_data['total_price'] = order_total_price
+            order_data_list.append(order_data)
+            total_parts_price += order_total_price
+
+        response_data = {
+            'orders': order_data_list,
         }
 
-        for item in serializer.data:
-            data = {}
-            data['product_id'] = item['product']['id']
-            data['parts_name'] = item['product']['parts_name']
-            data['parts_price'] = item['product']['parts_price'] * item[
-                'quantity']
-            data['quantity'] = item['quantity']
-
-            data['order'] = order_data
-
-            product.append(data)
-            total_parts_price += data['parts_price']
-
-        final['products'] = product
-        final['total_parts_price'] = total_parts_price
-
-        response = Response({'data': final}, status=status.HTTP_200_OK)
-        return response
+        return Response({'data': response_data}, status=status.HTTP_200_OK)
 
 
 class BtwocView(APIView):

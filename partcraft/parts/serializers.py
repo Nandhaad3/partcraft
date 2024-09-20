@@ -288,6 +288,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductoneSerializer(serializers.ModelSerializer):
+    product_id =  serializers.SerializerMethodField()
     parts_name = serializers.SerializerMethodField()
     brand_image = serializers.SerializerMethodField()
     final_price = serializers.SerializerMethodField()
@@ -300,11 +301,15 @@ class ProductoneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'parts_type','brand_image' ,'parts_name', 'parts_no', 'parts_price', 'parts_offer', 'final_price', 'main_image',
+        fields = ['product_id', 'parts_type','brand_image' ,'parts_name', 'parts_no', 'parts_price', 'parts_offer', 'final_price', 'main_image',
                   'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart', 'product_fit']
 
     def get_addtocart(self, obj):
         return f"/api/create/cart/"
+
+    def get_product_id(self, obj):
+        return obj.id
+
     def get_brand_image(self,obj):
         return obj.parts_brand.brand_manufacturer.logo
 
