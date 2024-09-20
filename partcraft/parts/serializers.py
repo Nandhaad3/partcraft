@@ -124,7 +124,7 @@ class ProductSerializer(serializers.ModelSerializer):
                   'is_in_wishlist', 'related_products', 'similar_products', 'addtocart', 'buynow']
 
     def get_addtocart(self, obj):
-        return f"/api/create/cart{obj.id}"
+        return f"/api/create/cart/"
     def get_brand_image(self,obj):
         return obj.parts_brand.brand_manufacturer.logo
     def arrangename(self, obj):
@@ -300,7 +300,7 @@ class ProductoneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'parts_type','brand_image' ,'parts_name', 'parts_price', 'parts_offer', 'final_price', 'main_image',
+        fields = ['id', 'parts_type','brand_image' ,'parts_name', 'parts_no', 'parts_price', 'parts_offer', 'final_price', 'main_image',
                   'product_full_detail', 'wishlist', 'is_in_wishlist', 'addtocart', 'product_fit']
 
     def get_addtocart(self, obj):

@@ -39,7 +39,7 @@ def adddict(serializer):
              f'{i["subcategory_name"]}'
              f"{i['parts_voltage']} "
              f"{i['parts_litre']}L ")
-        data['parts__Name'] = d.replace('NoneL', '').strip()
+        data['parts_name'] = d.replace('NoneL', '').strip()
         data['parts_no'] = i['parts_no']
         data['parts_offer'] = i['parts_offer']
         data['parts_price'] = i['parts_price']
@@ -59,7 +59,7 @@ def adddict(serializer):
 
 
 class CustomPagination(PageNumberPagination):
-    page_size = 3
+    page_size = 6
     page_size_query_param = 'size'
     max_page_size = 10
 
@@ -180,11 +180,11 @@ class brandonedetail(generics.ListAPIView):
         brand_id = self.kwargs.get('pk')
         brand = Brand.objects.get(id=brand_id)
         if not queryset.exists():
-            return Response({'data': 'Product Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'data': 'Product Not Found'}, status=status.HTTP_200_OK)
         serializer = self.get_serializer(queryset, many=True)
         brand_serializer = BrandSerializer(brand, context={'request': request})
         lastdata = adddict(serializer)
-        return Response({'data': brand_serializer.data, 'parts': lastdata}, status=status.HTTP_200_OK)
+        return Response({'data': brand_serializer.data, 'data': lastdata}, status=status.HTTP_200_OK)
 
 
 class vehiclelistview(generics.ListAPIView):
@@ -342,11 +342,11 @@ class WishlistCreateView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         product = self.get_product()
         if not product:
-            return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Product not found."}, status=status.HTTP_200_OK)
 
         existing_wishlist = Wishlist.objects.filter(wishlist_name=self.request.user, wishlist_product=product).exists()
         if existing_wishlist:
-            return Response({"message": "Product is already in the wishlist."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Product is already in the wishlist."}, status=status.HTTP_200_OK)
 
         data = {
             'wishlist_name': self.request.user,
@@ -356,7 +356,7 @@ class WishlistCreateView(generics.ListCreateAPIView):
         self.perform_create(s)
 
         headers = self.get_success_headers(serializer)
-        return Response({'message': 'Wishlist created successfully'}, status=status.HTTP_201_CREATED, headers=headers)
+        return Response({'message': 'Wishlist created successfully'}, status=status.HTTP_200_OK, headers=headers)
 
     def perform_create(self, serializer):
         if serializer.is_valid(raise_exception=True):
@@ -401,7 +401,7 @@ class WishallView(APIView):
         if bool(wish) is not False:
             return response
         else:
-            return Response({'Message': 'No Wishlist '}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'data': []}, status=status.HTTP_200_OK)
 
 
 class MoveToCartView(APIView):
@@ -440,7 +440,7 @@ class DeleteWishlistItemView(APIView):
         wishid = kwargs.get('pk')
         wishlistitem = get_object_or_404(Wishlist, pk=wishid, wishlist_name=self.request.user)
         wishlistitem.delete()
-        return Response({'message': 'Item removed from wishlist successfully.'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'message': 'Item removed from wishlist successfully.'}, status=status.HTTP_200_OK)
 
 
 class DeleteAllWishlistItemsView(APIView):
@@ -1237,13 +1237,13 @@ class PreferencesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Get all preferences
-        prefer = SellerPreferces.objects.all()
-        print(prefer)
-        # Serialize preferences
-        serializer = PreferencesSerializer(prefer, many=True)
-        # Return serialized data
-        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+        u=request.user
+        prefer = SellerPreferces.objects.get(user=u)
+        b=[]
+        for i in prefer.seller.all():
+            b.append(f'{i.name} {i.address}')
+        data={'user':prefer.user.email,'seller':b}
+        return Response({'data': data}, status=status.HTTP_200_OK)
 
     def post(self, request):
         seller_id = request.data.get('seller_id', [])
@@ -1566,10 +1566,15 @@ class CartItemDetailView(APIView):
 
         order_items = orderitems.objects.filter(order=active_order)
         serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
+        u=Usercoupon.objects.filter(user=request.user.id)
+        print(u)
         product = []
         final={}
+        couponprice = []
         for item in serializer.data:
+
             data = {}
+
             data['product_id'] = item['product']['id']
             data['parts_name'] = item['product']['parts_name']
             data['parts_price'] = item['product']['parts_price'] * item['quantity']
@@ -1577,7 +1582,18 @@ class CartItemDetailView(APIView):
             data['parts_no'] = item['product']['parts_no']
             data['parts_offer'] = item['product']['parts_offer']
             data['product_full_detail'] = item['product']['product_full_detail'],
-            data['final_price'] = item['product']['final_price'] * item['quantity']
+            for i in u:
+                productcoupon = i.product.id
+                if productcoupon == item['product']['id']:
+                    couponcode=[]
+                    for j in i.code.all():
+                        couponcode.append(j.carousel_code)
+                        couponprice.append(j.carousel_offer)
+                    f=(item['product']['final_price'] * item['quantity'])
+                    data['final_price'] = f - f * (sum(couponprice)/100)
+                    data['couponcode'] = couponcode
+                else:
+                    data['final_price'] = item['product']['final_price'] * item['quantity']
             data['quantity'] = item['quantity']
             data['detele'] = item['delete']
             product.append(data)
@@ -1591,7 +1607,7 @@ class CartItemDetailView(APIView):
             actual_price.append(int(a))
         tot=sum(total_price)
         act=sum(actual_price)
-        saving_price=act-tot
+        saving_price=act-tot + sum(couponprice)
         final['total_price']=tot
         final['saving_price']=saving_price
         response = Response({'data':final}, status=status.HTTP_200_OK)
@@ -1636,7 +1652,7 @@ class OrderSummaryAPIView(APIView):
 
         seller_id = request.COOKIES.get('seller_id')
         if not seller_id:
-            return Response({"error": "No seller preferences found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "No seller select."}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             seller_preferences = Seller.objects.get(id=seller_id)
@@ -1655,13 +1671,22 @@ class OrderSummaryAPIView(APIView):
         central_tax = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'Central Tax'])
         state_tax = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'State Tax'])
 
+        tax = state_tax + central_tax
 
+        miscellaneous = shipping_cost + packaging_cost + tax
 
-        miscellaneous = shipping_cost + packaging_cost + central_tax + state_tax
+        u=Usercoupon.objects.filter(user=user.id)
 
         product_data = []
         for item in order_item_serializer.data:
             product = item.get('product', {})
+            cc = []
+            for i in u:
+                if product.get('id',0) == i.product.id:
+                        for j in i.code.all():
+                            cc.append(j.carousel_offer)
+            couponprice=sum(cc)
+            t=item.get('quantity', 1) * product.get('final_price', 0)
             product_data.append({
                 'parts_name': product.get('parts_name', 'N/A'),  # Access 'parts_name' within the 'product' key
                 'parts_price': product.get('parts_price', 0),
@@ -1671,7 +1696,7 @@ class OrderSummaryAPIView(APIView):
                 'product_full_detail': product.get('product_full_detail', 'N/A'),
                 'final_price': product.get('final_price', 0),
                 'quantity': item.get('quantity', 1),
-                'total_price': item.get('quantity', 1) * product.get('final_price', 0)
+                'total_price': t - t * (couponprice / 100)
             })
 
         total_price = sum([item['total_price'] for item in product_data])
@@ -1688,8 +1713,7 @@ class OrderSummaryAPIView(APIView):
             'total_price': total_price,
             'shipping_cost': shipping_cost,
             'packaging_cost': packaging_cost,
-            'central_tax': central_tax,
-            'state_tax': state_tax,
+            'tax': tax,
             'final_price': ordercost_price
         }
 
@@ -2077,6 +2101,31 @@ class ProductattributeView(APIView):
 
         # Return the serialized MongoDB data as an API response
         return Response(data={"products": product_list}, status=200)
+
+
+    def post(self, request):
+        productcode= request.data.get('productcode')
+        p=Product.objects.get(product_code=productcode)
+        a=ProductAttribute.objects.filter(productcode=p.id)
+        p=[]
+        for i in a:
+            data = {}
+            data['Attributename']= i.attributecode.name
+            try:
+                v = ProductAttributeValue.objects.get(product_attribute_id=i.product_attribute_id)
+                print(v.value, v.choice_value)
+                if v.value is not None:
+                    data['attributevalue'] = v.value
+                elif v.choice_value is not None:
+                    data['attributevalue'] = v.choice_value
+            except:
+                data['attributevalue'] = None
+            p.append(data)
+
+        return Response(data=p, status=status.HTTP_200_OK)
+
+
+
 
 
 
