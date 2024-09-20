@@ -16,6 +16,7 @@ from datetime import timedelta
 from django.conf import settings
 import os
 import dj_database_url
+from decouple import config
 
 
 # from dotenv import load_dotenv
@@ -268,7 +269,7 @@ SIMPLE_JWT = {
 PASSWORD_RESET_TIMEOUT = 1800
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-mail.outlook.com'
+EMAIL_HOST = 'smtp.office365.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'dhanushpathiprakash@ad3infotech.com'
@@ -318,3 +319,4 @@ CORS_ALLOW_HEADERS = [
 
 SESSION_COOKIE_SAMESITE ='None'
 SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_NAME = 'session_key'

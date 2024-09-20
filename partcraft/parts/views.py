@@ -696,28 +696,65 @@ class RemoveCarouselView(APIView):
             self.save_cart_items_to_cookie(response, cart_items)
             return response, status.HTTP_200_OK
 
-    def delete(self, request):
-        carousel_serializer = Carouselpostserializer(data=request.data)
+    def post(self, request):
+        if request.user.is_authenticated:
+            carouselserializer = Carouselpostserializer(data=request.data)
+            user = request.user
 
-        if carousel_serializer.is_valid():
-            carousel = get_object_or_404(Carousel, carousel_code=carousel_serializer.validated_data['carousel_code'])
-            brand = get_object_or_404(Brand, brand_name=carousel.carousel_brand)
-            category = get_object_or_404(Category, category_name=carousel.carousel_category)
-            products = Product.objects.filter(parts_brand=brand, parts_category=category)
-            response_data, status_code = self._remove_carousel_from_products(carousel, products, request,user=request.user)
-            if isinstance(response_data, dict):
-                return Response(response_data, status=status_code)
-            return response_data
+            if carouselserializer.is_valid():
+                try:
+                    c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
+                    b = Brand.objects.get(brand_manufacturer=c.carousel_brand.brand_manufacturer)
+                    ct = Category.objects.get(category_name=c.carousel_category)
+                    p = Product.objects.filter(parts_brand=b, parts_category=ct)
+
+                    crt = orders.objects.get(orderedby=user)
+                    order_items = orderitems.objects.filter(order_id=crt.ID)
+
+                    for i in p:
+                        if order_items:
+                            for j in order_items:
+                                if i == j.product:
+                                    u = User.objects.get(id=user.id)
+                                    user_coupon = Usercoupon.objects.filter(user=u, product=j.product.id)
+
+                                    # Debugging output
+                                    print(
+                                        f"User ID: {u.id}, Product ID: {j.product.id}, User Coupon Exists: {user_coupon.exists()}")
+
+                                    # If a user coupon exists for the product, delete it
+                                    if user_coupon.exists():
+                                        user_coupon.delete()
+                                        return Response(data='Coupon deleted successfully',
+                                                        status=status.HTTP_204_NO_CONTENT)
+                                    else:
+                                        return Response(data='No coupon to delete for this product',
+                                                        status=status.HTTP_404_NOT_FOUND)
+
+                        else:
+                            return Response(data='Cart not found', status=status.HTTP_404_NOT_FOUND)
+
+                    # If no matching product was found in the user's order
+                    return Response(data='Product not found in cart', status=status.HTTP_404_NOT_FOUND)
+
+                except Carousel.DoesNotExist:
+                    return Response(data="Carousel code not found", status=status.HTTP_404_NOT_FOUND)
+                except Brand.DoesNotExist:
+                    return Response(data="Brand not found", status=status.HTTP_404_NOT_FOUND)
+                except Category.DoesNotExist:
+                    return Response(data="Category not found", status=status.HTTP_404_NOT_FOUND)
+                except orders.DoesNotExist:
+                    return Response(data="Order not found for user", status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(carousel_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data="User not authenticated", status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CartItemsCreateView(BaseCartView):
 
     def post(self, request, pk):
-        # Retrieve the product by primary key
         product = get_object_or_404(Product, pk=pk)
-        # Get the quantity from the request, default to 1 if not provided
         quantity = int(request.data.get('quantity', 1))
 
         if request.user.is_authenticated:
@@ -1223,13 +1260,20 @@ class SelectSellerAddressAPIView(APIView):
         except Seller.DoesNotExist:
             return Response({'message': 'Seller not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+        selected_seller, created = SelectedSeller.objects.update_or_create(
+            user=request.user,
+            defaults={'seller': seller}
+        )
 
         serializer = SellerSerializer(seller, context={'request': request})
-        response =  Response({
-            "message": "Seller selected successfully.",
+        response_message = "Seller selected successfully."
+        if not created:
+            response_message = "Seller updated successfully."
+
+        response = Response({
+            "message": response_message,
             "selected_seller": serializer.data
         }, status=status.HTTP_200_OK)
-        response.set_cookie('seller_id', seller.id, max_age=3600)
         return response
 
 
@@ -1521,97 +1565,137 @@ class CartItemDetailView(APIView):
         if request.user.is_authenticated:
             carouselserializer = Carouselpostserializer(data=request.data)
             user = request.user
+
             if carouselserializer.is_valid():
-                c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
-                b = Brand.objects.get(brand_manufacturer=c.carousel_brand.brand_manufacturer)
-                ct = Category.objects.get(category_name=c.carousel_category)
-                p = Product.objects.filter(parts_brand=b, parts_category=ct)
-                pro = None
-                print(p)
-                for i in p:
+                try:
+                    # Fetch the related carousel, brand, category, and products
+                    c = Carousel.objects.get(carousel_code=carouselserializer.validated_data['carousel_code'])
+                    b = Brand.objects.get(brand_manufacturer=c.carousel_brand.brand_manufacturer)
+                    ct = Category.objects.get(category_name=c.carousel_category)
+                    p = Product.objects.filter(parts_brand=b, parts_category=ct)
+
+                    # Initialize the cart and order items
                     crt = orders.objects.get(orderedby=user)
-                    o = orderitems.objects.all().filter(order_id=crt.ID)
-                    if o:
-                        for j in o:
-                            if i == j.product:
-                                print(j.product.id)
-                                # j.code.add(c)
-                                u = User.objects.get(id=user.id)
-                                l = Usercoupon.objects.filter(user=u,product=j.product.id)
-                                if bool(l) is False:
-                                    Usercoupon.objects.create(user=u,product=j.product)
-                                o = Usercoupon.objects.get(user=u,product=j.product.id)
-                                o.code.add(c)
-                                return Response(data='Add successfully', status=status.HTTP_201_CREATED)
-                    else:
-                        return Response(data='Cart not found', status=status.HTTP_404_NOT_FOUND)
+                    order_items = orderitems.objects.filter(order_id=crt.ID)
+
+                    # Loop through the products and find matching ones in the order
+                    for i in p:
+                        if order_items:
+                            for j in order_items:
+                                if i == j.product:
+                                    u = User.objects.get(id=user.id)
+                                    user_coupon = Usercoupon.objects.filter(user=u, product=j.product.id)
+
+                                    # If no user coupon exists for the product, create it
+                                    if not user_coupon.exists():
+                                        Usercoupon.objects.create(user=u, product=j.product)
+
+                                    # Add the coupon code to the user's product coupon
+                                    o = Usercoupon.objects.get(user=u, product=j.product.id)
+                                    o.code.add(c)
+                                    return Response(data='Added successfully', status=status.HTTP_201_CREATED)
+
+                        else:
+                            return Response(data='Cart not found', status=status.HTTP_404_NOT_FOUND)
+
+                    # If no matching product was found in the user's order
+                    return Response(data='Product not found in cart', status=status.HTTP_404_NOT_FOUND)
+
+                except Carousel.DoesNotExist:
+                    return Response(data="Carousel code not found", status=status.HTTP_404_NOT_FOUND)
+                except Brand.DoesNotExist:
+                    return Response(data="Brand not found", status=status.HTTP_404_NOT_FOUND)
+                except Category.DoesNotExist:
+                    return Response(data="Category not found", status=status.HTTP_404_NOT_FOUND)
+                except orders.DoesNotExist:
+                    return Response(data="Order not found for user", status=status.HTTP_404_NOT_FOUND)
+
             else:
                 return Response(carouselserializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response(data='Add successfully', status=status.HTTP_201_CREATED)
+        else:
+            return Response(data="User not authenticated", status=status.HTTP_401_UNAUTHORIZED)
 
     def get(self, request, format=None):
         user = request.user
-        order_status_new, created = OrderStatus.objects.get_or_create(order_status='New')
+        try:
+            # Get or create new order status
+            order_status_new, created = OrderStatus.objects.get_or_create(order_status='New')
 
-        if user.is_authenticated:
-            active_order = orders.objects.filter(orderedby=user, orderstatus=order_status_new).first()
-        else:
-            session_key = request.session.session_key
-            if not session_key:
-                return Response({"error": "Session not found."}, status=status.HTTP_400_BAD_REQUEST)
-            active_order = orders.objects.filter(session_key=session_key, orderstatus=order_status_new).first()
+            if user.is_authenticated:
+                active_order = orders.objects.filter(orderedby=user, orderstatus=order_status_new).first()
+            else:
+                session_key = request.session.session_key
+                if not session_key:
+                    return Response({"error": "Session not found."}, status=status.HTTP_400_BAD_REQUEST)
+                active_order = orders.objects.filter(session_key=session_key, orderstatus=order_status_new).first()
 
-        if not active_order:
-            return Response({"error": "No active order found."}, status=status.HTTP_404_NOT_FOUND)
+            if not active_order:
+                return Response({"error": "No active order found."}, status=status.HTTP_404_NOT_FOUND)
 
-        order_items = orderitems.objects.filter(order=active_order)
-        serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
-        u=Usercoupon.objects.filter(user=request.user.id)
-        print(u)
-        product = []
-        final={}
-        couponprice = []
-        for item in serializer.data:
+            # Retrieve order items
+            order_items = orderitems.objects.filter(order=active_order)
+            serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
 
-            data = {}
+            # Get user coupons
+            u = Usercoupon.objects.filter(user=request.user.id)
 
-            data['product_id'] = item['product']['id']
-            data['parts_name'] = item['product']['parts_name']
-            data['parts_price'] = item['product']['parts_price'] * item['quantity']
-            data['main_image'] = item['product']['main_image']
-            data['parts_no'] = item['product']['parts_no']
-            data['parts_offer'] = item['product']['parts_offer']
-            data['product_full_detail'] = item['product']['product_full_detail'],
-            for i in u:
-                productcoupon = i.product.id
-                if productcoupon == item['product']['id']:
-                    couponcode=[]
-                    for j in i.code.all():
-                        couponcode.append(j.carousel_code)
-                        couponprice.append(j.carousel_offer)
-                    f=(item['product']['final_price'] * item['quantity'])
-                    data['final_price'] = f - f * (sum(couponprice)/100)
-                    data['couponcode'] = couponcode
-                else:
-                    data['final_price'] = item['product']['final_price'] * item['quantity']
-            data['quantity'] = item['quantity']
-            data['detele'] = item['delete']
-            product.append(data)
-        final['products'] = product
-        total_price = []
-        actual_price=[]
-        for i in product:
-            t = i["final_price"] * i["quantity"]
-            total_price.append(int(t))
-            a = i['parts_price'] * i['quantity']
-            actual_price.append(int(a))
-        tot=sum(total_price)
-        act=sum(actual_price)
-        saving_price=act-tot + sum(couponprice)
-        final['total_price']=tot
-        final['saving_price']=saving_price
-        response = Response({'data':final}, status=status.HTTP_200_OK)
-        return response
+            product = []
+            final = {}
+            couponprice = []
+
+            for item in serializer.data:
+                data = {
+                    'product_id': item['product']['id'],
+                    'parts_name': item['product']['parts_name'],
+                    'parts_price': item['product']['parts_price'] * item['quantity'],
+                    'main_image': item['product']['main_image'],
+                    'parts_no': item['product']['parts_no'],
+                    'parts_offer': item['product']['parts_offer'],
+                    'product_full_detail': item['product']['product_full_detail'],
+                    'quantity': item['quantity'],
+                    'delete': item['delete']
+                }
+
+                # Default final price without coupons
+                data['final_price'] = round(item['product']['final_price'] * item['quantity'], 2)
+
+                # Check if product has coupons
+                for i in u:
+                    productcoupon = i.product.id
+                    if productcoupon == item['product']['id']:
+                        couponcode = []
+                        couponprice = []
+                        for j in i.code.all():
+                            couponcode.append(j.carousel_code)
+                            couponprice.append(j.carousel_offer)
+
+                        f = item['product']['final_price'] * item['quantity']
+                        data['final_price'] = f - f * (sum(couponprice) / 100)
+                        data['couponcode'] = couponcode
+                        break  # No need to check other coupons for this product
+
+                product.append(data)
+
+            final['order_items'] = product
+
+            total_price = []
+            actual_price = []
+            for i in product:
+                total_price.append(i["final_price"])
+                actual_price.append(i['parts_price'])
+
+            tot = sum(total_price)
+            act = sum(actual_price)
+            saving_price = act - tot + sum(couponprice)
+
+            final['total_price'] = round(tot, 2)
+            final['saving_price'] = round(saving_price, 2)
+
+            return Response({'data': final}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class CartDeleteView(APIView):
     def delete(self, request, item_id, format=None):
@@ -1646,70 +1730,39 @@ class OrderSummaryAPIView(APIView):
         if not active_order:
             return Response({"error": "No active order found."}, status=status.HTTP_404_NOT_FOUND)
 
+        # Retrieve the latest billing address
         billing_address = BillingAddress.objects.filter(user=user).order_by('-id').first()
         if not billing_address:
             return Response({"error": "No billing address found."}, status=status.HTTP_404_NOT_FOUND)
 
-        seller_id = request.COOKIES.get('seller_id')
-        if not seller_id:
-            return Response({"error": "No seller select."}, status=status.HTTP_404_NOT_FOUND)
-
+        # Retrieve the selected seller for the user
         try:
-            seller_preferences = Seller.objects.get(id=seller_id)
-        except Seller.DoesNotExist:
-            return Response({"error": "Seller not found."}, status=status.HTTP_404_NOT_FOUND)
+            selected_seller = SelectedSeller.objects.get(user=user)
+            seller_preferences = selected_seller.seller
+        except SelectedSeller.DoesNotExist:
+            return Response({"error": "No seller selected."}, status=status.HTTP_404_NOT_FOUND)
 
         order_items = orderitems.objects.filter(order=active_order)
         order_item_serializer = OrderItemSerializer(order_items, many=True, context={'request': request})
 
-
         order_costs = ordercosts.objects.filter(order=active_order)
+        shipping_cost, packaging_cost, tax = self.calculate_costs(order_costs)
 
-        # Separate costs by category, skipping 'Discount Cost'
-        shipping_cost = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'Shipping Cost'])
-        packaging_cost = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'Packaging Cost'])
-        central_tax = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'Central Tax'])
-        state_tax = sum([cost.amount for cost in order_costs if cost.cost_type.name == 'State Tax'])
+        user_coupons = Usercoupon.objects.filter(user=user.id)
+        product_data = self.process_order_items(order_item_serializer.data, user_coupons)
 
-        tax = state_tax + central_tax
+        total_price = sum(item['total_price'] for item in product_data)
+        ordercost_price = total_price + shipping_cost + packaging_cost + tax
 
-        miscellaneous = shipping_cost + packaging_cost + tax
-
-        u=Usercoupon.objects.filter(user=user.id)
-
-        product_data = []
-        for item in order_item_serializer.data:
-            product = item.get('product', {})
-            cc = []
-            for i in u:
-                if product.get('id',0) == i.product.id:
-                        for j in i.code.all():
-                            cc.append(j.carousel_offer)
-            couponprice=sum(cc)
-            t=item.get('quantity', 1) * product.get('final_price', 0)
-            product_data.append({
-                'parts_name': product.get('parts_name', 'N/A'),  # Access 'parts_name' within the 'product' key
-                'parts_price': product.get('parts_price', 0),
-                'main_image': product.get('main_image', ''),
-                'parts_no': product.get('parts_no', 'N/A'),
-                'parts_offer': product.get('parts_offer', 'N/A'),
-                'product_full_detail': product.get('product_full_detail', 'N/A'),
-                'final_price': product.get('final_price', 0),
-                'quantity': item.get('quantity', 1),
-                'total_price': t - t * (couponprice / 100)
-            })
-
-        total_price = sum([item['total_price'] for item in product_data])
-
-        ordercost_price = total_price + miscellaneous
-
+        # Serialize billing address and seller information
         billing_serializer = Billaddressserializer(billing_address)
         seller_serializer = SellerSerializer(seller_preferences)
 
+        # Prepare the response data
         response_data = {
             'billing_address': billing_serializer.data,
             'seller': seller_serializer.data,
-            'products': product_data,
+            'order_items': product_data,
             'total_price': total_price,
             'shipping_cost': shipping_cost,
             'packaging_cost': packaging_cost,
@@ -1719,6 +1772,42 @@ class OrderSummaryAPIView(APIView):
 
         return Response({'data': response_data}, status=status.HTTP_200_OK)
 
+    def calculate_costs(self, order_costs):
+        # Calculate individual costs
+        shipping_cost = sum(cost.amount for cost in order_costs if cost.cost_type.name == 'Shipping Cost')
+        packaging_cost = sum(cost.amount for cost in order_costs if cost.cost_type.name == 'Packaging Cost')
+        central_tax = sum(cost.amount for cost in order_costs if cost.cost_type.name == 'Central Tax')
+        state_tax = sum(cost.amount for cost in order_costs if cost.cost_type.name == 'State Tax')
+
+        return shipping_cost, packaging_cost, state_tax + central_tax  # Return numeric values
+
+    def process_order_items(self, order_items, user_coupons):
+        product_data = []
+        for item in order_items:
+            product = item.get('product', {})
+            coupon_discount = self.calculate_coupon_discount(product, user_coupons)
+            quantity = item.get('quantity', 1)
+            total_price = quantity * product.get('final_price', 0)
+            product_data.append({
+                'parts_name': product.get('parts_name', 'N/A'),
+                'parts_price': product.get('parts_price', 0),
+                'main_image': product.get('main_image', ''),
+                'parts_no': product.get('parts_no', 'N/A'),
+                'parts_offer': product.get('parts_offer', 'N/A'),
+                'product_full_detail': product.get('product_full_detail', 'N/A'),
+                'final_price': product.get('final_price', 0),
+                'quantity': quantity,
+                'total_price': round(total_price - (total_price * (coupon_discount / 100)), 2)
+            })
+        return product_data
+
+    def calculate_coupon_discount(self, product, user_coupons):
+        coupon_price = 0
+        for coupon in user_coupons:
+            if product.get('id', 0) == coupon.product.id:
+                for code in coupon.code.all():
+                    coupon_price += code.carousel_offer
+        return coupon_price
 
 class PlaceOrder(APIView):
     permission_classes = [IsAuthenticated]
@@ -2123,14 +2212,6 @@ class ProductattributeView(APIView):
             p.append(data)
 
         return Response(data=p, status=status.HTTP_200_OK)
-
-
-
-
-
-
-
-
 
 
 

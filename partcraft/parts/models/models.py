@@ -613,4 +613,13 @@ class SellerPreferces(models.Model):
         return f"{self.user}"
 
 
+class SelectedSeller(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
+    selected_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('user', 'seller')
+
+    def __str__(self):
+        return f"{self.user} - {self.seller.name}"
