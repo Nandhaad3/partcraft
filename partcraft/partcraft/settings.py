@@ -16,7 +16,6 @@ from datetime import timedelta
 from django.conf import settings
 import os
 import dj_database_url
-from decouple import config
 
 
 # from dotenv import load_dotenv
