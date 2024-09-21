@@ -18,15 +18,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from account.emails import send_confirmation_email
 from django.contrib.auth import login
 from account.models import User
-# from reportlab.pdfgen import canvas
-# from reportlab.lib.pagesizes import A4
-from io import BytesIO
 from django.utils import timezone
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from .models import mongo_models as mongodb
-from django.template.loader import render_to_string
-from weasyprint import HTML
-from io import BytesIO
+
 
 def adddict(serializer):
     last_data = []
