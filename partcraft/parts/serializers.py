@@ -1,3 +1,4 @@
+import collections
 import json
 from django.urls import reverse
 from rest_framework import serializers
@@ -173,34 +174,48 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_product_fit(self, obj):
         request = self.context.get('request')
+
+        # Ensure that the request object is present
         if not request:
             return 'Not Guarantee Fit'
+
+        # Retrieve vehicle data from POST request and cookies
         post_vehicle_data = request.data.get('vehicle')
         cookie_vehicle_data = request.COOKIES.get('vehicle')
-        if cookie_vehicle_data:
-            cookie_vehicle = json.loads(cookie_vehicle_data)
-        else:
-            cookie_vehicle = []
 
+        # Parse the vehicle data from cookies if present
+        cookie_vehicle = []
+        if cookie_vehicle_data:
+            try:
+                cookie_vehicle = json.loads(cookie_vehicle_data)
+            except json.JSONDecodeError:
+                return 'Not Guarantee Fit'
+
+        # Get all vehicles this part fits
         parts_fits = obj.this_parts_fits.all()
 
+        # Helper function to match a vehicle
         def check_vehicle_match(vehicle_list):
             for vehicle in vehicle_list:
                 for fit in parts_fits:
                     if (
-                            vehicle.get('vehicle_make') == fit.vehicle_make and
+                            vehicle.get('vehicle_make') == fit.vehicle_make.id and
                             vehicle.get('vehicle_model') == fit.vehicle_model and
                             vehicle.get('vehicle_year') == fit.vehicle_year and
                             vehicle.get('vehicle_variant') == fit.vehicle_variant
                     ):
                         return True
-                return False
+            return False
 
-        if post_vehicle_data and check_vehicle_match([post_vehicle_data]):
-            return 'Guarantee Fit'
+        # Check vehicle match based on POST data
+        if post_vehicle_data and isinstance(post_vehicle_data, dict):
+            if check_vehicle_match([post_vehicle_data]):
+                return 'Guarantee Fit'
 
-        if cookie_vehicle and check_vehicle_match(cookie_vehicle):
-            return 'Guarantee Fit'
+        # Check vehicle match based on cookie data
+        if cookie_vehicle and isinstance(cookie_vehicle, list):
+            if check_vehicle_match(cookie_vehicle):
+                return 'Guarantee Fit'
 
         return 'Not Guarantee Fit'
 
@@ -340,22 +355,31 @@ class ProductoneSerializer(serializers.ModelSerializer):
 
     def get_product_fit(self, obj):
         request = self.context.get('request', None)
-        if request is None:
+
+        if not request:
             return "NOT Guarantee fit"
 
         vehicle_data = request.COOKIES.get('vehicle')
+
         if not vehicle_data:
             return "NOT Guarantee fit"
 
-        vehicles = json.loads(vehicle_data)
+        try:
+            vehicles = json.loads(vehicle_data)
+        except json.JSONDecodeError:
+            return "NOT Guarantee fit"
 
-        for vehicle in obj.this_parts_fits.all():
+        if not isinstance(vehicles, list):
+            return "NOT Guarantee fit"
+
+        for fit_vehicle in obj.this_parts_fits.all():
             for v in vehicles:
-                if (vehicle.vehicle_make.name == v.get('vehicle_make') and
-                        vehicle.vehicle_model == v.get('vehicle_model') and
-                        vehicle.vehicle_year == v.get('vehicle_year') and
-                        vehicle.vehicle_variant == v.get('vehicle_variant')):
+                if (fit_vehicle.vehicle_make.id == v.get('vehicle_make') and
+                        fit_vehicle.vehicle_model == v.get('vehicle_model') and
+                        fit_vehicle.vehicle_year == v.get('vehicle_year') and
+                        fit_vehicle.vehicle_variant == v.get('vehicle_variant')):
                     return "Guarantee fit"
+
         return "NOT Guarantee fit"
 
 
@@ -705,18 +729,43 @@ class ApplicationCategorySerializer(serializers.ModelSerializer):
         fields = ['category_name', 'url']
 
 class ApplicationSerializer(serializers.ModelSerializer):
-    vehicle_make = serializers.SerializerMethodField()
-    vehicle_category = serializers.SerializerMethodField()
+    vehicle_make = serializers.CharField()  # This is okay for input as a string
+    vehicle_category = serializers.SerializerMethodField()  # This will be computed from the object
 
     class Meta:
         model = Vehicle
         fields = '__all__'
 
+    def validate_vehicle_make(self, value):
+        """
+        Custom validation to ensure the vehicle_make is a valid manufacturer name.
+        """
+        try:
+            manufacturer = Manufacturer.objects.get(name=value, is_vehicle_manufacturer=True)
+        except Manufacturer.DoesNotExist:
+            raise serializers.ValidationError(f"Manufacturer with name '{value}' does not exist.")
+        return manufacturer  # Return the Manufacturer object
+
+    def create(self, validated_data):
+        # The vehicle_make will now be the Manufacturer instance after validation
+        return super().create(validated_data)
+
     def get_vehicle_make(self, obj):
-        return obj.vehicle_make.name
+        if isinstance(obj, Vehicle):
+            return obj.vehicle_make.name
+        elif isinstance(obj, dict) or isinstance(obj, collections.OrderedDict):
+            return obj.get('vehicle_make', None)
+        return None
 
     def get_vehicle_category(self, obj):
-        return obj.vehicle_category.category_name
+        # Handle both object and dict representations
+        if isinstance(obj, Vehicle):
+            return obj.vehicle_category.category_name
+        elif isinstance(obj, dict) or isinstance(obj, collections.OrderedDict):
+            vehicle_category = obj.get('vehicle_category', None)
+            if vehicle_category:
+                return vehicle_category.get('category_name', None)
+        return None
 
 
 class SellerSerializer(serializers.ModelSerializer):

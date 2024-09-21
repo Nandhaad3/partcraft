@@ -22,11 +22,10 @@ from account.models import User
 # from reportlab.lib.pagesizes import A4
 from io import BytesIO
 from django.utils import timezone
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from .models import mongo_models as mongodb
 from django.template.loader import render_to_string
 from weasyprint import HTML
-from django.core.mail import EmailMessage
 from io import BytesIO
 
 def adddict(serializer):
@@ -242,7 +241,6 @@ def vehicle_view(request):
         serializer = ApplicationSerializer(queryset, many=True, context={'request': request})
         return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
-
 class vehicleoneview(generics.ListAPIView):
     serializer_class = ProductSerializer
 
@@ -289,7 +287,6 @@ class MatchVehicle(APIView):
             return Response({'details': 'Vehicle Not Found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = ApplicationSerializer(vehicles, many=True, context={'request': request})
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
-
 
 class VehicleTypeView(generics.ListAPIView):
     serializer_class = ApplicationcategorySerializer
@@ -1109,11 +1106,6 @@ class BestSellingView(generics.ListAPIView):
         # return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
-
-
-
 class ToptenView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = Toptenserializer
@@ -1375,7 +1367,7 @@ class CreateCartItem(APIView):
             inventory, _ = ProductInventory.objects.get_or_create(product=product)
 
             if inventory.instock_count <= inventory.back_order_threshold:
-                return Response({"error": f"Product {product.name} is out of stock."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": f"Product {product} is out of stock."}, status=status.HTTP_400_BAD_REQUEST)
 
             order_item, created = orderitems.objects.get_or_create(
                 order=active_order,
@@ -1839,17 +1831,34 @@ class PlaceOrder(APIView):
         #     total_cost=total_cost,
         #     quotation_id=quotation_id
         # )
-        # email = EmailMessage(
-        #     subject= f'Order Received - {quotation_id}',
-        #     message = (f'Dear Sir/Madam,\n'
-        #            f'You have received an order {quotation_id}.\n'
-        #            f'please find the quotation attachment'),
-        #     email_from = settings.EMAIL_HOST_USER,
-        #     recipient_list =
-        # )
-        # print(email)
-        # email.send()
-        # print("successfully sent email")
+
+        def send_email_seller(quotation_id, url):
+            html_content = f"""
+                        <html>
+                        <body>
+                            <h4>Dear Sir/Madam,</h4>
+                            <p>You have received an order <strong>{quotation_id}</strong>.</p>
+                            <p>Please find the quotation attachment.</p>
+                            <a href="{url}">Click here</a>
+                        </body>
+                        </html>
+                        """
+
+            email = EmailMessage(
+                subject=f'Order Received - {quotation_id}',
+                body=html_content,
+                from_email=settings.EMAIL_HOST_USER,
+                to=['dhanushpathiprakash0511@gmail.com'],
+            )
+            email.content_subtype = "html"
+            try:
+                email.send()
+                print("Email sent successfully")
+            except Exception as e:
+                print(f"Failed to send email: {str(e)}")
+
+        send_email_seller(quotation_id, url)
+
         return Response({
             "message": "Order placed successfully.",
             "quotation_no": quotation_id,
@@ -1881,7 +1890,6 @@ class PlaceOrder(APIView):
             cost_type = cost.cost_type
 
             if cost_type.percentage > 0:
-                # Apply percentage-based cost (like tax or discount on product price)
                 percentage_amount = (cost_type.percentage / 100) * product_price
 
                 # Determine if the percentage amount is a debit (D) or credit (C)
@@ -1890,7 +1898,6 @@ class PlaceOrder(APIView):
                 elif cost_type.transaction_type == 'C':  # Credit
                     total_item_cost -= percentage_amount
             else:
-                # Apply fixed amount cost
                 if cost_type.transaction_type == 'D':  # Debit
                     total_item_cost += cost.amount
                 elif cost_type.transaction_type == 'C':  # Credit
@@ -1927,7 +1934,6 @@ class PlaceOrder(APIView):
 
         total_percentage_cost = 0
         for cost in percentage_costs:
-            # Calculate percentage amount
             percentage_amount = (cost.cost_type.percentage / 100) * base_amount
             if cost.cost_type.transaction_type == 'D':  # Debit
                 total_percentage_cost += percentage_amount
@@ -2347,3 +2353,31 @@ class CategoryTreeView(APIView):
             category_data["children"].append(sub_child_data)
 
         return category_data
+
+client = MongoClient('mongodb+srv://admin:kWwviQLhdkbL5MQE@admindash.zvg2l7k.mongodb.net/?retryWrites=true&w=majority')
+db = client['partscraft']
+
+class ProductoneattributeView(APIView):
+    def get(self, request, *args, **kwargs):
+        product_id = request.data.get('product_id')
+
+        try:
+            product_code = Product.objects.get(id=product_id)
+            code = product_code.product_code
+
+            product = db['product'].find_one({"Productcode": "PR003"})
+
+            if product:
+                if "_id" in product:
+                    product["_id"] = str(product["_id"])
+
+                # Return the full product details including Productcode
+                return Response(product, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        except Product.DoesNotExist:
+            return Response({"error": "Product code not found in Django"}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -61,6 +61,6 @@ urlpatterns = [
     path('sellerprefer/',PreferencesView.as_view(),name='sellerprefer'),
     path('productattribute/',ProductattributeView.as_view(), name='productattribute'),
     path('categorytree/',CategoryTreeView.as_view(), name='categorytree'),
-
+    path('productoneattribute/',ProductoneattributeView.as_view(),name='productoneattribute'),
 ]
 
