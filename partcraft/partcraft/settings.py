@@ -294,7 +294,7 @@ CORS_ALLOWED_ORIGINS = [
     'https://partcraft-a2ti.onrender.com',
     'https://partscraft-frontend-m4hv-q1dj9snwr-kannans-projects-ce53a14f.vercel.app',
     'http://13.213.8.36:8002',
-    'https://vhmzkfkqql.execute-api.ap-southeast-1.amazonaws.com'
+    'https://oa7makjqe8.execute-api.ap-south-1.amazonaws.com',
 ]
 
 
