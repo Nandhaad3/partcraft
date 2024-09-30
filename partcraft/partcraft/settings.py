@@ -292,7 +292,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://partcraft-a2ti.onrender.com',
-    'https://partscraft-frontend-vqo3.vercel.app/',
+    'https://partscraft-frontend-vqo3.vercel.app',
     'http://13.213.8.36:8002',
     'https://oa7makjqe8.execute-api.ap-south-1.amazonaws.com',
 ]
